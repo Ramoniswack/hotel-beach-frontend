@@ -1,5 +1,8 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useAuthStore } from '@/store/authStore';
 
 interface HeaderProps {
   isScrolled: boolean;
@@ -7,6 +10,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp }) => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const { user, logout } = useAuthStore();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -47,6 +51,21 @@ const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp }) => {
           <Link href="/blog" className="hover:text-black transition-colors">Blog</Link>
           <Link href="/explore" className="hover:text-black transition-colors">Explore</Link>
           <Link href="/contact" className="hover:text-black transition-colors">Contact</Link>
+          
+          {/* Auth Links */}
+          {user ? (
+            <div className="flex items-center space-x-4">
+              <span className="text-xs">Welcome, {user.name}</span>
+              <button 
+                onClick={logout}
+                className="hover:text-black transition-colors"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <Link href="/login" className="hover:text-black transition-colors">Login</Link>
+          )}
         </div>
 
         {/* Right Actions */}
