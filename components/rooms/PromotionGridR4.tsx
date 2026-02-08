@@ -3,7 +3,7 @@ import Image from 'next/image';
 const PROMOTIONS = [
   {
     title: "2 Nights Getaway Promotion Package",
-    image: "https://images.unsplash.com/photo-1544161515-4ad6ce6db874?auto=format&fit=crop&q=80&w=800",
+    image: "https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?auto=format&fit=crop&q=80&w=800",
   },
   {
     title: "Free Breakfast for 3 days Package",

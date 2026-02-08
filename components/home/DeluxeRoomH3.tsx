@@ -13,18 +13,6 @@ const rooms = [
       recommend: 'great for business trip'
     },
     image: 'https://images.unsplash.com/photo-1590490359683-658d3d23f972?auto=format&fit=crop&q=80&w=1200'
-  },
-  {
-    title: 'Grand Suite',
-    price: '$450',
-    details: {
-      bed: '2 queen beds',
-      capacity: '4 adults 2 children',
-      'room size': '85m²',
-      view: 'ocean front',
-      recommend: 'perfect for families'
-    },
-    image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=1200'
   }
 ];
 

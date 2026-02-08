@@ -3,30 +3,36 @@ import Image from 'next/image';
 
 const RetreatSpaH5: React.FC = () => {
   return (
-    <div className="relative h-[600px] w-full">
-      <div className="absolute inset-0">
+    <section className="relative w-full h-[80vh] md:h-[90vh] overflow-hidden flex items-center">
+      {/* Background Image with Overlay */}
+      <div className="absolute inset-0 z-0">
         <Image 
-          src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=2000" 
-          alt="Retreat Spa"
+          src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=1000" 
+          alt="Luxury Villa Interior" 
           fill
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-black/40" />
+        {/* Subtle dark gradient overlay for text readability */}
+        <div className="absolute inset-0 bg-black/10"></div>
       </div>
-      
-      <div className="relative h-full flex flex-col items-center justify-center text-center text-white px-6">
-        <h2 className="text-4xl md:text-5xl font-bold mb-6">
-          Visit Our Exclusive Spa
-        </h2>
-        <p className="text-sm md:text-base max-w-2xl mb-8 leading-relaxed">
-          A hallmark of the Retreat Hotel experience, the Retreat Spa transports your mind and body 
-          to new dimensions of peace and rejuvenation.
-        </p>
-        <button className="border-2 border-white text-white px-8 py-3 text-sm font-semibold hover:bg-white hover:text-black transition-colors">
-          VIEW OFFERS
-        </button>
+
+      {/* Content Overlay */}
+      <div className="relative z-10 max-w-[1300px] mx-auto px-6 sm:px-8 w-full">
+        <div className="max-w-2xl text-white">
+          <h2 className="text-[42px] md:text-[52px] lg:text-[60px] font-bold leading-[1.1] mb-10 tracking-tight drop-shadow-sm">
+            Visit Our fantastic villas
+          </h2>
+          <p className="text-[15px] md:text-[16px] leading-[1.8] font-normal mb-12 max-w-[500px] text-white/90 drop-shadow-sm">
+            Featuring a pleasant blend of natural materials and elegance, the decor and furnishings create an inviting ambience fostering relaxation and a sense of well-being.
+          </p>
+          <div>
+            <button className="px-10 py-3 rounded-full border border-white text-[13px] font-bold tracking-[0.1em] transition-all duration-300 hover:bg-white hover:text-black">
+              Discover our rooms
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
 
