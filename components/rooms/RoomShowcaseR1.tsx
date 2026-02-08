@@ -131,9 +131,17 @@ const RoomRow: React.FC<{ room: Room }> = ({ room }) => {
         </div>
 
         <div className="mt-4">
-          <button className="px-12 py-3.5 rounded-full border border-white/80 text-[11px] font-bold uppercase tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300">
+          <a 
+            href={
+              room.id === 'superior' ? '/accommodation/superior-room' : 
+              room.id === 'deluxe' ? '/accommodation/deluxe-room' : 
+              room.id === 'signature' ? '/accommodation/signature-room' :
+              '#'
+            }
+            className="px-12 py-3.5 rounded-full border border-white/80 text-[11px] font-bold uppercase tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 inline-block"
+          >
             view detail
-          </button>
+          </a>
         </div>
       </div>
 

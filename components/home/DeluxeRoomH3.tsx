@@ -50,9 +50,12 @@ const DeluxeRoomH3: React.FC = () => {
         </div>
 
         <div>
-          <button className="px-10 py-3 rounded-full border border-white/30 text-[10px] font-bold tracking-[0.25em] uppercase hover:bg-white hover:text-black transition-all duration-300">
+          <a 
+            href="/accommodation/deluxe-room"
+            className="px-10 py-3 rounded-full border border-white/30 text-[10px] font-bold tracking-[0.25em] uppercase hover:bg-white hover:text-black transition-all duration-300 inline-block"
+          >
             view detail
-          </button>
+          </a>
         </div>
       </div>
 

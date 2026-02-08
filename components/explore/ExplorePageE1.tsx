@@ -151,7 +151,12 @@ const ExplorePageE1: React.FC = () => {
                 </div>
 
                 <a 
-                  href="#" 
+                  href={
+                    room.title === 'Deluxe Room' ? '/accommodation/deluxe-room' : 
+                    room.title === 'Superior Room' ? '/accommodation/superior-room' : 
+                    room.title === 'Signature Room' ? '/accommodation/signature-room' :
+                    '#'
+                  }
                   className="text-[11px] font-bold text-[#1a1a1a] uppercase tracking-[0.15em] border-b border-black pb-1 hover:opacity-50 transition-opacity"
                 >
                   Book now from {room.price}
