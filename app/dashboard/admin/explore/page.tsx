@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import RouteGuard from '@/components/RouteGuard';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import ImageUpload from '@/components/ImageUpload';
+import MultiImageUpload from '@/components/MultiImageUpload';
 import { contentAPI } from '@/lib/api';
 import { Compass, Edit, X, Save, Eye, EyeOff } from 'lucide-react';
 
@@ -255,32 +257,12 @@ export default function ExploreManagement() {
                         {/* Hero Image */}
                         {section.sectionId === 'hero-image' && (
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Hero Image URL
-                            </label>
-                            {formData.images?.map((img, idx) => (
-                              <div key={idx} className="flex gap-2 mb-2">
-                                <input
-                                  type="text"
-                                  value={img}
-                                  onChange={(e) => updateImageAtIndex(idx, e.target.value)}
-                                  placeholder="Image URL"
-                                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
-                                />
-                                <button
-                                  onClick={() => removeImage(idx)}
-                                  className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                                >
-                                  <X size={20} />
-                                </button>
-                              </div>
-                            ))}
-                            <button
-                              onClick={addImage}
-                              className="mt-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-                            >
-                              + Add Image
-                            </button>
+                            <MultiImageUpload
+                              label="Hero Images"
+                              value={formData.images || []}
+                              onChange={(urls) => setFormData({ ...formData, images: urls })}
+                              maxImages={5}
+                            />
                           </div>
                         )}
 
@@ -303,15 +285,10 @@ export default function ExploreManagement() {
                                 </div>
                                 <div className="space-y-3">
                                   <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                                      Image URL
-                                    </label>
-                                    <input
-                                      type="text"
+                                    <ImageUpload
+                                      label="Image"
                                       value={item.image || ''}
-                                      onChange={(e) => updateGalleryItem(idx, 'image', e.target.value)}
-                                      placeholder="https://..."
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                      onChange={(url) => updateGalleryItem(idx, 'image', url)}
                                     />
                                   </div>
                                   <div>
@@ -407,15 +384,10 @@ export default function ExploreManagement() {
                                       />
                                     </div>
                                     <div className="col-span-2">
-                                      <label className="block text-xs font-medium text-gray-600 mb-1">
-                                        Image URL
-                                      </label>
-                                      <input
-                                        type="text"
+                                      <ImageUpload
+                                        label="Room Image"
                                         value={item.image || ''}
-                                        onChange={(e) => updateGalleryItem(idx, 'image', e.target.value)}
-                                        placeholder="https://..."
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                        onChange={(url) => updateGalleryItem(idx, 'image', url)}
                                       />
                                     </div>
                                     <div>

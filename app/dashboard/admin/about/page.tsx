@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import RouteGuard from '@/components/RouteGuard';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import ImageUpload from '@/components/ImageUpload';
+import MultiImageUpload from '@/components/MultiImageUpload';
 import { contentAPI } from '@/lib/api';
 import { FileText, Edit, X, Save, Eye, EyeOff } from 'lucide-react';
 

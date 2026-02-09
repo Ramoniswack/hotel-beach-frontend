@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import RouteGuard from '@/components/RouteGuard';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import ImageUpload from '@/components/ImageUpload';
+import MultiImageUpload from '@/components/MultiImageUpload';
 import { roomsAPI } from '@/lib/api';
 import { Hotel, ToggleLeft, ToggleRight, Edit, X, Save } from 'lucide-react';
 import Image from 'next/image';
@@ -368,27 +370,11 @@ export default function RoomManagement() {
 
                         {/* Hero Image */}
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Hero Image URL
-                          </label>
-                          <input
-                            type="text"
+                          <ImageUpload
+                            label="Hero Image"
                             value={formData.heroImage || ''}
-                            onChange={(e) =>
-                              setFormData({ ...formData, heroImage: e.target.value })
-                            }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#59a4b5] focus:border-transparent"
+                            onChange={(url) => setFormData({ ...formData, heroImage: url })}
                           />
-                          {formData.heroImage && (
-                            <div className="mt-2 relative h-32 rounded-lg overflow-hidden">
-                              <Image
-                                src={formData.heroImage}
-                                alt="Preview"
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
-                          )}
                         </div>
 
                         {/* Description */}
@@ -415,38 +401,12 @@ export default function RoomManagement() {
 
                         {/* Gallery Images */}
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Gallery Images (one URL per line)
-                          </label>
-                          <textarea
-                            value={formData.gallery?.join('\n') || ''}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                gallery: e.target.value.split('\n').filter(line => line.trim()),
-                              })
-                            }
-                            rows={4}
-                            placeholder="Enter image URLs, one per line"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#59a4b5] focus:border-transparent"
+                          <MultiImageUpload
+                            label="Gallery Images"
+                            value={formData.gallery || []}
+                            onChange={(urls) => setFormData({ ...formData, gallery: urls })}
+                            maxImages={10}
                           />
-                          <p className="text-xs text-gray-500 mt-1">
-                            {formData.gallery?.length || 0} images
-                          </p>
-                          {formData.gallery && formData.gallery.length > 0 && (
-                            <div className="mt-2 grid grid-cols-3 gap-2">
-                              {formData.gallery.slice(0, 3).map((img, idx) => (
-                                <div key={idx} className="relative h-20 rounded overflow-hidden">
-                                  <Image
-                                    src={img}
-                                    alt={`Gallery ${idx + 1}`}
-                                    fill
-                                    className="object-cover"
-                                  />
-                                </div>
-                              ))}
-                            </div>
-                          )}
                         </div>
 
                         {/* Amenities */}
