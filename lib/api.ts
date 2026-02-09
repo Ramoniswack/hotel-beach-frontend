@@ -54,6 +54,16 @@ export const authAPI = {
   
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     api.post('/auth/change-password', data),
+  
+  // Admin user management
+  getAllUsers: () =>
+    api.get('/auth/users'),
+  
+  createUser: (data: { email: string; password: string; name: string; phone?: string; role: string }) =>
+    api.post('/auth/users', data),
+  
+  updateUser: (userId: string, data: { role?: string; isActive?: boolean }) =>
+    api.put(`/auth/users/${userId}`, data),
 };
 
 export const roomsAPI = {
