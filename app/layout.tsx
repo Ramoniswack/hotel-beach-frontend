@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import AuthProvider from '@/components/AuthProvider';
+import PageTransition from '@/components/PageTransition';
 
 export const metadata: Metadata = {
   title: 'Hoteller Beach Hotel - Luxury Santorini Resort',
@@ -16,7 +17,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
-          {children}
+          <PageTransition>
+            {children}
+          </PageTransition>
         </AuthProvider>
       </body>
     </html>
