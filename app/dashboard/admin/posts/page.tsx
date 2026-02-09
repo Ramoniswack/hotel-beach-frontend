@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Eye } from 'lucide-react';
+import RouteGuard from '@/components/RouteGuard';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import api from '@/lib/api';
 
 interface BlogPost {
@@ -46,8 +48,9 @@ export default function PostsManagement() {
     try {
       const response = await api.get('/blog');
       setPosts(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching posts:', error);
+      alert(`Error fetching posts: ${error.response?.data?.message || error.message}`);
     } finally {
       setLoading(false);
     }
@@ -62,22 +65,28 @@ export default function PostsManagement() {
         excerpt: formData.excerpt,
         content: formData.content,
         heroImage: formData.heroImage,
-        categories: formData.categories.split(',').map(c => c.trim()),
-        tags: formData.tags.split(',').map(t => t.trim()),
+        categories: formData.categories.split(',').map(c => c.trim()).filter(c => c),
+        tags: formData.tags.split(',').map(t => t.trim()).filter(t => t),
         author: { name: formData.authorName },
         status: formData.status
       };
 
+      console.log('Submitting post data:', postData);
+
       if (editingPost) {
         await api.put(`/blog/${editingPost._id}`, postData);
+        alert('Post updated successfully!');
       } else {
         await api.post('/blog', postData);
+        alert('Post created successfully!');
       }
 
       fetchPosts();
       resetForm();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving post:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Error saving post';
+      alert(`Error: ${errorMessage}`);
     }
   };
 
@@ -131,11 +140,19 @@ export default function PostsManagement() {
   };
 
   if (loading) {
-    return <div className="p-8">Loading...</div>;
+    return (
+      <RouteGuard allowedRoles={['admin']}>
+        <DashboardLayout>
+          <div className="p-8">Loading...</div>
+        </DashboardLayout>
+      </RouteGuard>
+    );
   }
 
   return (
-    <div className="p-8">
+    <RouteGuard allowedRoles={['admin']}>
+      <DashboardLayout>
+        <div className="p-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Blog Posts</h1>
         <button
@@ -342,6 +359,8 @@ export default function PostsManagement() {
           </tbody>
         </table>
       </div>
-    </div>
+        </div>
+      </DashboardLayout>
+    </RouteGuard>
   );
 }
