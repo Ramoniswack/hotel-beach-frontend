@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Eye } from 'lucide-react';
 import RouteGuard from '@/components/RouteGuard';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import ImageUpload from '@/components/ImageUpload';
 import api from '@/lib/api';
 
 interface BlogPost {
@@ -220,13 +221,10 @@ export default function PostsManagement() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Hero Image URL</label>
-              <input
-                type="url"
+              <ImageUpload
+                label="Hero Image"
                 value={formData.heroImage}
-                onChange={(e) => setFormData({ ...formData, heroImage: e.target.value })}
-                className="w-full border rounded px-3 py-2"
-                required
+                onChange={(url) => setFormData({ ...formData, heroImage: url })}
               />
             </div>
 

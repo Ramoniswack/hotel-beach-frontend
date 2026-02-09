@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import RouteGuard from '@/components/RouteGuard';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import ImageUpload from '@/components/ImageUpload';
 import { contentAPI } from '@/lib/api';
 import { Settings, Edit, X, Save, Plus, Trash2 } from 'lucide-react';
 
@@ -200,28 +201,17 @@ export default function SiteSettingsManagement() {
 
                           {formData.subtitle === 'Use image logo' ? (
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Logo Image URL
-                              </label>
-                              <input
-                                type="text"
+                              <ImageUpload
+                                label="Logo Image"
                                 value={formData.images?.[0] || ''}
-                                onChange={(e) => {
-                                  const newImages = [e.target.value];
+                                onChange={(url) => {
+                                  const newImages = [url];
                                   updateFormField('images', newImages);
                                 }}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                                placeholder="https://example.com/logo.png"
                               />
-                              {formData.images?.[0] && (
-                                <div className="mt-2">
-                                  <img 
-                                    src={formData.images[0]} 
-                                    alt="Logo preview" 
+                            </div> 
                                     className="h-16 object-contain"
                                   />
-                                </div>
-                              )}
                             </div>
                           ) : (
                             <div>
