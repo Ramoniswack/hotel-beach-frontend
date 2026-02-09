@@ -18,10 +18,30 @@ const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
   const data = rooms[roomId] || rooms['superior-room'];
 
   const handleClearDates = () => {
     setDateRange(undefined);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setStartX(e.pageX);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    e.preventDefault();
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
   };
 
   useEffect(() => {
@@ -256,14 +276,20 @@ const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
 
       {/* Gallery Section */}
       <section id="gallery" className="py-24 px-4 overflow-hidden">
-        <div className="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 h-[700px]">
+        <div 
+          className="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 h-[700px] cursor-grab active:cursor-grabbing select-none"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
+        >
           {data.gallery.map((img, idx) => (
             <div key={idx} className="h-full overflow-hidden relative">
               <Image 
                 src={img}
                 alt={`Gallery ${idx + 1}`}
                 fill
-                className="object-cover transition-transform hover:scale-105 duration-700"
+                className="object-cover transition-transform hover:scale-105 duration-700 pointer-events-none"
               />
             </div>
           ))}

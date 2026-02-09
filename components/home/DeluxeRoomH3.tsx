@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { roomsAPI } from '@/lib/api';
 
@@ -24,6 +24,9 @@ const DeluxeRoomH3: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const dragRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -66,6 +69,33 @@ const DeluxeRoomH3: React.FC = () => {
 
   const nextRoom = () => setCurrentIndex((prev) => (prev + 1) % rooms.length);
   const prevRoom = () => setCurrentIndex((prev) => (prev - 1 + rooms.length) % rooms.length);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setStartX(e.pageX);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const diff = e.pageX - startX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        prevRoom();
+      } else {
+        nextRoom();
+      }
+      setIsDragging(false);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
 
   if (isLoading) {
     return (
@@ -134,13 +164,20 @@ const DeluxeRoomH3: React.FC = () => {
       </div>
 
       {/* Right Column: Image Slider */}
-      <div className="flex-grow relative overflow-hidden group">
+      <div 
+        ref={dragRef}
+        className="flex-grow relative overflow-hidden group cursor-grab active:cursor-grabbing select-none"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+      >
         <div className="relative w-full h-full">
           <Image 
             src={currentRoom.heroImage}
             alt={currentRoom.title}
             fill
-            className="object-cover transition-all duration-1000 ease-in-out"
+            className="object-cover transition-all duration-1000 ease-in-out pointer-events-none"
           />
           {/* Overlay for aesthetic */}
           <div className="absolute inset-0 bg-black/5"></div>

@@ -90,9 +90,38 @@ const roomsData: Room[] = [
 
 const RoomRow: React.FC<{ room: Room }> = ({ room }) => {
   const [activeImg, setActiveImg] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
 
   const nextImg = () => setActiveImg((prev) => (prev + 1) % room.images.length);
   const prevImg = () => setActiveImg((prev) => (prev - 1 + room.images.length) % room.images.length);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setStartX(e.pageX);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const diff = e.pageX - startX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        prevImg();
+      } else {
+        nextImg();
+      }
+      setIsDragging(false);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
 
   return (
     <div className="flex flex-col lg:flex-row w-full border-b border-black last:border-b-0 overflow-hidden">
@@ -148,12 +177,18 @@ const RoomRow: React.FC<{ room: Room }> = ({ room }) => {
       {/* Image Slider Area - The 90/10 split layout */}
       <div className="flex-grow flex relative h-[500px] lg:h-auto overflow-hidden bg-[#1a1a1a]">
         {/* Main Image Container */}
-        <div className="relative w-[88%] lg:w-[90%] h-full overflow-hidden bg-black/20 group">
+        <div 
+          className="relative w-[88%] lg:w-[90%] h-full overflow-hidden bg-black/20 group cursor-grab active:cursor-grabbing select-none"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
+        >
           <Image 
             src={room.images[activeImg]}
             alt={room.title}
             fill
-            className="object-cover transition-opacity duration-700 ease-in-out"
+            className="object-cover transition-opacity duration-700 ease-in-out pointer-events-none"
           />
 
           {/* Circular Navigation Controls */}

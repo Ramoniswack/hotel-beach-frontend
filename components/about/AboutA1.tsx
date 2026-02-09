@@ -1,7 +1,30 @@
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
 
 const AboutA1: React.FC = () => {
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    setStartX(e.pageX);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    e.preventDefault();
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
   return (
     <div className="bg-white">
       {/* 1. Header Section */}
@@ -57,13 +80,19 @@ const AboutA1: React.FC = () => {
       </div>
 
       {/* 4. Horizontal Gallery Strip */}
-      <div className="relative group mb-32 px-1">
+      <div 
+        className="relative group mb-32 px-1 cursor-grab active:cursor-grabbing select-none"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+      >
         <div className="grid grid-cols-2 md:grid-cols-5 gap-0.5 h-[480px]">
-          <div className="relative w-full h-full"><Image src="https://images.unsplash.com/photo-1433086177604-50dc80846517?auto=format&fit=crop&q=80&w=600" alt="Gallery 1" fill className="object-cover" /></div>
-          <div className="relative w-full h-full"><Image src="https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&q=80&w=600" alt="Gallery 2" fill className="object-cover" /></div>
-          <div className="relative w-full h-full"><Image src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=600" alt="Gallery 3" fill className="object-cover" /></div>
-          <div className="relative w-full h-full"><Image src="https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?auto=format&fit=crop&q=80&w=600" alt="Gallery 4" fill className="object-cover" /></div>
-          <div className="relative w-full h-full"><Image src="https://images.unsplash.com/photo-1549294413-26f195200c16?auto=format&fit=crop&q=80&w=600" alt="Gallery 5" fill className="object-cover" /></div>
+          <div className="relative w-full h-full"><Image src="https://images.unsplash.com/photo-1433086177604-50dc80846517?auto=format&fit=crop&q=80&w=600" alt="Gallery 1" fill className="object-cover pointer-events-none" /></div>
+          <div className="relative w-full h-full"><Image src="https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&q=80&w=600" alt="Gallery 2" fill className="object-cover pointer-events-none" /></div>
+          <div className="relative w-full h-full"><Image src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=600" alt="Gallery 3" fill className="object-cover pointer-events-none" /></div>
+          <div className="relative w-full h-full"><Image src="https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?auto=format&fit=crop&q=80&w=600" alt="Gallery 4" fill className="object-cover pointer-events-none" /></div>
+          <div className="relative w-full h-full"><Image src="https://images.unsplash.com/photo-1549294413-26f195200c16?auto=format&fit=crop&q=80&w=600" alt="Gallery 5" fill className="object-cover pointer-events-none" /></div>
         </div>
         
         {/* Navigation Arrows */}

@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
+import MainContentWrapper from '@/components/MainContentWrapper';
 import AboutA1 from '@/components/about/AboutA1';
 import Footer from '@/components/Footer';
 
 export default function AboutPage() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,13 +19,22 @@ export default function AboutPage() {
   }, []);
 
   return (
-    <div className="relative bg-white selection:bg-hotel-gold selection:text-white overflow-x-hidden">
-      <Header isScrolled={isScrolled} />
-      <main>
-        <AboutA1 />
-      </main>
-      
-      <Footer />
+    <div 
+      className="relative bg-white selection:bg-hotel-gold selection:text-white"
+      style={{
+        perspective: '2000px',
+        perspectiveOrigin: 'left center',
+        overflow: 'hidden',
+      }}
+    >
+      <Header isScrolled={isScrolled} onMenuToggle={setIsMenuOpen} />
+      <MainContentWrapper isMenuOpen={isMenuOpen} onOverlayClick={() => setIsMenuOpen(false)}>
+        <main>
+          <AboutA1 />
+        </main>
+        
+        <Footer />
+      </MainContentWrapper>
     </div>
   );
 }
