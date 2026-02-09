@@ -178,6 +178,13 @@ const SideDrawerMenu: React.FC<SideDrawerMenuProps> = ({ isOpen, onClose }) => {
           <div className="drawer-link pt-6 border-t border-white/10">
             {user ? (
               <div className="space-y-3">
+                <Link
+                  href={user.role === 'guest' ? '/dashboard/guest' : '/dashboard/admin'}
+                  onClick={handleLinkClick}
+                  className="text-white text-lg font-medium hover:text-[#59a4b5] transition-colors duration-300 block"
+                >
+                  Dashboard
+                </Link>
                 <p className="text-white/60 text-sm">Welcome, {user.name}</p>
                 <button
                   onClick={handleLogout}

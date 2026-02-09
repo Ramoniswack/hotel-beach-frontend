@@ -71,6 +71,16 @@ const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggl
               <div className={`hidden lg:flex items-center space-x-4 text-[13px] font-medium transition-colors ${
                 scrolled ? 'text-slate-800' : 'text-white/90'
               }`}>
+                <Link 
+                  href={
+                    user.role === 'guest' ? '/dashboard/guest' : 
+                    user.role === 'staff' ? '/dashboard/staff' : 
+                    '/dashboard/admin'
+                  }
+                  className="hover:text-black transition-colors"
+                >
+                  Dashboard
+                </Link>
                 <span>Welcome, {user.name}</span>
                 <button 
                   onClick={logout}
