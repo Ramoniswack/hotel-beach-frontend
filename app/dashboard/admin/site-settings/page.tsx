@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import RouteGuard from '@/components/RouteGuard';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import ImageUpload from '@/components/ImageUpload';
+import MultiImageUpload from '@/components/MultiImageUpload';
 import { contentAPI } from '@/lib/api';
 import { Settings, Edit, X, Save, Plus, Trash2 } from 'lucide-react';
 
@@ -11,14 +12,6 @@ interface NavItem {
   label: string;
   url: string;
   order?: number;
-}
-
-interface FooterSection {
-  section: string;
-  title?: string;
-  content?: string;
-  images?: string[];
-  links?: NavItem[];
 }
 
 interface Section {
@@ -309,13 +302,12 @@ export default function SiteSettingsManagement() {
                               {item.images && (
                                 <div>
                                   <label className="block text-xs font-medium text-gray-600 mb-1">
-                                    Award Images (URLs, one per line)
+                                    Award Images
                                   </label>
-                                  <textarea
-                                    value={item.images?.join('\n') || ''}
-                                    onChange={(e) => updateFooterSection(idx, 'images', e.target.value.split('\n'))}
-                                    rows={2}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                  <MultiImageUpload
+                                    label=""
+                                    value={item.images || []}
+                                    onChange={(urls) => updateFooterSection(idx, 'images', urls)}
                                   />
                                 </div>
                               )}

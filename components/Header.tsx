@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import SideDrawerMenu from './SideDrawerMenu';
 import { contentAPI } from '@/lib/api';
@@ -18,8 +19,10 @@ interface NavItem {
 }
 
 const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggle }) => {
+  const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [logoText, setLogoText] = useState('HOTEL BEACH');
   const [logoImage, setLogoImage] = useState('');
   const [useImageLogo, setUseImageLogo] = useState(false);
@@ -33,11 +36,14 @@ const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggl
   ]);
   const { user, logout } = useAuthStore();
 
+  // Check if we're on homepage
+  const isHomePage = pathname === '/';
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -69,7 +75,7 @@ const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggl
     fetchHeaderSettings();
   }, []);
 
-  const scrolled = isScrolledProp || isScrolled;
+  const scrolled = isScrolledProp || isScrolled || !isHomePage;
 
   const toggleMenu = () => {
     const newState = !isMenuOpen;
@@ -86,7 +92,7 @@ const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggl
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 py-6 ${
+      <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 py-6 ${
         scrolled ? 'bg-white border-b border-gray-100 shadow-sm' : 'bg-transparent'
       }`}>
         <div className="max-w-[1400px] mx-auto px-8 flex justify-between items-center">
@@ -119,8 +125,15 @@ const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggl
             scrolled ? 'text-slate-800' : 'text-white/90'
           }`}>
             {navItems.map((item, idx) => (
-              <Link key={idx} href={item.url} className="hover:text-black transition-colors">
+              <Link 
+                key={idx} 
+                href={item.url} 
+                className="relative group transition-colors"
+              >
                 {item.label}
+                <span className={`absolute left-0 bottom-0 w-0 h-[2px] transition-all duration-300 group-hover:w-full ${
+                  scrolled ? 'bg-black' : 'bg-white'
+                }`}></span>
               </Link>
             ))}
           </div>
@@ -128,35 +141,62 @@ const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggl
           {/* Right Actions */}
           <div className="flex items-center space-x-8">
             {user ? (
-              <div className={`hidden lg:flex items-center space-x-4 text-[13px] font-medium transition-colors ${
+              <div className={`hidden lg:flex items-center space-x-4 text-[13px] font-medium transition-colors relative ${
                 scrolled ? 'text-slate-800' : 'text-white/90'
               }`}>
-                <Link 
-                  href={
-                    user.role === 'guest' ? '/dashboard/guest' : 
-                    user.role === 'staff' ? '/dashboard/staff' : 
-                    '/dashboard/admin'
-                  }
-                  className="hover:text-black transition-colors"
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center space-x-2 relative group transition-colors"
                 >
-                  Dashboard
-                </Link>
-                <span>Welcome, {user.name}</span>
-                <button 
-                  onClick={logout}
-                  className="hover:text-black transition-colors"
-                >
-                  Logout
+                  <span>Welcome, {user.name}</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
                 </button>
+                
+                {/* Dropdown Menu */}
+                {isUserMenuOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setIsUserMenuOpen(false)}
+                    ></div>
+                    <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                      <Link
+                        href={
+                          user.role === 'guest' ? '/dashboard/guest' : 
+                          user.role === 'staff' ? '/dashboard/staff' : 
+                          '/dashboard/admin'
+                        }
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      >
+                        Dashboard
+                      </Link>
+                      <button
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          logout();
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             ) : (
-              <Link href="/login" className={`hidden lg:flex items-center space-x-2 text-[13px] font-medium transition-colors ${
+              <Link href="/login" className={`hidden lg:flex items-center space-x-2 text-[13px] font-medium transition-colors relative group ${
                 scrolled ? 'text-slate-800' : 'text-white/90'
               }`}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
                 <span>Login</span>
+                <span className={`absolute left-0 bottom-0 w-0 h-[2px] transition-all duration-300 group-hover:w-full ${
+                  scrolled ? 'bg-black' : 'bg-white'
+                }`}></span>
               </Link>
             )}
 
