@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 
@@ -12,8 +12,17 @@ interface RouteGuardProps {
 const RouteGuard: React.FC<RouteGuardProps> = ({ children, allowedRoles }) => {
   const router = useRouter();
   const { user, token } = useAuthStore();
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Wait for zustand to hydrate from localStorage
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   useEffect(() => {
+    // Don't check auth until hydrated
+    if (!isHydrated) return;
+
     // Check if user is authenticated
     if (!token || !user) {
       router.push('/login');
@@ -31,10 +40,10 @@ const RouteGuard: React.FC<RouteGuardProps> = ({ children, allowedRoles }) => {
         router.push('/');
       }
     }
-  }, [user, token, allowedRoles, router]);
+  }, [user, token, allowedRoles, router, isHydrated]);
 
-  // Show loading or nothing while checking
-  if (!token || !user || !allowedRoles.includes(user.role)) {
+  // Show loading while hydrating or checking auth
+  if (!isHydrated || !token || !user || !allowedRoles.includes(user.role)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">

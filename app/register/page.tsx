@@ -22,7 +22,18 @@ export default function RegisterPage() {
     
     try {
       await register(formData);
-      router.push('/');
+      
+      // Get the updated user from store
+      const user = useAuthStore.getState().user;
+      
+      // Redirect based on role (new users are typically guests)
+      if (user?.role === 'admin') {
+        router.push('/dashboard/admin');
+      } else if (user?.role === 'staff') {
+        router.push('/dashboard/staff');
+      } else {
+        router.push('/dashboard/guest');
+      }
     } catch (error) {
       // Error is handled by the store
     }

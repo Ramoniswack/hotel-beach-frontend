@@ -20,7 +20,18 @@ export default function LoginPage() {
     
     try {
       await login(formData.email, formData.password);
-      router.push('/');
+      
+      // Get the updated user from store
+      const user = useAuthStore.getState().user;
+      
+      // Redirect based on role
+      if (user?.role === 'admin') {
+        router.push('/dashboard/admin');
+      } else if (user?.role === 'staff') {
+        router.push('/dashboard/staff');
+      } else {
+        router.push('/dashboard/guest');
+      }
     } catch (error) {
       // Error is handled by the store
     }
