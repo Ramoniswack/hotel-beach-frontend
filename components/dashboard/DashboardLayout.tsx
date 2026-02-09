@@ -14,7 +14,9 @@ import {
   Hotel,
   BarChart3,
   MessageSquare,
-  FileText
+  FileText,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -23,6 +25,7 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [pagesMenuOpen, setPagesMenuOpen] = useState(true);
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthStore();
@@ -49,20 +52,26 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Overview', href: '/dashboard/admin', icon: BarChart3 },
     { name: 'Bookings', href: '/dashboard/admin/bookings', icon: Calendar },
     { name: 'Rooms', href: '/dashboard/admin/rooms', icon: Hotel },
-    { name: 'Home Page', href: '/dashboard/admin/home', icon: Home },
-    { name: 'Rooms Page', href: '/dashboard/admin/rooms-page', icon: FileText },
-    { name: 'About Page', href: '/dashboard/admin/about', icon: FileText },
-    { name: 'Explore Page', href: '/dashboard/admin/explore', icon: FileText },
-    { name: 'Contact Page', href: '/dashboard/admin/contact', icon: MessageSquare },
+    { name: 'Site Settings', href: '/dashboard/admin/site-settings', icon: MessageSquare },
     { name: 'Financial Hub', href: '/dashboard/admin/financial', icon: BarChart3 },
     { name: 'Users', href: '/dashboard/admin/users', icon: Users },
     { name: 'Back to Site', href: '/', icon: Home },
+  ];
+
+  const pagesSubMenu = [
+    { name: 'Home Page', href: '/dashboard/admin/home' },
+    { name: 'Rooms Page', href: '/dashboard/admin/rooms-page' },
+    { name: 'About Page', href: '/dashboard/admin/about' },
+    { name: 'Explore Page', href: '/dashboard/admin/explore' },
+    { name: 'Contact Page', href: '/dashboard/admin/contact' },
   ];
 
   const navItems = 
     user?.role === 'guest' ? guestNavItems :
     user?.role === 'staff' ? staffNavItems :
     adminNavItems;
+
+  const isPageActive = pagesSubMenu.some(page => pathname === page.href);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -132,6 +141,47 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 </Link>
               );
             })}
+
+            {/* Pages Menu (Admin Only) */}
+            {user?.role === 'admin' && (
+              <div>
+                <button
+                  onClick={() => setPagesMenuOpen(!pagesMenuOpen)}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${
+                    isPageActive
+                      ? 'bg-[#59a4b5] text-white'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <FileText size={20} />
+                    <span className="font-medium">Pages</span>
+                  </div>
+                  {pagesMenuOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                </button>
+                
+                {pagesMenuOpen && (
+                  <div className="ml-4 mt-1 space-y-1">
+                    {pagesSubMenu.map((page) => {
+                      const isActive = pathname === page.href;
+                      return (
+                        <Link
+                          key={page.href}
+                          href={page.href}
+                          className={`flex items-center px-4 py-2 rounded-lg text-sm transition-colors ${
+                            isActive
+                              ? 'bg-[#59a4b5] text-white'
+                              : 'text-white/60 hover:bg-white/5 hover:text-white/80'
+                          }`}
+                        >
+                          {page.name}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
           </nav>
 
           {/* Logout */}

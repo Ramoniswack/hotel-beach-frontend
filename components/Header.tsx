@@ -4,15 +4,33 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
 import SideDrawerMenu from './SideDrawerMenu';
+import { contentAPI } from '@/lib/api';
 
 interface HeaderProps {
   isScrolled: boolean;
   onMenuToggle?: (isOpen: boolean) => void;
 }
 
+interface NavItem {
+  label: string;
+  url: string;
+  order?: number;
+}
+
 const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggle }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [logoText, setLogoText] = useState('HOTEL BEACH');
+  const [logoImage, setLogoImage] = useState('');
+  const [useImageLogo, setUseImageLogo] = useState(false);
+  const [navItems, setNavItems] = useState<NavItem[]>([
+    { label: 'Home', url: '/', order: 1 },
+    { label: 'Our Rooms', url: '/rooms', order: 2 },
+    { label: 'About Us', url: '/about', order: 3 },
+    { label: 'Blog', url: '/blog', order: 4 },
+    { label: 'Explore', url: '/explore', order: 5 },
+    { label: 'Contact', url: '/contact', order: 6 }
+  ]);
   const { user, logout } = useAuthStore();
 
   useEffect(() => {
@@ -21,6 +39,34 @@ const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggl
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const fetchHeaderSettings = async () => {
+      try {
+        const response = await contentAPI.getByPage('site-settings');
+        const headerSection = response.data.data.sections.find((s: any) => s.sectionId === 'header');
+        if (headerSection) {
+          // Check if using image logo
+          if (headerSection.subtitle === 'Use image logo' && headerSection.images?.[0]) {
+            setUseImageLogo(true);
+            setLogoImage(headerSection.images[0]);
+          } else {
+            setUseImageLogo(false);
+            if (headerSection.title) {
+              setLogoText(headerSection.title);
+            }
+          }
+          
+          if (headerSection.items && headerSection.items.length > 0) {
+            setNavItems(headerSection.items.sort((a: any, b: any) => (a.order || 0) - (b.order || 0)));
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching header settings:', error);
+      }
+    };
+    fetchHeaderSettings();
   }, []);
 
   const scrolled = isScrolledProp || isScrolled;
@@ -33,6 +79,11 @@ const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggl
     }
   };
 
+  // Split logo text into two parts (e.g., "HOTEL BEACH" -> "HOTEL" and "BEACH")
+  const logoParts = logoText.split(' ');
+  const logoMain = logoParts[0] || 'HOTEL';
+  const logoSub = logoParts.slice(1).join(' ') || 'BEACH';
+
   return (
     <>
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 py-6 ${
@@ -41,28 +92,37 @@ const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggl
         <div className="max-w-[1400px] mx-auto px-8 flex justify-between items-center">
           {/* Logo */}
           <Link href="/" className="flex flex-col leading-none">
-            <span className={`text-2xl font-bold tracking-tight transition-colors ${
-              scrolled ? 'text-slate-900' : 'text-white'
-            }`}>
-              HOTEL
-            </span>
-            <span className={`text-[10px] font-bold tracking-[0.4em] ml-1 transition-colors ${
-              scrolled ? 'text-slate-900' : 'text-white'
-            }`}>
-              BEACH
-            </span>
+            {useImageLogo && logoImage ? (
+              <img 
+                src={logoImage} 
+                alt="Logo" 
+                className="h-12 w-auto object-contain"
+              />
+            ) : (
+              <>
+                <span className={`text-2xl font-bold tracking-tight transition-colors ${
+                  scrolled ? 'text-slate-900' : 'text-white'
+                }`}>
+                  {logoMain}
+                </span>
+                <span className={`text-[10px] font-bold tracking-[0.4em] ml-1 transition-colors ${
+                  scrolled ? 'text-slate-900' : 'text-white'
+                }`}>
+                  {logoSub}
+                </span>
+              </>
+            )}
           </Link>
 
           {/* Navigation Links */}
           <div className={`hidden lg:flex space-x-10 text-[13px] font-medium transition-colors ${
             scrolled ? 'text-slate-800' : 'text-white/90'
           }`}>
-            <Link href="/" className="hover:text-black transition-colors">Home</Link>
-            <Link href="/rooms" className="hover:text-black transition-colors">Our Rooms</Link>
-            <Link href="/about" className="hover:text-black transition-colors">About Us</Link>
-            <Link href="/blog" className="hover:text-black transition-colors">Blog</Link>
-            <Link href="/explore" className="hover:text-black transition-colors">Explore</Link>
-            <Link href="/contact" className="hover:text-black transition-colors">Contact</Link>
+            {navItems.map((item, idx) => (
+              <Link key={idx} href={item.url} className="hover:text-black transition-colors">
+                {item.label}
+              </Link>
+            ))}
           </div>
 
           {/* Right Actions */}
