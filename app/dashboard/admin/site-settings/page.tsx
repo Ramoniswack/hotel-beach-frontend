@@ -25,6 +25,8 @@ interface Section {
   sectionId: string;
   sectionName: string;
   title?: string;
+  subtitle?: string;
+  images?: string[];
   items?: any[];
   isVisible: boolean;
   order: number;
@@ -209,9 +211,6 @@ export default function SiteSettingsManagement() {
                                   updateFormField('images', newImages);
                                 }}
                               />
-                            </div> 
-                                    className="h-16 object-contain"
-                                  />
                             </div>
                           ) : (
                             <div>
