@@ -6,8 +6,8 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
-import { bookingsAPI } from '@/lib/api';
-import { rooms } from '@/data/roomsData';
+import { bookingsAPI, roomsAPI } from '@/lib/api';
+import { rooms as fallbackRooms } from '@/data/roomsData';
 import { Loader2 } from 'lucide-react';
 
 interface Props {
@@ -21,6 +21,26 @@ interface AvailabilityResponse {
   message?: string;
 }
 
+interface RoomData {
+  _id: string;
+  id: string;
+  title: string;
+  subtitle: string;
+  heroImage: string;
+  price: number;
+  description: string[];
+  specs: {
+    bed: string;
+    capacity: string;
+    size: string;
+    view: string;
+  };
+  gallery: string[];
+  amenities?: string[];
+  services?: string[];
+  isAvailable: boolean;
+}
+
 const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
@@ -28,18 +48,49 @@ const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
+  
+  // Room data states
+  const [roomData, setRoomData] = useState<RoomData | null>(null);
+  const [isLoadingRoom, setIsLoadingRoom] = useState(true);
   
   // Availability check states
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
   const [availabilityResult, setAvailabilityResult] = useState<AvailabilityResponse | null>(null);
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
-  
-  const data = rooms[roomId] || rooms['superior-room'];
 
+  // Fetch room data from API
+  useEffect(() => {
+    const fetchRoomData = async () => {
+      try {
+        setIsLoadingRoom(true);
+        const response = await roomsAPI.getById(roomId);
+        setRoomData(response.data.data);
+      } catch (error) {
+        console.error('Error fetching room:', error);
+        // Fallback to static data if API fails
+        const fallbackData = fallbackRooms[roomId] || fallbackRooms['superior-room'];
+        setRoomData({
+          _id: roomId,
+          id: roomId,
+          title: fallbackData.title,
+          subtitle: fallbackData.subtitle,
+          heroImage: fallbackData.heroImage,
+          price: parseInt(fallbackData.price.replace('$', '')),
+          description: fallbackData.description,
+          specs: fallbackData.specs,
+          gallery: fallbackData.gallery,
+          isAvailable: true,
+        });
+      } finally {
+        setIsLoadingRoom(false);
+      }
+    };
+
+    fetchRoomData();
+  }, [roomId]);
+  
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
-    setStartX(e.pageX);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -103,14 +154,40 @@ const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showBookingForm, showCalendar]);
 
+  // Show loading state
+  if (isLoadingRoom) {
+    return (
+      <div className="bg-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#59a4b5] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading room details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if no room data
+  if (!roomData) {
+    return (
+      <div className="bg-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 text-xl">Room not found</p>
+          <Link href="/rooms" className="text-[#59a4b5] hover:underline mt-4 inline-block">
+            Back to Rooms
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white">
       {/* Hero Section */}
       <section className="relative h-[70vh] w-full overflow-hidden flex flex-col items-center justify-center">
         <div className="absolute inset-0">
           <Image 
-            src={data.heroImage}
-            alt={data.title}
+            src={roomData.heroImage}
+            alt={roomData.title}
             fill
             className="object-cover"
             priority
@@ -118,8 +195,8 @@ const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
           <div className="absolute inset-0 bg-black/30"></div>
         </div>
         <div className="relative z-10 text-center text-white">
-          <h1 className="text-[60px] md:text-[80px] font-bold tracking-tight mb-4">{data.title}</h1>
-          <p className="text-[12px] uppercase tracking-[0.4em] font-medium opacity-90 mb-12">{data.subtitle}</p>
+          <h1 className="text-[60px] md:text-[80px] font-bold tracking-tight mb-4">{roomData.title}</h1>
+          <p className="text-[12px] uppercase tracking-[0.4em] font-medium opacity-90 mb-12">{roomData.subtitle}</p>
           <div className="flex items-center justify-center space-x-8 text-[11px] font-bold uppercase tracking-[0.2em]">
             <a href="#detail" className="hover:text-white/70 border-b border-white pb-1">Detail</a>
             <a href="#amenities" className="hover:text-white/70 transition-colors">Amenities & Services</a>
@@ -134,10 +211,10 @@ const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
           {/* Left: Description */}
           <div className="lg:w-2/3">
             <h2 className="text-[24px] font-bold text-[#1a1a1a] mb-8 leading-tight">
-              {data.description[0]}
+              {roomData.description[0]}
             </h2>
             <div className="space-y-6 text-[#666] text-[15px] leading-[1.8] font-light">
-              {data.description.slice(1).map((p, i) => (
+              {roomData.description.slice(1).map((p, i) => (
                 <p key={i}>{p}</p>
               ))}
             </div>
@@ -147,7 +224,7 @@ const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
           <div className="lg:w-1/3 lg:border-l lg:pl-12 flex flex-col relative">
             <div className="mb-10">
               <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mb-2">From</span>
-              <span className="text-[56px] font-bold text-[#1a1a1a] leading-none tracking-tighter">{data.price}</span>
+              <span className="text-[56px] font-bold text-[#1a1a1a] leading-none tracking-tighter">${roomData.price}</span>
             </div>
             <button 
               onClick={() => setShowBookingForm(!showBookingForm)}
@@ -279,25 +356,25 @@ const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
                 <svg className="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
-                <span className="font-medium">{data.specs.bed}</span>
+                <span className="font-medium">{roomData.specs.bed}</span>
               </div>
               <div className="flex items-center space-x-4">
                 <svg className="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
-                <span className="font-medium">{data.specs.capacity}</span>
+                <span className="font-medium">{roomData.specs.capacity}</span>
               </div>
               <div className="flex items-center space-x-4">
                 <svg className="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                 </svg>
-                <span className="font-medium">{data.specs.size}</span>
+                <span className="font-medium">{roomData.specs.size}</span>
               </div>
               <div className="flex items-center space-x-4">
                 <svg className="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
-                <span className="font-medium">{data.specs.view}</span>
+                <span className="font-medium">{roomData.specs.view}</span>
               </div>
             </div>
           </div>
@@ -317,22 +394,16 @@ const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
             <div>
               <h3 className="text-[20px] font-bold mb-8 tracking-tight">Amenities</h3>
               <ul className="space-y-4 text-[13px] text-gray-400 font-medium">
-                {[
-                  '40-inch Samsung® LED TV',
-                  'Electronic safe with charging facility',
-                  'iHome™ Bluetooth MP3 Player',
-                  'Iron and ironing board',
-                  'Mini bar',
-                  'Non-smoking',
-                  'USB charging station',
-                  'Wired and wireless broadband Internet access',
-                  'Work desk'
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-center space-x-3">
-                    <span className="text-white text-[10px]">›</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
+                {roomData.amenities && roomData.amenities.length > 0 ? (
+                  roomData.amenities.map((item, idx) => (
+                    <li key={idx} className="flex items-center space-x-3">
+                      <span className="text-white text-[10px]">›</span>
+                      <span>{item}</span>
+                    </li>
+                  ))
+                ) : (
+                  <li className="text-gray-500">No amenities listed</li>
+                )}
               </ul>
             </div>
           </div>
@@ -347,18 +418,16 @@ const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
             <div>
               <h3 className="text-[20px] font-bold mb-8 tracking-tight">Services</h3>
               <ul className="space-y-4 text-[13px] text-gray-400 font-medium">
-                {[
-                  'Free-to-use smartphone (Free )',
-                  'Safe-deposit box (Free )',
-                  'Luggage storage (Free )',
-                  'Childcare ($60 / Once / Per Accommodation )',
-                  'Massage ($15 / Once / Per Guest )'
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-center space-x-3">
-                    <span className="text-white text-[10px]">›</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
+                {roomData.services && roomData.services.length > 0 ? (
+                  roomData.services.map((item, idx) => (
+                    <li key={idx} className="flex items-center space-x-3">
+                      <span className="text-white text-[10px]">›</span>
+                      <span>{item}</span>
+                    </li>
+                  ))
+                ) : (
+                  <li className="text-gray-500">No services listed</li>
+                )}
               </ul>
             </div>
           </div>
@@ -374,7 +443,7 @@ const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseLeave}
         >
-          {data.gallery.map((img, idx) => (
+          {roomData.gallery.map((img, idx) => (
             <div key={idx} className="h-full overflow-hidden relative">
               <Image 
                 src={img}
@@ -396,7 +465,8 @@ const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            {data.otherRooms.map((room, idx) => (
+            {/* Use fallback data for other rooms section */}
+            {fallbackRooms[roomId]?.otherRooms?.map((room: any, idx: number) => (
               <Link key={idx} href={`/accommodation/${room.id}`} className="group">
                 <div className="aspect-[4/3] overflow-hidden mb-8 relative">
                   <Image 
@@ -420,7 +490,9 @@ const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
                   </div>
                 </div>
               </Link>
-            ))}
+            )) || (
+              <p className="col-span-3 text-center text-gray-500">No other rooms available</p>
+            )}
           </div>
         </div>
       </section>
