@@ -6,10 +6,19 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
-import { rooms, RoomData } from '@/data/roomsData';
+import { bookingsAPI } from '@/lib/api';
+import { rooms } from '@/data/roomsData';
+import { Loader2 } from 'lucide-react';
 
 interface Props {
   roomId: string;
+}
+
+interface AvailabilityResponse {
+  available: boolean;
+  totalPrice?: number;
+  nights?: number;
+  message?: string;
 }
 
 const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
@@ -20,11 +29,13 @@ const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
   const [children, setChildren] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
+  
+  // Availability check states
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
+  const [availabilityResult, setAvailabilityResult] = useState<AvailabilityResponse | null>(null);
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+  
   const data = rooms[roomId] || rooms['superior-room'];
-
-  const handleClearDates = () => {
-    setDateRange(undefined);
-  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
@@ -43,6 +54,40 @@ const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
   const handleMouseLeave = () => {
     setIsDragging(false);
   };
+
+  // Check availability when dates are selected
+  const handleCheckAvailability = async () => {
+    if (!dateRange?.from || !dateRange?.to) {
+      setAvailabilityError('Please select check-in and check-out dates');
+      return;
+    }
+
+    setIsCheckingAvailability(true);
+    setAvailabilityError(null);
+    setAvailabilityResult(null);
+
+    try {
+      const response = await bookingsAPI.checkAvailability({
+        roomId: roomId,
+        checkInDate: format(dateRange.from, 'yyyy-MM-dd'),
+        checkOutDate: format(dateRange.to, 'yyyy-MM-dd'),
+      });
+
+      setAvailabilityResult(response.data.data);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Failed to check availability';
+      setAvailabilityError(errorMessage);
+      setAvailabilityResult({ available: false, message: errorMessage });
+    } finally {
+      setIsCheckingAvailability(false);
+    }
+  };
+
+  // Reset availability when dates change
+  useEffect(() => {
+    setAvailabilityResult(null);
+    setAvailabilityError(null);
+  }, [dateRange]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -176,8 +221,54 @@ const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
                       </select>
                     </div>
                   </div>
-                  <button className="w-full py-3.5 bg-[#59a4b5] hover:bg-[#4a8a99] text-white rounded-full text-[12px] font-bold uppercase tracking-widest transition-all mt-2 shadow-md shadow-[#59a4b5]/10">
-                    Check Availability
+
+                  {/* Availability Status */}
+                  {availabilityResult && (
+                    <div className={`p-4 rounded-lg ${
+                      availabilityResult.available 
+                        ? 'bg-green-50 border border-green-200' 
+                        : 'bg-red-50 border border-red-200'
+                    }`}>
+                      {availabilityResult.available ? (
+                        <div>
+                          <p className="text-green-800 font-bold text-sm mb-2">✓ Room Available!</p>
+                          <div className="text-green-700 text-xs space-y-1">
+                            <p>Nights: {availabilityResult.nights}</p>
+                            <p className="font-bold text-lg">Total: ${availabilityResult.totalPrice}</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <p className="text-red-800 font-bold text-sm mb-1">✗ Not Available</p>
+                          <p className="text-red-700 text-xs">
+                            {availabilityResult.message || 'This room is fully booked for the selected dates. Please try another date range.'}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {availabilityError && !availabilityResult && (
+                    <div className="p-4 rounded-lg bg-yellow-50 border border-yellow-200">
+                      <p className="text-yellow-800 text-xs">{availabilityError}</p>
+                    </div>
+                  )}
+
+                  <button 
+                    onClick={handleCheckAvailability}
+                    disabled={isCheckingAvailability || !dateRange?.from || !dateRange?.to}
+                    className="w-full py-3.5 bg-[#59a4b5] hover:bg-[#4a8a99] text-white rounded-full text-[12px] font-bold uppercase tracking-widest transition-all mt-2 shadow-md shadow-[#59a4b5]/10 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  >
+                    {isCheckingAvailability ? (
+                      <>
+                        <Loader2 className="animate-spin" size={16} />
+                        <span>Checking...</span>
+                      </>
+                    ) : availabilityResult?.available ? (
+                      <span>Proceed to Booking</span>
+                    ) : (
+                      <span>Check Availability</span>
+                    )}
                   </button>
                 </div>
               </div>

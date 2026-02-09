@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import RouteGuard from '@/components/RouteGuard';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { roomsAPI, bookingsAPI } from '@/lib/api';
-import { Hotel, CheckCircle, XCircle, Clock, Users, Sparkles } from 'lucide-react';
+import { roomsAPI } from '@/lib/api';
+import { Hotel, CheckCircle, Users, Sparkles } from 'lucide-react';
 
 interface Room {
   _id: string;
