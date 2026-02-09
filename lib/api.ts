@@ -115,3 +115,17 @@ export const bookingsAPI = {
   cancel: (id: string) =>
     api.delete(`/bookings/${id}`),
 };
+
+export const contentAPI = {
+  getAll: () =>
+    api.get('/content'),
+  
+  getByPage: (pageName: string) =>
+    api.get(`/content/${pageName}`),
+  
+  create: (data: any) =>
+    api.post('/content', data),
+  
+  update: (pageName: string, data: any) =>
+    api.put(`/content/${pageName}`, data),
+};

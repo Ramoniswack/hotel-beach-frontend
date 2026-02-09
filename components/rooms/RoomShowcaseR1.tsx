@@ -156,7 +156,7 @@ const RoomRow: React.FC<{ room: Room }> = ({ room }) => {
   );
 };
 
-const RoomShowcaseR1: React.FC = () => {
+const RoomShowcaseR1: React.FC<{ section?: any }> = ({ section }) => {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -206,10 +206,10 @@ const RoomShowcaseR1: React.FC = () => {
       {/* Intro Header Section */}
       <div className="max-w-[1300px] mx-auto px-8 pt-24 pb-16 lg:pt-32 lg:pb-24">
         <h2 className="text-[36px] md:text-[48px] font-bold mb-8 tracking-tight text-[#1a1a1a] leading-[1.1]">
-          In harmony with nature
+          {section?.title || 'In harmony with nature'}
         </h2>
         <p className="text-[#666] text-[15px] leading-[1.9] max-w-2xl font-normal">
-          Exercitation photo booth stumptown tote bag Banksy, elit small batch freegan sed. Craft beer elit seitan exercitation, photo booth et 8-bit kale chips proident chillwave deep v laborum.
+          {section?.description || 'Exercitation photo booth stumptown tote bag Banksy, elit small batch freegan sed. Craft beer elit seitan exercitation, photo booth et 8-bit kale chips proident chillwave deep v laborum.'}
         </p>
       </div>
 

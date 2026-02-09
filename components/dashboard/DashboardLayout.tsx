@@ -13,7 +13,8 @@ import {
   X,
   Hotel,
   BarChart3,
-  MessageSquare
+  MessageSquare,
+  FileText
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -48,6 +49,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Overview', href: '/dashboard/admin', icon: BarChart3 },
     { name: 'Bookings', href: '/dashboard/admin/bookings', icon: Calendar },
     { name: 'Rooms', href: '/dashboard/admin/rooms', icon: Hotel },
+    { name: 'Home Page', href: '/dashboard/admin/home', icon: Home },
+    { name: 'Rooms Page', href: '/dashboard/admin/rooms-page', icon: FileText },
+    { name: 'About Page', href: '/dashboard/admin/about', icon: FileText },
+    { name: 'Explore Page', href: '/dashboard/admin/explore', icon: FileText },
+    { name: 'Contact Page', href: '/dashboard/admin/contact', icon: MessageSquare },
     { name: 'Financial Hub', href: '/dashboard/admin/financial', icon: BarChart3 },
     { name: 'Users', href: '/dashboard/admin/users', icon: Users },
     { name: 'Back to Site', href: '/', icon: Home },

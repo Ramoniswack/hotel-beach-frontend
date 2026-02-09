@@ -1,21 +1,52 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 
-const slides = [
-  {
-    image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&q=80&w=1920',
-    title: 'Santorini Retreat',
-    subtitle: 'Unlock the door to a wonder of the world'
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&q=80&w=1920',
-    title: 'Luxury Awaits',
-    subtitle: 'Experience the pinnacle of Mediterranean hospitality'
-  }
-];
+interface Section {
+  sectionId: string;
+  title?: string;
+  subtitle?: string;
+  images?: string[];
+  items?: any[];
+}
 
-const HeroH1: React.FC = () => {
+interface HeroH1Props {
+  section?: Section;
+}
+
+const HeroH1: React.FC<HeroH1Props> = ({ section }) => {
   const [current, setCurrent] = useState(0);
+
+  // Default slides
+  const defaultSlides = [
+    {
+      image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&q=80&w=1920',
+      title: 'Santorini Retreat',
+      subtitle: 'Unlock the door to a wonder of the world'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&q=80&w=1920',
+      title: 'Luxury Awaits',
+      subtitle: 'Experience the pinnacle of Mediterranean hospitality'
+    }
+  ];
+
+  // Use section data if available, otherwise use defaults
+  const slides = section?.items && section.items.length > 0
+    ? section.items
+    : section?.images && section.images.length > 0
+    ? [
+        {
+          image: section.images[0],
+          title: section.title || 'Santorini Retreat',
+          subtitle: section.subtitle || 'Unlock the door to a wonder of the world'
+        },
+        {
+          image: section.images[1] || section.images[0],
+          title: 'Luxury Awaits',
+          subtitle: 'Experience the pinnacle of Mediterranean hospitality'
+        }
+      ]
+    : defaultSlides;
 
   const nextSlide = () => setCurrent((prev) => (prev + 1) % slides.length);
   const prevSlide = () => setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
