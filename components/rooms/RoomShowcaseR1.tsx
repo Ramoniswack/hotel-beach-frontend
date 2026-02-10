@@ -24,37 +24,64 @@ const RoomRow: React.FC<{ room: Room }> = ({ room }) => {
   const [activeImg, setActiveImg] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const images = room.gallery && room.gallery.length > 0 ? room.gallery : [room.heroImage];
 
-  const nextImg = () => setActiveImg((prev) => (prev + 1) % images.length);
-  const prevImg = () => setActiveImg((prev) => (prev - 1 + images.length) % images.length);
+  const nextImg = () => {
+    if (isDragging) return;
+    setIsTransitioning(true);
+    setActiveImg((prev) => (prev + 1) % images.length);
+    setDragOffset(0);
+    setTimeout(() => setIsTransitioning(false), 700);
+  };
+
+  const prevImg = () => {
+    if (isDragging) return;
+    setIsTransitioning(true);
+    setActiveImg((prev) => (prev - 1 + images.length) % images.length);
+    setDragOffset(0);
+    setTimeout(() => setIsTransitioning(false), 700);
+  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     setStartX(e.pageX);
+    setIsTransitioning(false);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
     e.preventDefault();
-    const diff = e.pageX - startX;
-    if (Math.abs(diff) > 50) {
-      if (diff > 0) {
-        prevImg();
-      } else {
-        nextImg();
-      }
-      setIsDragging(false);
-    }
+    const currentX = e.pageX;
+    const diff = currentX - startX;
+    setDragOffset(diff);
   };
 
   const handleMouseUp = () => {
+    if (!isDragging) return;
     setIsDragging(false);
+    
+    // Snap to next/prev image if dragged more than 100px
+    if (Math.abs(dragOffset) > 100) {
+      if (dragOffset < 0) {
+        nextImg();
+      } else {
+        prevImg();
+      }
+    } else {
+      // Snap back to current image
+      setIsTransitioning(true);
+      setDragOffset(0);
+      setTimeout(() => setIsTransitioning(false), 300);
+    }
   };
 
   const handleMouseLeave = () => {
-    setIsDragging(false);
+    if (isDragging) {
+      handleMouseUp();
+    }
   };
 
   return (
@@ -103,7 +130,9 @@ const RoomRow: React.FC<{ room: Room }> = ({ room }) => {
       <div className="flex-grow flex relative h-[500px] lg:h-auto overflow-hidden bg-[#1a1a1a]">
         {/* Main Image Container */}
         <div 
-          className="relative w-[88%] lg:w-[90%] h-full overflow-hidden bg-black/20 group cursor-grab active:cursor-grabbing select-none"
+          className={`relative w-[88%] lg:w-[90%] h-full overflow-hidden bg-black/20 group select-none ${
+            isDragging ? 'cursor-grabbing' : 'cursor-grab'
+          }`}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}

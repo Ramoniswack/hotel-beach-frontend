@@ -30,3 +30,21 @@
     transform: translateX(400%);
   }
 }
+
+/* Infinite Scroll Animation */
+@keyframes infinite-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333%);
+  }
+}
+
+.animate-infinite-scroll {
+  animation: infinite-scroll 20s linear infinite;
+}
+
+.pause-animation:hover {
+  animation-play-state: paused;
+}

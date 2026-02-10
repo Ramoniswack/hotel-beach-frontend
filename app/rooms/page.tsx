@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import MainContentWrapper from '@/components/MainContentWrapper';
+import { RetreatSectionR0 } from '@/components/rooms/RetreatSectionR0';
 import RoomShowcaseR1 from '@/components/rooms/RoomShowcaseR1';
 import SpaSectionR3 from '@/components/rooms/SpaSectionR3';
 import PromotionGridR4 from '@/components/rooms/PromotionGridR4';
@@ -63,6 +64,7 @@ export default function RoomsPage() {
       <Header isScrolled={isScrolled} onMenuToggle={setIsMenuOpen} />
       <MainContentWrapper isMenuOpen={isMenuOpen} onOverlayClick={() => setIsMenuOpen(false)}>
         <main>
+          <RetreatSectionR0 />
           {(sections.length === 0 || getSection('rooms-showcase')) && (
             <RoomShowcaseR1 section={getSection('header')} />
           )}

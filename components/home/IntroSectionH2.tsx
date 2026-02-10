@@ -38,11 +38,11 @@ const IntroSectionH2: React.FC<IntroSectionH2Props> = ({ section }) => {
             <div className="pt-8">
               <div className="mb-4">
                 <Image 
-                  src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Signature_of_Richard_Nixon.svg" 
+                  src="https://hotellerv1.b-cdn.net/beach/wp-content/uploads/sites/4/2018/06/signature.png" 
                   alt="Signature" 
                   width={200}
                   height={80}
-                  className="h-16 w-auto mb-4 opacity-80 grayscale invert brightness-0"
+                  className="h-16 w-auto mb-4"
                 />
                 <p className="text-xs font-bold tracking-[0.2em] uppercase text-slate-900">
                   {section?.content || 'Richard Morgan - General Manager'}
