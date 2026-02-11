@@ -79,7 +79,7 @@ const Footer: React.FC = () => {
   const linksSection = getSection('footer-links');
 
   return (
-    <footer className="relative bg-[#1a1a1a] pt-24 pb-12 overflow-hidden">
+    <footer className="relative z-10 bg-[#1a1a1a] pt-24 pb-12 overflow-hidden">
       {/* Wave Decorative Divider - Flipped horizontally (slant opposite) */}
       <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0] transform rotate-360 scale-x-[-1]">
         <svg

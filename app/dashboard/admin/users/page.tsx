@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import RouteGuard from '@/components/RouteGuard';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { authAPI } from '@/lib/api';
-import { Users, UserPlus, Edit2, Trash2, Shield, User as UserIcon } from 'lucide-react';
+import { Users, UserPlus, Edit2, Trash2, Shield, User as UserIcon, Power } from 'lucide-react';
 
 interface User {
   _id: string;
@@ -73,6 +73,17 @@ export default function UserManagement() {
   const handleToggleActive = async (userId: string, currentStatus: boolean) => {
     if (confirm(`Are you sure you want to ${currentStatus ? 'deactivate' : 'activate'} this user?`)) {
       await handleUpdateUser(userId, { isActive: !currentStatus });
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (confirm(`Are you sure you want to permanently delete ${userName}? This action cannot be undone.`)) {
+      try {
+        await authAPI.deleteUser(userId);
+        fetchUsers();
+      } catch (err: any) {
+        alert('Failed to delete user: ' + (err.response?.data?.message || 'Unknown error'));
+      }
     }
   };
 
@@ -288,9 +299,16 @@ export default function UserManagement() {
                           <button
                             onClick={() => handleToggleActive(user._id, user.isActive)}
                             className={`${
-                              user.isActive ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'
+                              user.isActive ? 'text-orange-600 hover:text-orange-900' : 'text-green-600 hover:text-green-900'
                             }`}
                             title={user.isActive ? 'Deactivate' : 'Activate'}
+                          >
+                            <Power size={18} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteUser(user._id, user.name)}
+                            className="text-red-600 hover:text-red-900"
+                            title="Delete"
                           >
                             <Trash2 size={18} />
                           </button>

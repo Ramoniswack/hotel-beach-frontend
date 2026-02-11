@@ -90,8 +90,8 @@ function BookingConfirmationContent() {
   const [paymentMethod, setPaymentMethod] = useState('woocommerce');
   const [acceptTerms, setAcceptTerms] = useState(false);
   
-  // Additional services
-  const [services, setServices] = useState({
+  // Additional services - using dynamic keys to support admin-configured services
+  const [services, setServices] = useState<{ [key: string]: boolean | number }>({
     smartphone: false,
     safeBox: false,
     luggage: false,
@@ -232,11 +232,13 @@ function BookingConfirmationContent() {
     if (bookingSettings.additionalServices?.items) {
       bookingSettings.additionalServices.items.forEach(service => {
         const serviceKey = service.name.toLowerCase().replace(/[^a-z]/g, '');
-        if (services[serviceKey]) {
+        const isServiceChecked = services[serviceKey];
+        
+        if (isServiceChecked === true) {
           if (service.type === 'guests') {
             const guestsKey = `${serviceKey}Guests`;
-            const guestCount = services[guestsKey] || 1;
-            total += service.price * guestCount;
+            const guestCount = typeof services[guestsKey] === 'number' ? services[guestsKey] : 1;
+            total += service.price * (guestCount as number);
           } else {
             total += service.price;
           }
@@ -413,20 +415,23 @@ function BookingConfirmationContent() {
                   {bookingSettings.additionalServices?.title || 'Choose Additional Services'}
                 </h4>
                 <div className="space-y-3">
-                  {bookingSettings.additionalServices?.items.map((service, idx) => (
-                    service.type === 'guests' ? (
+                  {bookingSettings.additionalServices?.items.map((service, idx) => {
+                    const serviceKey = service.name.toLowerCase().replace(/[^a-z]/g, '');
+                    const guestsKey = `${serviceKey}Guests`;
+                    
+                    return service.type === 'guests' ? (
                       <div key={idx} className="flex items-center gap-2 text-xs text-gray-600">
                         <input
                           type="checkbox"
-                          checked={services[service.name.toLowerCase().replace(/[^a-z]/g, '')] || false}
-                          onChange={(e) => setServices({ ...services, [service.name.toLowerCase().replace(/[^a-z]/g, '')]: e.target.checked })}
+                          checked={services[serviceKey] === true}
+                          onChange={(e) => setServices({ ...services, [serviceKey]: e.target.checked })}
                           className="accent-[#59a4b5] rounded-sm border-gray-300 w-3 h-3"
                         />
                         <span>{service.name} <span className="italic text-gray-500">({service.priceLabel})</span> {service.guestsLabel || 'for'}</span>
                         <input
                           type="number"
-                          value={services[`${service.name.toLowerCase().replace(/[^a-z]/g, '')}Guests`] || 1}
-                          onChange={(e) => setServices({ ...services, [`${service.name.toLowerCase().replace(/[^a-z]/g, '')}Guests`]: parseInt(e.target.value) || 1 })}
+                          value={typeof services[guestsKey] === 'number' ? services[guestsKey] : 1}
+                          onChange={(e) => setServices({ ...services, [guestsKey]: parseInt(e.target.value) || 1 })}
                           className="w-10 border border-gray-300 px-1 py-0.5 text-center text-xs"
                           min="1"
                         />
@@ -436,20 +441,20 @@ function BookingConfirmationContent() {
                       <label key={idx} className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={services[service.name.toLowerCase().replace(/[^a-z]/g, '')] || false}
-                          onChange={(e) => setServices({ ...services, [service.name.toLowerCase().replace(/[^a-z]/g, '')]: e.target.checked })}
+                          checked={services[serviceKey] === true}
+                          onChange={(e) => setServices({ ...services, [serviceKey]: e.target.checked })}
                           className="accent-[#59a4b5] rounded-sm border-gray-300 w-3 h-3"
                         />
                         <span>{service.name} <span className="italic text-gray-500">({service.priceLabel})</span></span>
                       </label>
-                    )
-                  )) || (
+                    );
+                  }) || (
                     // Fallback to default services if not loaded
                     <>
                       <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={services.smartphone}
+                          checked={services.smartphone === true}
                           onChange={(e) => setServices({ ...services, smartphone: e.target.checked })}
                           className="accent-[#59a4b5] rounded-sm border-gray-300 w-3 h-3"
                         />
@@ -458,7 +463,7 @@ function BookingConfirmationContent() {
                       <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={services.safeBox}
+                          checked={services.safeBox === true}
                           onChange={(e) => setServices({ ...services, safeBox: e.target.checked })}
                           className="accent-[#59a4b5] rounded-sm border-gray-300 w-3 h-3"
                         />
@@ -467,7 +472,7 @@ function BookingConfirmationContent() {
                       <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={services.luggage}
+                          checked={services.luggage === true}
                           onChange={(e) => setServices({ ...services, luggage: e.target.checked })}
                           className="accent-[#59a4b5] rounded-sm border-gray-300 w-3 h-3"
                         />
@@ -476,7 +481,7 @@ function BookingConfirmationContent() {
                       <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={services.childcare}
+                          checked={services.childcare === true}
                           onChange={(e) => setServices({ ...services, childcare: e.target.checked })}
                           className="accent-[#59a4b5] rounded-sm border-gray-300 w-3 h-3"
                         />
@@ -485,14 +490,14 @@ function BookingConfirmationContent() {
                       <div className="flex items-center gap-2 text-xs text-gray-600">
                         <input
                           type="checkbox"
-                          checked={services.massage}
+                          checked={services.massage === true}
                           onChange={(e) => setServices({ ...services, massage: e.target.checked })}
                           className="accent-[#59a4b5] rounded-sm border-gray-300 w-3 h-3"
                         />
                         <span>Massage <span className="italic text-gray-500">($15 / Once)</span> for</span>
                         <input
                           type="number"
-                          value={services.massageGuests}
+                          value={typeof services.massageGuests === 'number' ? services.massageGuests : 1}
                           onChange={(e) => setServices({ ...services, massageGuests: parseInt(e.target.value) || 1 })}
                           className="w-10 border border-gray-300 px-1 py-0.5 text-center text-xs"
                           min="1"
@@ -545,13 +550,13 @@ function BookingConfirmationContent() {
                 </div>
                 {bookingSettings.additionalServices?.items.map((service, idx) => {
                   const serviceKey = service.name.toLowerCase().replace(/[^a-z]/g, '');
-                  const isChecked = services[serviceKey];
+                  const isChecked = services[serviceKey] === true;
                   
                   if (!isChecked) return null;
                   
                   if (service.type === 'guests') {
                     const guestsKey = `${serviceKey}Guests`;
-                    const guestCount = services[guestsKey] || 1;
+                    const guestCount = typeof services[guestsKey] === 'number' ? services[guestsKey] : 1;
                     return (
                       <div key={idx} className="grid grid-cols-2 text-xs text-gray-600 border-b border-gray-100 p-4">
                         <div>{service.name} ({guestCount} guest{guestCount > 1 ? 's' : ''})</div>

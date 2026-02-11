@@ -65,6 +65,9 @@ export const authAPI = {
   
   updateUser: (userId: string, data: { role?: string; isActive?: boolean }) =>
     api.put(`/auth/users/${userId}`, data),
+  
+  deleteUser: (userId: string) =>
+    api.delete(`/auth/users/${userId}`),
 };
 
 export const roomsAPI = {
