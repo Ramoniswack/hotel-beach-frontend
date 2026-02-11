@@ -218,6 +218,8 @@ export default function BookingSettingsManagement() {
     
     if (formData.sectionId === 'policies') {
       newItem = { title: '', content: '' };
+    } else if (formData.sectionId === 'additional-services') {
+      newItem = { name: '', price: 0, priceLabel: 'Free', type: 'checkbox' };
     } else {
       newItem = { label: '', value: '' };
     }
@@ -314,6 +316,112 @@ export default function BookingSettingsManagement() {
                           </>
                         )}
 
+                        {/* Additional Services */}
+                        {section.sectionId === 'additional-services' && (
+                          <>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Section Title
+                              </label>
+                              <input
+                                type="text"
+                                value={formData.title || ''}
+                                onChange={(e) => updateFormField('title', e.target.value)}
+                                placeholder="Choose Additional Services"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Services
+                              </label>
+                              {formData.items?.map((item: any, idx: number) => (
+                                <div key={idx} className="border border-gray-300 rounded-lg p-4 mb-4">
+                                  <div className="flex justify-between items-center mb-3">
+                                    <h4 className="font-medium text-gray-900">Service {idx + 1}</h4>
+                                    <button
+                                      onClick={() => removeItem(idx)}
+                                      className="text-red-500 hover:text-red-700"
+                                    >
+                                      <X size={20} />
+                                    </button>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="col-span-2">
+                                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                                        Service Name
+                                      </label>
+                                      <input
+                                        type="text"
+                                        value={item.name || ''}
+                                        onChange={(e) => updateItem(idx, 'name', e.target.value)}
+                                        placeholder="Free-to-use smartphone"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                                        Price ($)
+                                      </label>
+                                      <input
+                                        type="number"
+                                        value={item.price || 0}
+                                        onChange={(e) => updateItem(idx, 'price', e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                                        Price Label
+                                      </label>
+                                      <input
+                                        type="text"
+                                        value={item.priceLabel || ''}
+                                        onChange={(e) => updateItem(idx, 'priceLabel', e.target.value)}
+                                        placeholder="Free or $60 / Once"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                                        Type
+                                      </label>
+                                      <select
+                                        value={item.type || 'checkbox'}
+                                        onChange={(e) => updateItem(idx, 'type', e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                      >
+                                        <option value="checkbox">Checkbox</option>
+                                        <option value="guests">With Guest Count</option>
+                                      </select>
+                                    </div>
+                                    {item.type === 'guests' && (
+                                      <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                                          Guests Label
+                                        </label>
+                                        <input
+                                          type="text"
+                                          value={item.guestsLabel || ''}
+                                          onChange={(e) => updateItem(idx, 'guestsLabel', e.target.value)}
+                                          placeholder="for"
+                                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                              <button
+                                onClick={addItem}
+                                className="w-full px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 font-medium"
+                              >
+                                + Add Service
+                              </button>
+                            </div>
+                          </>
+                        )}
+
                         {/* Title for sidebar sections */}
                         {(section.sectionId === 'sidebar-contact' || section.sectionId === 'sidebar-address') && (
                           <div>
@@ -330,7 +438,7 @@ export default function BookingSettingsManagement() {
                         )}
 
                         {/* Items */}
-                        {formData.items && formData.items.length > 0 && (
+                        {formData.items && formData.items.length > 0 && section.sectionId !== 'additional-services' && (
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                               {section.sectionId === 'policies' ? 'Policy Items' : 'Contact Items'}

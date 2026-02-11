@@ -19,6 +19,10 @@ interface Room {
 interface BookingSettings {
   checkInTime?: string;
   checkOutTime?: string;
+  additionalServices?: {
+    title: string;
+    items: Array<{ name: string; price: number; priceLabel: string; type: string; guestsLabel?: string }>;
+  };
   policies?: Array<{ title: string; content: string }>;
   sidebarContact?: {
     title: string;
@@ -113,6 +117,7 @@ function BookingConfirmationContent() {
         const sections = response.data.data.sections;
         
         const checkTimes = sections.find((s: any) => s.sectionId === 'check-times');
+        const additionalServices = sections.find((s: any) => s.sectionId === 'additional-services');
         const policies = sections.find((s: any) => s.sectionId === 'policies');
         const sidebarContact = sections.find((s: any) => s.sectionId === 'sidebar-contact');
         const sidebarAddress = sections.find((s: any) => s.sectionId === 'sidebar-address');
@@ -120,6 +125,10 @@ function BookingConfirmationContent() {
         setBookingSettings({
           checkInTime: checkTimes?.title || 'Check-in: from 11:00 am',
           checkOutTime: checkTimes?.subtitle || 'Check-out: until 10:00 am',
+          additionalServices: additionalServices ? {
+            title: additionalServices.title,
+            items: additionalServices.items
+          } : undefined,
           policies: policies?.items || [],
           sidebarContact: sidebarContact ? {
             title: sidebarContact.title,
@@ -389,62 +398,97 @@ function BookingConfirmationContent() {
 
                 {/* Additional Services */}
                 <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">
-                  Choose Additional Services
+                  {bookingSettings.additionalServices?.title || 'Choose Additional Services'}
                 </h4>
                 <div className="space-y-3">
-                  <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={services.smartphone}
-                      onChange={(e) => setServices({ ...services, smartphone: e.target.checked })}
-                      className="accent-[#59a4b5] rounded-sm border-gray-300 w-3 h-3"
-                    />
-                    <span>Free-to-use smartphone <span className="italic text-gray-500">(Free)</span></span>
-                  </label>
-                  <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={services.safeBox}
-                      onChange={(e) => setServices({ ...services, safeBox: e.target.checked })}
-                      className="accent-[#59a4b5] rounded-sm border-gray-300 w-3 h-3"
-                    />
-                    <span>Safe-deposit box <span className="italic text-gray-500">(Free)</span></span>
-                  </label>
-                  <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={services.luggage}
-                      onChange={(e) => setServices({ ...services, luggage: e.target.checked })}
-                      className="accent-[#59a4b5] rounded-sm border-gray-300 w-3 h-3"
-                    />
-                    <span>Luggage storage <span className="italic text-gray-500">(Free)</span></span>
-                  </label>
-                  <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={services.childcare}
-                      onChange={(e) => setServices({ ...services, childcare: e.target.checked })}
-                      className="accent-[#59a4b5] rounded-sm border-gray-300 w-3 h-3"
-                    />
-                    <span>Childcare <span className="italic text-gray-500">($60 / Once)</span></span>
-                  </label>
-                  <div className="flex items-center gap-2 text-xs text-gray-600">
-                    <input
-                      type="checkbox"
-                      checked={services.massage}
-                      onChange={(e) => setServices({ ...services, massage: e.target.checked })}
-                      className="accent-[#59a4b5] rounded-sm border-gray-300 w-3 h-3"
-                    />
-                    <span>Massage <span className="italic text-gray-500">($15 / Once)</span> for</span>
-                    <input
-                      type="number"
-                      value={services.massageGuests}
-                      onChange={(e) => setServices({ ...services, massageGuests: parseInt(e.target.value) || 1 })}
-                      className="w-10 border border-gray-300 px-1 py-0.5 text-center text-xs"
-                      min="1"
-                    />
-                    <span>guest(s)</span>
-                  </div>
+                  {bookingSettings.additionalServices?.items.map((service, idx) => (
+                    service.type === 'guests' ? (
+                      <div key={idx} className="flex items-center gap-2 text-xs text-gray-600">
+                        <input
+                          type="checkbox"
+                          checked={services[service.name.toLowerCase().replace(/[^a-z]/g, '')] || false}
+                          onChange={(e) => setServices({ ...services, [service.name.toLowerCase().replace(/[^a-z]/g, '')]: e.target.checked })}
+                          className="accent-[#59a4b5] rounded-sm border-gray-300 w-3 h-3"
+                        />
+                        <span>{service.name} <span className="italic text-gray-500">({service.priceLabel})</span> {service.guestsLabel || 'for'}</span>
+                        <input
+                          type="number"
+                          value={services[`${service.name.toLowerCase().replace(/[^a-z]/g, '')}Guests`] || 1}
+                          onChange={(e) => setServices({ ...services, [`${service.name.toLowerCase().replace(/[^a-z]/g, '')}Guests`]: parseInt(e.target.value) || 1 })}
+                          className="w-10 border border-gray-300 px-1 py-0.5 text-center text-xs"
+                          min="1"
+                        />
+                        <span>guest(s)</span>
+                      </div>
+                    ) : (
+                      <label key={idx} className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={services[service.name.toLowerCase().replace(/[^a-z]/g, '')] || false}
+                          onChange={(e) => setServices({ ...services, [service.name.toLowerCase().replace(/[^a-z]/g, '')]: e.target.checked })}
+                          className="accent-[#59a4b5] rounded-sm border-gray-300 w-3 h-3"
+                        />
+                        <span>{service.name} <span className="italic text-gray-500">({service.priceLabel})</span></span>
+                      </label>
+                    )
+                  )) || (
+                    // Fallback to default services if not loaded
+                    <>
+                      <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={services.smartphone}
+                          onChange={(e) => setServices({ ...services, smartphone: e.target.checked })}
+                          className="accent-[#59a4b5] rounded-sm border-gray-300 w-3 h-3"
+                        />
+                        <span>Free-to-use smartphone <span className="italic text-gray-500">(Free)</span></span>
+                      </label>
+                      <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={services.safeBox}
+                          onChange={(e) => setServices({ ...services, safeBox: e.target.checked })}
+                          className="accent-[#59a4b5] rounded-sm border-gray-300 w-3 h-3"
+                        />
+                        <span>Safe-deposit box <span className="italic text-gray-500">(Free)</span></span>
+                      </label>
+                      <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={services.luggage}
+                          onChange={(e) => setServices({ ...services, luggage: e.target.checked })}
+                          className="accent-[#59a4b5] rounded-sm border-gray-300 w-3 h-3"
+                        />
+                        <span>Luggage storage <span className="italic text-gray-500">(Free)</span></span>
+                      </label>
+                      <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={services.childcare}
+                          onChange={(e) => setServices({ ...services, childcare: e.target.checked })}
+                          className="accent-[#59a4b5] rounded-sm border-gray-300 w-3 h-3"
+                        />
+                        <span>Childcare <span className="italic text-gray-500">($60 / Once)</span></span>
+                      </label>
+                      <div className="flex items-center gap-2 text-xs text-gray-600">
+                        <input
+                          type="checkbox"
+                          checked={services.massage}
+                          onChange={(e) => setServices({ ...services, massage: e.target.checked })}
+                          className="accent-[#59a4b5] rounded-sm border-gray-300 w-3 h-3"
+                        />
+                        <span>Massage <span className="italic text-gray-500">($15 / Once)</span> for</span>
+                        <input
+                          type="number"
+                          value={services.massageGuests}
+                          onChange={(e) => setServices({ ...services, massageGuests: parseInt(e.target.value) || 1 })}
+                          className="w-10 border border-gray-300 px-1 py-0.5 text-center text-xs"
+                          min="1"
+                        />
+                        <span>guest(s)</span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
