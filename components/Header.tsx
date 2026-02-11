@@ -34,7 +34,7 @@ const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggl
     { label: 'Explore', url: '/explore', order: 5 },
     { label: 'Contact', url: '/contact', order: 6 }
   ]);
-  const { user, logout } = useAuthStore();
+  const { user, logout, _hasHydrated } = useAuthStore();
 
   // Check if we're on homepage
   const isHomePage = pathname === '/';
@@ -140,7 +140,7 @@ const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggl
 
           {/* Right Actions */}
           <div className="flex items-center space-x-8">
-            {user ? (
+            {_hasHydrated && user ? (
               <div className={`hidden lg:flex items-center space-x-4 text-[13px] font-medium transition-colors relative ${
                 scrolled ? 'text-slate-800' : 'text-white/90'
               }`}>
@@ -186,7 +186,7 @@ const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggl
                   </>
                 )}
               </div>
-            ) : (
+            ) : _hasHydrated ? (
               <Link href="/login" className={`hidden lg:flex items-center space-x-2 text-[13px] font-medium transition-colors relative group ${
                 scrolled ? 'text-slate-800' : 'text-white/90'
               }`}>
@@ -198,7 +198,7 @@ const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggl
                   scrolled ? 'bg-black' : 'bg-white'
                 }`}></span>
               </Link>
-            )}
+            ) : null}
 
             {/* Burger Menu Button */}
             <button 

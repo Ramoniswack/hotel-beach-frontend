@@ -16,6 +16,7 @@ interface Section {
   title?: string;
   subtitle?: string;
   description?: string;
+  heroImage?: string;
   items?: any[];
   isVisible: boolean;
   order: number;
@@ -64,7 +65,9 @@ export default function RoomsPage() {
       <Header isScrolled={isScrolled} onMenuToggle={setIsMenuOpen} />
       <MainContentWrapper isMenuOpen={isMenuOpen} onOverlayClick={() => setIsMenuOpen(false)}>
         <main>
-          <RetreatSectionR0 />
+          {(sections.length === 0 || getSection('retreat-hero')) && (
+            <RetreatSectionR0 section={getSection('retreat-hero')} />
+          )}
           {(sections.length === 0 || getSection('rooms-showcase')) && (
             <RoomShowcaseR1 section={getSection('header')} />
           )}

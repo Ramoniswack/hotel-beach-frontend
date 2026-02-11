@@ -15,12 +15,15 @@ interface AuthState {
   token: string | null;
   isLoading: boolean;
   error: string | null;
+  _hasHydrated: boolean;
   
   // Actions
   login: (email: string, password: string) => Promise<void>;
   register: (data: { email: string; password: string; name: string; phone?: string }) => Promise<void>;
   logout: () => void;
   clearError: () => void;
+  setAuth: (user: User, token: string) => void;
+  setHasHydrated: (state: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -30,6 +33,7 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       isLoading: false,
       error: null,
+      _hasHydrated: false,
 
       login: async (email: string, password: string) => {
         set({ isLoading: true, error: null });
@@ -64,10 +68,21 @@ export const useAuthStore = create<AuthState>()(
       },
 
       clearError: () => set({ error: null }),
+
+      setAuth: (user: User, token: string) => {
+        set({ user, token, isLoading: false, error: null });
+      },
+
+      setHasHydrated: (state: boolean) => {
+        set({ _hasHydrated: state });
+      },
     }),
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import RouteGuard from '@/components/RouteGuard';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import ImageUpload from '@/components/ImageUpload';
 import { contentAPI } from '@/lib/api';
 import { FileText, Edit, X, Save } from 'lucide-react';
 
@@ -16,7 +17,9 @@ interface Section {
   sectionId: string;
   sectionName: string;
   title?: string;
+  subtitle?: string;
   description?: string;
+  heroImage?: string;
   items?: Promotion[];
   isVisible: boolean;
   order: number;
@@ -170,8 +173,48 @@ export default function RoomsPageManagement() {
                       </div>
 
                       <div className="space-y-4">
+                        {/* Retreat Hero Section Fields */}
+                        {section.sectionId === 'retreat-hero' && (
+                          <>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Title
+                              </label>
+                              <input
+                                type="text"
+                                value={formData.title || ''}
+                                onChange={(e) => updateFormField('title', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Subtitle
+                              </label>
+                              <textarea
+                                value={formData.subtitle || ''}
+                                onChange={(e) => updateFormField('subtitle', e.target.value)}
+                                rows={2}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Hero Image
+                              </label>
+                              <ImageUpload
+                                value={formData.heroImage || ''}
+                                onChange={(url) => updateFormField('heroImage', url)}
+                                label="Upload Hero Image"
+                              />
+                            </div>
+                          </>
+                        )}
+
                         {/* Title */}
-                        {section.sectionId !== 'promotions' && (
+                        {section.sectionId !== 'promotions' && section.sectionId !== 'retreat-hero' && (
                           <>
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -231,14 +274,12 @@ export default function RoomsPageManagement() {
                                   </div>
                                   <div>
                                     <label className="block text-xs font-medium text-gray-600 mb-1">
-                                      Image URL
+                                      Package Image
                                     </label>
-                                    <input
-                                      type="text"
+                                    <ImageUpload
                                       value={promo.image || ''}
-                                      onChange={(e) => updatePromotion(idx, 'image', e.target.value)}
-                                      placeholder="https://..."
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                      onChange={(url) => updatePromotion(idx, 'image', url)}
+                                      label="Upload Package Image"
                                     />
                                   </div>
                                   <div>

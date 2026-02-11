@@ -233,8 +233,8 @@ const RoomShowcaseR1: React.FC<{ section?: any }> = ({ section }) => {
   return (
     <section className="bg-white">
       {/* Intro Header Section */}
-      <div className="max-w-[1300px] mx-auto px-8 pt-24 pb-16 lg:pt-32 lg:pb-24">
-        <h2 className="text-[36px] md:text-[48px] font-bold mb-8 tracking-tight text-[#1a1a1a] leading-[1.1]">
+  <div className="max-w-[1300px] mx-auto px-8 pt-4 pb-16 lg:pt-6 lg:pb-24">
+        <h2 className="text-[36px] md:text-[30px] font-bold mb-8 tracking-tight text-[#1a1a1a] leading-[1.1]" style={{ fontFamily: '"Raleway", sans-serif' }}>
           {section?.title || 'In harmony with nature'}
         </h2>
         <p className="text-[#666] text-[15px] leading-[1.9] max-w-2xl font-normal">

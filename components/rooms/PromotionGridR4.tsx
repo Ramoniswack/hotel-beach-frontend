@@ -32,7 +32,7 @@ const PromotionGridR4: React.FC<PromotionGridR4Props> = ({ section }) => {
   const promotions = section?.items && section.items.length > 0 ? section.items : DEFAULT_PROMOTIONS;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 w-full h-[400px]">
+    <div className="grid grid-cols-1 md:grid-cols-3 w-full h-[300px] mb-16">
       {promotions.map((promo, idx) => (
         <div key={idx} className="relative group overflow-hidden h-full">
           <Image 

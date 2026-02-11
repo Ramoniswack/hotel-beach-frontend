@@ -9,19 +9,30 @@ import Image from 'next/image';
  * - Image breaks out of the grid to touch the left screen edge.
  * - Image retains a small gap on the right side.
  */
-export const RetreatSectionR0: React.FC = () => {
-  // Pastel blue building with palm trees
-  const imageUrl = "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=2670&auto=format&fit=crop";
+
+interface RetreatSectionR0Props {
+  section?: {
+    title?: string;
+    subtitle?: string;
+    heroImage?: string;
+  };
+}
+
+export const RetreatSectionR0: React.FC<RetreatSectionR0Props> = ({ section }) => {
+  // Default values
+  const title = section?.title || "Retreat Hotel at Santorini";
+  const subtitle = section?.subtitle || "Unwind the clock of modern life. Unlock the door to a wonder of the world.";
+  const imageUrl = section?.heroImage || "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=2670&auto=format&fit=crop";
 
   return (
-    <section className="w-full pt-32 pb-12 overflow-hidden">
+    <section className="w-full pt-32 pb-4 overflow-hidden">
       {/* Text Content - Kept in a standard container for readability alignment */}
       <div className="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-16 mb-8">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight font-sans mb-4">
-          Retreat Hotel at Santorini
+        <h1 className="text-gray-900 tracking-tight mb-4" style={{ fontFamily: '"Raleway", sans-serif', fontSize: '50px', fontWeight: 700 }}>
+          {title}
         </h1>
         <p className="text-base md:text-lg text-gray-600 font-normal max-w-2xl leading-relaxed">
-          Unwind the clock of modern life. Unlock the door to a wonder of the world.
+          {subtitle}
         </p>
       </div>
 
@@ -33,7 +44,7 @@ export const RetreatSectionR0: React.FC = () => {
         >
           <Image
             src={imageUrl}
-            alt="Pastel blue hotel building with palm trees"
+            alt={title}
             fill
             className="object-cover"
             loading="lazy"
