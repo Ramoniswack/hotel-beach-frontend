@@ -228,9 +228,21 @@ function BookingConfirmationContent() {
     const nights = calculateNights();
     let total = room.price * nights;
     
-    // Add service costs
-    if (services.childcare) total += 60;
-    if (services.massage) total += 15 * services.massageGuests;
+    // Add service costs dynamically
+    if (bookingSettings.additionalServices?.items) {
+      bookingSettings.additionalServices.items.forEach(service => {
+        const serviceKey = service.name.toLowerCase().replace(/[^a-z]/g, '');
+        if (services[serviceKey]) {
+          if (service.type === 'guests') {
+            const guestsKey = `${serviceKey}Guests`;
+            const guestCount = services[guestsKey] || 1;
+            total += service.price * guestCount;
+          } else {
+            total += service.price;
+          }
+        }
+      });
+    }
     
     return total;
   };
@@ -531,18 +543,31 @@ function BookingConfirmationContent() {
                   <div>Dates Subtotal</div>
                   <div className="text-right">{getCurrencySymbol()}{room ? convertPrice(room.price * nights) : 0}</div>
                 </div>
-                {services.childcare && (
-                  <div className="grid grid-cols-2 text-xs text-gray-600 border-b border-gray-100 p-4">
-                    <div>Childcare</div>
-                    <div className="text-right">{getCurrencySymbol()}{convertPrice(60)}</div>
-                  </div>
-                )}
-                {services.massage && (
-                  <div className="grid grid-cols-2 text-xs text-gray-600 border-b border-gray-100 p-4">
-                    <div>Massage ({services.massageGuests} guest{services.massageGuests > 1 ? 's' : ''})</div>
-                    <div className="text-right">{getCurrencySymbol()}{convertPrice(15 * services.massageGuests)}</div>
-                  </div>
-                )}
+                {bookingSettings.additionalServices?.items.map((service, idx) => {
+                  const serviceKey = service.name.toLowerCase().replace(/[^a-z]/g, '');
+                  const isChecked = services[serviceKey];
+                  
+                  if (!isChecked) return null;
+                  
+                  if (service.type === 'guests') {
+                    const guestsKey = `${serviceKey}Guests`;
+                    const guestCount = services[guestsKey] || 1;
+                    return (
+                      <div key={idx} className="grid grid-cols-2 text-xs text-gray-600 border-b border-gray-100 p-4">
+                        <div>{service.name} ({guestCount} guest{guestCount > 1 ? 's' : ''})</div>
+                        <div className="text-right">{getCurrencySymbol()}{convertPrice(service.price * guestCount)}</div>
+                      </div>
+                    );
+                  } else if (service.price > 0) {
+                    return (
+                      <div key={idx} className="grid grid-cols-2 text-xs text-gray-600 border-b border-gray-100 p-4">
+                        <div>{service.name}</div>
+                        <div className="text-right">{getCurrencySymbol()}{convertPrice(service.price)}</div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
                 <div className="grid grid-cols-2 text-xs font-bold text-gray-800 border-b border-gray-100 p-4 bg-gray-50">
                   <div>Subtotal</div>
                   <div className="text-right">{getCurrencySymbol()}{convertPrice(total)}</div>
