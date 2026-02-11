@@ -24,39 +24,34 @@ const RoomRow: React.FC<{ room: Room }> = ({ room }) => {
   const [activeImg, setActiveImg] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
-  const [dragOffset, setDragOffset] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [scrollOffset, setScrollOffset] = useState(0);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   const images = room.gallery && room.gallery.length > 0 ? room.gallery : [room.heroImage];
 
   const nextImg = () => {
-    if (isDragging) return;
-    setIsTransitioning(true);
-    setActiveImg((prev) => (prev + 1) % images.length);
-    setDragOffset(0);
-    setTimeout(() => setIsTransitioning(false), 700);
+    const newIndex = (activeImg + 1) % images.length;
+    setActiveImg(newIndex);
+    setScrollOffset(0);
   };
 
   const prevImg = () => {
-    if (isDragging) return;
-    setIsTransitioning(true);
-    setActiveImg((prev) => (prev - 1 + images.length) % images.length);
-    setDragOffset(0);
-    setTimeout(() => setIsTransitioning(false), 700);
+    const newIndex = (activeImg - 1 + images.length) % images.length;
+    setActiveImg(newIndex);
+    setScrollOffset(0);
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     setStartX(e.pageX);
-    setIsTransitioning(false);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
     e.preventDefault();
-    const currentX = e.pageX;
-    const diff = currentX - startX;
-    setDragOffset(diff);
+    const x = e.pageX;
+    const walk = startX - x;
+    setScrollOffset(walk);
   };
 
   const handleMouseUp = () => {
@@ -64,17 +59,13 @@ const RoomRow: React.FC<{ room: Room }> = ({ room }) => {
     setIsDragging(false);
     
     // Snap to next/prev image if dragged more than 100px
-    if (Math.abs(dragOffset) > 100) {
-      if (dragOffset < 0) {
-        nextImg();
-      } else {
-        prevImg();
-      }
+    if (scrollOffset > 100) {
+      nextImg();
+    } else if (scrollOffset < -100) {
+      prevImg();
     } else {
-      // Snap back to current image
-      setIsTransitioning(true);
-      setDragOffset(0);
-      setTimeout(() => setIsTransitioning(false), 300);
+      // Snap back to current position
+      setScrollOffset(0);
     }
   };
 
@@ -126,60 +117,67 @@ const RoomRow: React.FC<{ room: Room }> = ({ room }) => {
         </div>
       </div>
 
-      {/* Image Slider Area */}
-      <div className="flex-grow flex relative h-[500px] lg:h-auto overflow-hidden bg-[#1a1a1a]">
-        {/* Main Image Container */}
+      {/* Image Slider with 3cm Peek Preview */}
+      <div 
+        ref={containerRef}
+        className="flex-grow relative overflow-hidden h-[500px] lg:h-auto"
+        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+      >
+        {/* Image Container - Follows mouse drag smoothly */}
         <div 
-          className={`relative w-[88%] lg:w-[90%] h-full overflow-hidden bg-black/20 group select-none ${
-            isDragging ? 'cursor-grabbing' : 'cursor-grab'
-          }`}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseLeave}
+          className="flex h-full"
+          style={{ 
+            transform: `translateX(calc(-${activeImg} * (100% - 3cm) - ${scrollOffset}px))`,
+            transition: isDragging ? 'none' : 'transform 0.3s ease-out'
+          }}
         >
-          <Image 
-            src={images[activeImg]}
-            alt={room.title}
-            fill
-            className="object-cover transition-opacity duration-700 ease-in-out pointer-events-none"
-          />
-
-          {/* Circular Navigation Controls */}
-          <button 
-            onClick={prevImg}
-            className="absolute left-6 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white/90 hover:bg-white hover:text-black transition-all duration-300 z-20 shadow-xl"
-            aria-label="Previous image"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-
-          <button 
-            onClick={nextImg}
-            className="absolute right-6 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white/90 hover:bg-white hover:text-black transition-all duration-300 z-20 shadow-xl"
-            aria-label="Next image"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+          {images.map((image, index) => (
+            <div
+              key={index}
+              className="relative flex-shrink-0 h-full"
+              style={{ 
+                width: 'calc(100% - 3cm)'
+              }}
+            >
+              <Image 
+                src={image}
+                alt={`${room.title} - Image ${index + 1}`}
+                fill
+                className="object-cover pointer-events-none select-none"
+                draggable={false}
+              />
+            </div>
+          ))}
         </div>
 
-        {/* Peek Section */}
-        <div 
-          className="w-[12%] lg:w-[10%] h-full relative cursor-pointer group border-l border-white/5 bg-zinc-900" 
-          onClick={nextImg}
-        >
-          <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors duration-300 z-10"></div>
-          <Image 
-            src={images[(activeImg + 1) % images.length]}
-            alt="Next room preview"
-            fill
-            className="object-cover opacity-60 scale-110 group-hover:scale-100 transition-transform duration-700 ease-out grayscale-[20%]"
-          />
-        </div>
+        {/* Navigation Arrows */}
+        {images.length > 1 && (
+          <>
+            <button 
+              onClick={prevImg}
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-white transition-all hover:scale-110 z-20 bg-black/20 backdrop-blur-sm rounded-sm"
+              aria-label="Previous image"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            <button 
+              onClick={nextImg}
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-white transition-all hover:scale-110 z-20 bg-black/20 backdrop-blur-sm rounded-sm"
+              aria-label="Next image"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

@@ -18,8 +18,8 @@ interface RetreatSpaH5Props {
 const RetreatSpaH5: React.FC<RetreatSpaH5Props> = ({ section }) => {
   return (
     <section className="relative w-full h-[80vh] md:h-[90vh] overflow-hidden flex items-center">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
+      {/* Background Image with Overlay - Positioned to touch left, leave small space on right */}
+      <div className="absolute left-0 top-0 bottom-0 right-[1cm] z-0">
         <Image 
           src={section?.images?.[0] || 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=1000'} 
           alt="Luxury Villa Interior" 

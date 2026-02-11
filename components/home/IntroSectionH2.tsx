@@ -15,7 +15,7 @@ interface IntroSectionH2Props {
 
 const IntroSectionH2: React.FC<IntroSectionH2Props> = ({ section }) => {
   return (
-    <section className="py-24 overflow-hidden bg-white">
+    <section className="py-24 overflow-hidden bg-white p-[30px]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
           {/* Left Column: Text Content */}

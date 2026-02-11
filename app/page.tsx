@@ -78,7 +78,7 @@ export default function Home() {
           {(sections.length === 0 || getSection('deluxe-room')) && <DeluxeRoomH3 />}
           {(sections.length === 0 || getSection('chef-experience')) && <ChefExperienceH4 section={getSection('chef-experience')} />}
           {(sections.length === 0 || getSection('retreat-spa')) && <RetreatSpaH5 section={getSection('retreat-spa')} />}
-          {(sections.length === 0 || getSection('signature-designs')) && <SignatureDesignsH6 />}
+          {(sections.length === 0 || getSection('signature-designs')) && <SignatureDesignsH6 section={getSection('signature-designs')} />}
           {(sections.length === 0 || getSection('explore-santorini')) && <ExploreSantoriniH7 section={getSection('explore-santorini')} />}
         </main>
         

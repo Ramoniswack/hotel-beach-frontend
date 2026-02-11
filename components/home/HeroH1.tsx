@@ -66,38 +66,74 @@ const HeroH1: React.FC<HeroH1Props> = ({ section }) => {
 
   return (
     <section className="relative h-screen w-full overflow-hidden flex items-center justify-center bg-black">
-      {/* Background Slides with Continuous Scroll */}
-      <div 
-        className="absolute inset-0 flex transition-transform duration-700 ease-out"
-        style={{ transform: `translateX(-${current * 100}%)` }}
-      >
-        {slides.map((slide, index) => (
-          <div
-            key={index}
-            className="relative min-w-full h-full flex-shrink-0"
-          >
-            <Image 
-              src={slide.image}
-              alt={slide.title}
-              fill
-              className="object-cover opacity-70"
-              priority={index === 0}
-            />
-            <div className="absolute inset-0 bg-black/20"></div>
-            
-            {/* Content for each slide */}
-            <div className="absolute inset-0 z-10 flex items-center justify-center text-center text-white px-6">
-              <div>
-                <h1 className="text-[60px] md:text-[80px] lg:text-[100px] font-bold tracking-tight mb-4 leading-none">
-                  {slide.title}
-                </h1>
-                <p className="text-[14px] md:text-[16px] uppercase tracking-[0.3em] font-medium opacity-90">
-                  {slide.subtitle}
-                </p>
+      {/* Background Slides with Paper Rolling Animation */}
+      <div className="absolute inset-0">
+        {slides.map((slide, index) => {
+          const isActive = index === current;
+          const isPrev = index === (current - 1 + slides.length) % slides.length;
+          const isNext = index === (current + 1) % slides.length;
+          
+          return (
+            <div
+              key={index}
+              className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+                isActive 
+                  ? 'opacity-100 z-10' 
+                  : 'opacity-0 z-0'
+              }`}
+              style={{
+                clipPath: isActive 
+                  ? 'inset(0% 0% 0% 0%)' 
+                  : direction === 'left'
+                  ? 'inset(0% 0% 100% 0%)'
+                  : 'inset(100% 0% 0% 0%)',
+                transform: isActive 
+                  ? 'perspective(1000px) rotateX(0deg)' 
+                  : direction === 'left'
+                  ? 'perspective(1000px) rotateX(-90deg)'
+                  : 'perspective(1000px) rotateX(90deg)',
+                transformOrigin: direction === 'left' ? 'bottom' : 'top',
+              }}
+            >
+              <div className="relative w-full h-full">
+                <Image 
+                  src={slide.image}
+                  alt={slide.title}
+                  fill
+                  className="object-cover opacity-70"
+                  priority={index === 0}
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40"></div>
+                
+                {/* Shadow effect for paper curl */}
+                <div 
+                  className={`absolute inset-0 bg-gradient-to-b transition-opacity duration-500 pointer-events-none ${
+                    isActive ? 'opacity-0' : 'opacity-100'
+                  }`}
+                  style={{
+                    background: direction === 'left' 
+                      ? 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 50%)'
+                      : 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 50%)'
+                  }}
+                ></div>
+                
+                {/* Content for each slide */}
+                <div className={`absolute inset-0 z-10 flex items-center justify-center text-center text-white px-6 transition-all duration-700 delay-200 ${
+                  isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                }`}>
+                  <div>
+                    <h1 className="text-[60px] md:text-[80px] lg:text-[100px] font-bold tracking-tight mb-4 leading-none drop-shadow-2xl">
+                      {slide.title}
+                    </h1>
+                    <p className="text-[14px] md:text-[16px] uppercase tracking-[0.3em] font-medium opacity-90 drop-shadow-lg">
+                      {slide.subtitle}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Navigation Arrows */}

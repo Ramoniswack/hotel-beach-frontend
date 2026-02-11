@@ -226,17 +226,19 @@ export default function HomeManagement() {
                         </div>
 
                         {/* Subtitle */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Subtitle
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.subtitle || ''}
-                            onChange={(e) => updateFormField('subtitle', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                          />
-                        </div>
+                        {section.sectionId !== 'signature-designs' && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Subtitle
+                            </label>
+                            <input
+                              type="text"
+                              value={formData.subtitle || ''}
+                              onChange={(e) => updateFormField('subtitle', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                            />
+                          </div>
+                        )}
 
                         {/* Description */}
                         <div>
@@ -340,7 +342,7 @@ export default function HomeManagement() {
                         )}
 
                         {/* Button */}
-                        {(section.sectionId === 'retreat-spa' || section.sectionId === 'explore-santorini') && (
+                        {(section.sectionId === 'retreat-spa' || section.sectionId === 'explore-santorini' || section.sectionId === 'signature-designs') && (
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">

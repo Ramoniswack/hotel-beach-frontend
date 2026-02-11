@@ -17,7 +17,7 @@ interface ExploreSantoriniH7Props {
 
 const ExploreSantoriniH7: React.FC<ExploreSantoriniH7Props> = ({ section }) => {
   return (
-    <section className="py-24 bg-white overflow-hidden">
+    <section className="py-24 bg-white overflow-hidden" style={{ fontFamily: '"Raleway", sans-serif' }}>
       <div className="max-w-[1300px] mx-auto px-6 sm:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-center">
           {/* Left Side: Text Content */}
@@ -25,7 +25,7 @@ const ExploreSantoriniH7: React.FC<ExploreSantoriniH7Props> = ({ section }) => {
             <p className="text-[11px] font-bold tracking-[0.35em] uppercase text-slate-800 mb-10">
               {section?.subtitle || 'DESTINATION'}
             </p>
-            <h2 className="text-[48px] md:text-[56px] lg:text-[64px] font-[800] leading-[1.05] text-[#1a1a1a] mb-12 tracking-tight">
+            <h2 className="text-[28px] md:text-[56px] lg:text-[64px] font-[800] leading-[1.05] text-[#1a1a1a] mb-12 tracking-tight">
               {section?.title || 'Explore Santorini Greece'}
             </h2>
             <p className="text-[#666666] text-[15px] leading-[1.9] font-normal max-w-[460px] mb-12">

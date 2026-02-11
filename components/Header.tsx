@@ -92,10 +92,10 @@ const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggl
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 py-6 ${
-        scrolled ? 'bg-white border-b border-gray-100 shadow-sm' : 'bg-transparent'
+      <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ease-in-out ${
+        scrolled ? 'bg-white border-b border-gray-100 shadow-md py-4' : 'bg-transparent py-6'
       }`}>
-        <div className="max-w-[1400px] mx-auto px-8 flex justify-between items-center">
+        <div className="max-w-[1425px] w-full box-border mx-auto px-[90px] flex justify-between items-center">
           {/* Logo */}
           <Link href="/" className="flex flex-col leading-none">
             {useImageLogo && logoImage ? (

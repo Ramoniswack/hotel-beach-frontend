@@ -91,7 +91,7 @@ const Footer: React.FC = () => {
         </svg>
       </div>
 
-      <div className="container mx-auto px-6 relative z-10">
+      <div className="relative z-10" style={{ width: 'calc(100% - 2cm)', listStyle: 'none', margin: 'auto', paddingTop: '50px', paddingBottom: '50px' }}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-24">
           {/* Our Address */}
           {addressSection && (
@@ -143,7 +143,7 @@ const Footer: React.FC = () => {
                   <input 
                     type="email" 
                     placeholder="Your Email" 
-                    className="w-full bg-transparent border-b border-white/20 pb-2 text-white text-[13px] outline-none focus:border-hotel-gold transition-colors font-medium placeholder:text-white/40"
+                    className="w-full bg-transparent border-b border-white pb-2 text-white text-[13px] outline-none focus:border-hotel-gold transition-colors font-medium placeholder:text-white"
                   />
                 </div>
                 <button 
@@ -179,11 +179,21 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-10 border-t border-white/10 flex flex-col lg:flex-row justify-between items-center text-[11px] text-white/40 font-medium tracking-wide">
-          <p>{copyrightSection?.content}</p>
-          <div className="flex items-center space-x-6 mt-6 lg:mt-0">
+        <div 
+          className="pt-10 border-t border-white/10 flex flex-col lg:flex-row justify-between items-center"
+          style={{ 
+            fontFamily: 'Raleway', 
+            fontSize: '13px', 
+            fontWeight: 500, 
+            letterSpacing: '0px', 
+            lineHeight: 1.7, 
+            textTransform: 'none' 
+          }}
+        >
+          <p className="text-white">{copyrightSection?.content}</p>
+          <div className="flex items-center space-x-6 mt-6 lg:mt-0 text-white">
             {linksSection?.links?.map((link, idx) => (
-              <Link key={idx} href={link.url} className="hover:text-white transition-colors">
+              <Link key={idx} href={link.url} className="hover:opacity-70 transition-opacity">
                 {link.label}
               </Link>
             ))}
