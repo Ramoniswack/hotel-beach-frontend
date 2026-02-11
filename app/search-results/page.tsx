@@ -39,11 +39,31 @@ function SearchResultsContent() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   
+  // Currency state
+  const [selectedCurrency, setSelectedCurrency] = useState('USD');
+  
+  // Exchange rates (base: USD)
+  const exchangeRates: { [key: string]: { rate: number; symbol: string } } = {
+    USD: { rate: 1, symbol: '$' },
+    EUR: { rate: 0.92, symbol: '€' },
+    GBP: { rate: 0.79, symbol: '£' },
+    JPY: { rate: 149.50, symbol: '¥' },
+    CHF: { rate: 0.88, symbol: 'CHF' },
+    CAD: { rate: 1.36, symbol: 'C$' },
+    AUD: { rate: 1.53, symbol: 'A$' },
+  };
+  
   // Get search params
   const checkIn = searchParams.get('checkIn');
   const checkOut = searchParams.get('checkOut');
   const adults = searchParams.get('adults') || '1';
   const children = searchParams.get('children') || '0';
+
+  // Function to convert price
+  const convertPrice = (priceUSD: number) => {
+    const converted = priceUSD * exchangeRates[selectedCurrency].rate;
+    return converted.toFixed(2);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -80,7 +100,7 @@ function SearchResultsContent() {
 
   const handleBookRoom = (roomId: string) => {
     // Navigate to booking confirmation with params (use room.id slug, not _id)
-    router.push(`/booking-confirmation?roomId=${roomId}&checkIn=${checkIn}&checkOut=${checkOut}&adults=${adults}&children=${children}`);
+    router.push(`/booking-confirmation?roomId=${roomId}&checkIn=${checkIn}&checkOut=${checkOut}&adults=${adults}&children=${children}&currency=${selectedCurrency}`);
   };
 
   return (
@@ -155,6 +175,8 @@ function SearchResultsContent() {
                         key={room._id}
                         room={room}
                         onBook={() => handleBookRoom(room.id)}
+                        convertPrice={convertPrice}
+                        currencySymbol={exchangeRates[selectedCurrency].symbol}
                       />
                     ))}
                   </div>
@@ -168,6 +190,9 @@ function SearchResultsContent() {
                   checkOut={checkOut}
                   adults={adults}
                   children={children}
+                  selectedCurrency={selectedCurrency}
+                  setSelectedCurrency={setSelectedCurrency}
+                  exchangeRates={exchangeRates}
                 />
               </div>
             </div>
@@ -179,7 +204,12 @@ function SearchResultsContent() {
   );
 }
 
-const RoomCard: React.FC<{ room: Room; onBook: () => void }> = ({ room, onBook }) => {
+const RoomCard: React.FC<{ 
+  room: Room; 
+  onBook: () => void;
+  convertPrice: (price: number) => string;
+  currencySymbol: string;
+}> = ({ room, onBook, convertPrice, currencySymbol }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const images = [room.heroImage];
 
@@ -216,7 +246,7 @@ const RoomCard: React.FC<{ room: Room; onBook: () => void }> = ({ room, onBook }
       {/* Price */}
       <div className="mb-6">
         <span className="font-bold text-gray-900 text-sm">Prices start at:</span>{' '}
-        <span className="text-gray-600 text-sm">${room.price} per night</span>
+        <span className="text-gray-600 text-sm">{currencySymbol}{convertPrice(room.price)} per night</span>
       </div>
 
       {/* Book Button */}
@@ -244,7 +274,10 @@ const Sidebar: React.FC<{
   checkOut: string | null;
   adults: string;
   children: string;
-}> = ({ checkIn, checkOut, adults, children }) => {
+  selectedCurrency: string;
+  setSelectedCurrency: (currency: string) => void;
+  exchangeRates: { [key: string]: { rate: number; symbol: string } };
+}> = ({ checkIn, checkOut, adults, children, selectedCurrency, setSelectedCurrency, exchangeRates }) => {
   const router = useRouter();
   const [formData, setFormData] = useState({
     checkIn: checkIn || '',
@@ -264,6 +297,39 @@ const Sidebar: React.FC<{
 
   return (
     <div className="sticky top-8">
+      {/* Currency Selector */}
+      <div className="bg-white border border-gray-200 p-6 shadow-sm rounded-sm mb-6">
+        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">
+          Currency Converter
+        </h3>
+        
+        <div>
+          <label className="block text-xs font-semibold text-gray-700 mb-2">
+            Display prices in
+          </label>
+          <div className="relative">
+            <select
+              value={selectedCurrency}
+              onChange={(e) => setSelectedCurrency(e.target.value)}
+              className="w-full appearance-none border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-700 rounded-sm focus:outline-none focus:border-[#59a4b5] focus:ring-1 focus:ring-[#59a4b5]"
+            >
+              {Object.entries(exchangeRates).map(([code, { symbol }]) => (
+                <option key={code} value={code}>
+                  {code} ({symbol})
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+              size={14}
+            />
+          </div>
+          <p className="text-[10px] text-gray-400 mt-2 italic">
+            All prices will update automatically
+          </p>
+        </div>
+      </div>
+
       {/* Booking Form Card */}
       <div className="bg-[#f9f9f9] p-6 shadow-sm rounded-sm mb-6">
         <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">

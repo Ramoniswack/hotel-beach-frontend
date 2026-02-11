@@ -32,6 +32,28 @@ function ThankYouContent() {
   const [booking, setBooking] = useState<Booking | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Currency state
+  const [selectedCurrency, setSelectedCurrency] = useState('USD');
+  
+  // Exchange rates (base: USD)
+  const exchangeRates: { [key: string]: { rate: number; symbol: string } } = {
+    USD: { rate: 1, symbol: '$' },
+    EUR: { rate: 0.92, symbol: '€' },
+    GBP: { rate: 0.79, symbol: '£' },
+    JPY: { rate: 149.50, symbol: '¥' },
+    CHF: { rate: 0.88, symbol: 'CHF' },
+    CAD: { rate: 1.36, symbol: 'C$' },
+    AUD: { rate: 1.53, symbol: 'A$' },
+  };
+  
+  // Function to convert price
+  const convertPrice = (priceUSD: number) => {
+    const converted = priceUSD * exchangeRates[selectedCurrency].rate;
+    return converted.toFixed(2);
+  };
+  
+  const getCurrencySymbol = () => exchangeRates[selectedCurrency].symbol;
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -120,7 +142,7 @@ function ThankYouContent() {
                   />
                   <DetailItem 
                     label="Total:" 
-                    value={`$${booking.totalPrice}`} 
+                    value={`${getCurrencySymbol()}${convertPrice(booking.totalPrice)}`} 
                     isBold 
                   />
                   <DetailItem 
@@ -158,7 +180,7 @@ function ThankYouContent() {
                   />
                   <DetailItem 
                     label="Total:" 
-                    value={`$${booking.totalPrice}`} 
+                    value={`${getCurrencySymbol()}${convertPrice(booking.totalPrice)}`} 
                     isBold 
                   />
                   <DetailItem 
@@ -189,7 +211,11 @@ function ThankYouContent() {
 
             {/* RIGHT COLUMN: SIDEBAR */}
             <div className="w-full lg:w-[300px] shrink-0">
-              <Sidebar />
+              <Sidebar 
+                selectedCurrency={selectedCurrency}
+                setSelectedCurrency={setSelectedCurrency}
+                exchangeRates={exchangeRates}
+              />
             </div>
           </div>
         </div>
@@ -213,18 +239,34 @@ const DetailItem: React.FC<DetailItemProps> = ({ label, value, isBold = false, i
   </div>
 );
 
-const Sidebar = () => (
+const Sidebar: React.FC<{
+  selectedCurrency: string;
+  setSelectedCurrency: (currency: string) => void;
+  exchangeRates: { [key: string]: { rate: number; symbol: string } };
+}> = ({ selectedCurrency, setSelectedCurrency, exchangeRates }) => (
   <div className="space-y-12">
     {/* Currency Selector */}
     <div>
+      <h3 className="text-[11px] font-bold text-[#59a4b5] uppercase tracking-widest mb-3">
+        Currency
+      </h3>
       <div className="relative">
-        <select className="w-full appearance-none border border-gray-300 rounded-sm px-4 py-3 text-xs text-gray-600 bg-white focus:outline-none hover:border-gray-400">
-          <option>United States (US) dollar ($)</option>
-          <option>Euro (€)</option>
-          <option>British Pound (£)</option>
+        <select 
+          value={selectedCurrency}
+          onChange={(e) => setSelectedCurrency(e.target.value)}
+          className="w-full appearance-none border border-gray-300 rounded-sm px-4 py-3 text-xs text-gray-600 bg-white focus:outline-none hover:border-gray-400 focus:border-[#59a4b5]"
+        >
+          {Object.entries(exchangeRates).map(([code, { symbol }]) => (
+            <option key={code} value={code}>
+              {code} ({symbol})
+            </option>
+          ))}
         </select>
         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
       </div>
+      <p className="text-[10px] text-gray-400 mt-2 italic">
+        All prices will update automatically
+      </p>
     </div>
 
     {/* Questions */}

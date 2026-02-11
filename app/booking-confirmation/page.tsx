@@ -19,7 +19,7 @@ interface Room {
 function BookingConfirmationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useAuthStore();
+  const { user, token } = useAuthStore();
   
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -30,6 +30,29 @@ function BookingConfirmationContent() {
   const roomId = searchParams.get('roomId');
   const checkIn = searchParams.get('checkIn');
   const checkOut = searchParams.get('checkOut');
+  const currencyParam = searchParams.get('currency') || 'USD';
+  
+  // Currency state
+  const [selectedCurrency, setSelectedCurrency] = useState(currencyParam);
+  
+  // Exchange rates (base: USD)
+  const exchangeRates: { [key: string]: { rate: number; symbol: string } } = {
+    USD: { rate: 1, symbol: '$' },
+    EUR: { rate: 0.92, symbol: '€' },
+    GBP: { rate: 0.79, symbol: '£' },
+    JPY: { rate: 149.50, symbol: '¥' },
+    CHF: { rate: 0.88, symbol: 'CHF' },
+    CAD: { rate: 1.36, symbol: 'C$' },
+    AUD: { rate: 1.53, symbol: 'A$' },
+  };
+  
+  // Function to convert price
+  const convertPrice = (priceUSD: number) => {
+    const converted = priceUSD * exchangeRates[selectedCurrency].rate;
+    return converted.toFixed(2);
+  };
+  
+  const getCurrencySymbol = () => exchangeRates[selectedCurrency].symbol;
   
   // Form state
   const [adults, setAdults] = useState(searchParams.get('adults') || '1');
@@ -70,17 +93,29 @@ function BookingConfirmationContent() {
   // Fetch user profile to pre-fill billing info
   useEffect(() => {
     const fetchUserProfile = async () => {
-      if (user) {
+      if (user && token) {
         try {
           const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth/profile`, {
             headers: {
-              'Authorization': `Bearer ${user.token}`,
+              'Authorization': `Bearer ${token}`,
             },
           });
           
           if (response.ok) {
             const data = await response.json();
             const profile = data.data;
+            
+            // Pre-fill name fields
+            if (profile.name) {
+              const nameParts = profile.name.split(' ');
+              setFirstName(nameParts[0] || '');
+              setLastName(nameParts.slice(1).join(' ') || '');
+            }
+            
+            // Pre-fill email
+            if (profile.email) {
+              setEmail(profile.email);
+            }
             
             // Pre-fill billing info if available
             if (profile.billingInfo) {
@@ -101,7 +136,7 @@ function BookingConfirmationContent() {
     };
 
     fetchUserProfile();
-  }, [user]);
+  }, [user, token]);
 
 
   useEffect(() => {
@@ -376,7 +411,7 @@ function BookingConfirmationContent() {
                     <Minus size={12} className="text-gray-400" />
                     #{1} {room?.title}
                   </div>
-                  <div className="text-right text-gray-800">${room?.price}</div>
+                  <div className="text-right text-gray-800">{getCurrencySymbol()}{room ? convertPrice(room.price) : 0}</div>
                 </div>
                 <div className="grid grid-cols-2 text-xs border-b border-gray-100 p-4 bg-gray-50/50">
                   <div className="text-gray-600">Adults</div>
@@ -397,32 +432,32 @@ function BookingConfirmationContent() {
                 {checkIn && (
                   <div className="grid grid-cols-2 text-xs text-gray-600 border-b border-gray-100 p-4">
                     <div>{format(new Date(checkIn), 'MMMM dd, yyyy')}</div>
-                    <div className="text-right">${room?.price}</div>
+                    <div className="text-right">{getCurrencySymbol()}{room ? convertPrice(room.price) : 0}</div>
                   </div>
                 )}
                 <div className="grid grid-cols-2 text-xs font-bold text-gray-800 border-b border-gray-100 p-4 bg-gray-50">
                   <div>Dates Subtotal</div>
-                  <div className="text-right">${room ? room.price * nights : 0}</div>
+                  <div className="text-right">{getCurrencySymbol()}{room ? convertPrice(room.price * nights) : 0}</div>
                 </div>
                 {services.childcare && (
                   <div className="grid grid-cols-2 text-xs text-gray-600 border-b border-gray-100 p-4">
                     <div>Childcare</div>
-                    <div className="text-right">$60</div>
+                    <div className="text-right">{getCurrencySymbol()}{convertPrice(60)}</div>
                   </div>
                 )}
                 {services.massage && (
                   <div className="grid grid-cols-2 text-xs text-gray-600 border-b border-gray-100 p-4">
                     <div>Massage ({services.massageGuests} guest{services.massageGuests > 1 ? 's' : ''})</div>
-                    <div className="text-right">${15 * services.massageGuests}</div>
+                    <div className="text-right">{getCurrencySymbol()}{convertPrice(15 * services.massageGuests)}</div>
                   </div>
                 )}
                 <div className="grid grid-cols-2 text-xs font-bold text-gray-800 border-b border-gray-100 p-4 bg-gray-50">
                   <div>Subtotal</div>
-                  <div className="text-right">${total}</div>
+                  <div className="text-right">{getCurrencySymbol()}{convertPrice(total)}</div>
                 </div>
                 <div className="grid grid-cols-2 text-xs font-bold text-gray-800 p-4 bg-gray-50">
                   <div>Total</div>
-                  <div className="text-right">${total}</div>
+                  <div className="text-right">{getCurrencySymbol()}{convertPrice(total)}</div>
                 </div>
               </div>
 
@@ -589,13 +624,7 @@ function BookingConfirmationContent() {
                   Payment Method
                 </h2>
                 <div className="mb-10 space-y-3">
-                  <PaymentOption
-                    value="woocommerce"
-                    label="WooCommerce Payments"
-                    description="Choose from 100+ payment gateways for WooCommerce. Including: PayPal, Square, Visa, Bitcoin, Braintree, Stripe, Authorize.net"
-                    selected={paymentMethod}
-                    onChange={setPaymentMethod}
-                  />
+                
                   <PaymentOption
                     value="test"
                     label="Test Payment"
@@ -635,7 +664,7 @@ function BookingConfirmationContent() {
                 <div className="mb-8">
                   <div className="flex items-baseline gap-2 mb-6">
                     <span className="text-lg text-gray-600">Total Price:</span>
-                    <span className="text-2xl font-bold text-gray-900">${total}</span>
+                    <span className="text-2xl font-bold text-gray-900">{getCurrencySymbol()}{convertPrice(total)}</span>
                   </div>
 
                   <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer mb-8">
@@ -665,7 +694,11 @@ function BookingConfirmationContent() {
 
             {/* RIGHT COLUMN: SIDEBAR */}
             <div className="w-full lg:w-[300px] shrink-0">
-              <Sidebar />
+              <Sidebar 
+                selectedCurrency={selectedCurrency}
+                setSelectedCurrency={setSelectedCurrency}
+                exchangeRates={exchangeRates}
+              />
             </div>
           </div>
         </div>
@@ -704,18 +737,34 @@ const PaymentOption: React.FC<{
   </div>
 );
 
-const Sidebar = () => (
+const Sidebar: React.FC<{
+  selectedCurrency: string;
+  setSelectedCurrency: (currency: string) => void;
+  exchangeRates: { [key: string]: { rate: number; symbol: string } };
+}> = ({ selectedCurrency, setSelectedCurrency, exchangeRates }) => (
   <div className="space-y-8 sticky top-8">
     {/* Currency Selector */}
     <div>
+      <h3 className="text-[11px] font-bold text-[#59a4b5] uppercase tracking-widest mb-3">
+        Currency
+      </h3>
       <div className="relative">
-        <select className="w-full appearance-none border border-gray-300 rounded-sm px-4 py-2 text-xs text-gray-600 bg-white focus:outline-none hover:border-gray-400">
-          <option>United States (US) dollar ($)</option>
-          <option>Euro (€)</option>
-          <option>British Pound (£)</option>
+        <select 
+          value={selectedCurrency}
+          onChange={(e) => setSelectedCurrency(e.target.value)}
+          className="w-full appearance-none border border-gray-300 rounded-sm px-4 py-2 text-xs text-gray-600 bg-white focus:outline-none hover:border-gray-400 focus:border-[#59a4b5]"
+        >
+          {Object.entries(exchangeRates).map(([code, { symbol }]) => (
+            <option key={code} value={code}>
+              {code} ({symbol})
+            </option>
+          ))}
         </select>
         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
       </div>
+      <p className="text-[10px] text-gray-400 mt-2 italic">
+        All prices will update automatically
+      </p>
     </div>
 
     {/* Questions */}

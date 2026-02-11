@@ -25,7 +25,7 @@ interface UserProfile {
 }
 
 export default function ProfilePage() {
-  const { user, setAuth } = useAuthStore();
+  const { user, token, setAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -87,12 +87,12 @@ export default function ProfilePage() {
       const response = await authAPI.updateProfile(updateData);
       
       // Update auth store with new user data
-      if (user) {
-        setAuth(user.token, {
+      if (user && token) {
+        setAuth({
           ...user,
           name: response.data.data.name,
           phone: response.data.data.phone,
-        });
+        }, token);
       }
       
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
