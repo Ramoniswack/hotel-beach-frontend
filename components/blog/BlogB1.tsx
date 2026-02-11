@@ -46,8 +46,8 @@ const BlogB1: React.FC = () => {
 
   return (
     <section className="bg-white py-24 md:py-32">
-      {/* Header section remains unchanged as requested */}
-      <div className="max-w-[1300px] mx-auto px-6 lg:px-8 text-center mb-20">
+      {/* Header section with 3.5cm left spacing */}
+      <div className="mb-20" style={{ paddingLeft: '3.5cm' }}>
         <h2 className="text-[36px] md:text-[48px] font-bold mb-6 tracking-tight text-[#1a1a1a]">
           Retreat Hotel at Santorini
         </h2>
@@ -56,7 +56,7 @@ const BlogB1: React.FC = () => {
         </p>
       </div>
 
-      <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
+      <div style={{ paddingLeft: '3.5cm', paddingRight: '3.5cm' }}>
         {/* Adjusted gap and space-y to match the tighter, elegant masonry spacing */}
         <div className="columns-1 md:columns-2 lg:columns-3 gap-12 space-y-20">
           {posts.map((post, index) => {
