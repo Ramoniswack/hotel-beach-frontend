@@ -9,10 +9,8 @@ import { format } from 'date-fns';
 
 interface Booking {
   _id: string;
-  room: {
-    _id: string;
-    title: string;
-  };
+  roomId: string;
+  roomTitle: string; // Changed from room object to roomTitle string
   checkInDate: string;
   checkOutDate: string;
   adults: number;
@@ -172,7 +170,7 @@ export default function BookingsManager() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{booking.room.title}</div>
+                          <div className="text-sm text-gray-900">{booking.roomTitle}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">

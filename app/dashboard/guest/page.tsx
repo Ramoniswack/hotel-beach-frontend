@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { bookingsAPI } from '@/lib/api';
+import { generateInvoicePDF } from '@/lib/generateInvoicePDF';
 import RouteGuard from '@/components/RouteGuard';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Calendar, Users, MessageSquare, X, Download, FileText } from 'lucide-react';
@@ -11,12 +12,8 @@ import { format } from 'date-fns';
 
 interface Booking {
   _id: string;
-  room: {
-    _id: string;
-    title: string;
-    heroImage: string;
-    pricePerNight: number;
-  };
+  roomId: string;
+  roomTitle: string; // Changed from room object to roomTitle string
   checkInDate: string;
   checkOutDate: string;
   adults: number;
@@ -30,6 +27,7 @@ interface Booking {
     email: string;
     phone: string;
   };
+  createdAt: string;
 }
 
 export default function GuestDashboard() {
@@ -69,44 +67,13 @@ export default function GuestDashboard() {
     }
   };
 
-  const downloadInvoice = (booking: Booking) => {
-    // Generate simple text invoice (in production, use a PDF library)
-    const invoiceContent = `
-HOTEL SANTORINI - INVOICE
-${'-'.repeat(50)}
-
-Invoice Number: ${booking.invoiceNumber || 'N/A'}
-Date: ${format(new Date(), 'MMM dd, yyyy')}
-
-Guest Information:
-Name: ${booking.guestInfo.name}
-Email: ${booking.guestInfo.email}
-Phone: ${booking.guestInfo.phone}
-
-Booking Details:
-Room: ${booking.room.title}
-Check-in: ${format(new Date(booking.checkInDate), 'MMM dd, yyyy')}
-Check-out: ${format(new Date(booking.checkOutDate), 'MMM dd, yyyy')}
-Guests: ${booking.adults} Adult(s), ${booking.children} Child(ren)
-
-Payment Information:
-Total Amount: $${booking.totalPrice}
-Payment Status: ${booking.paymentStatus?.toUpperCase() || 'PENDING'}
-Booking Status: ${booking.status.toUpperCase()}
-
-${'-'.repeat(50)}
-Thank you for choosing Hotel Santorini!
-    `.trim();
-
-    const blob = new Blob([invoiceContent], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `invoice-${booking.invoiceNumber || booking._id}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+  const downloadInvoice = async (booking: Booking) => {
+    try {
+      await generateInvoicePDF(booking);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Failed to generate invoice PDF. Please try again.');
+    }
   };
 
   return (
@@ -207,11 +174,11 @@ Thank you for choosing Hotel Santorini!
                       key={booking._id}
                       className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
                     >
-                      {/* Room Image */}
-                      <div className="relative h-48">
+                      {/* Room Image - Use placeholder since we don't have heroImage */}
+                      <div className="relative h-48 bg-gray-200">
                         <Image
-                          src={booking.room.heroImage}
-                          alt={booking.room.title}
+                          src={`https://images.unsplash.com/photo-1590490359683-658d3d23f972?auto=format&fit=crop&q=80&w=800`}
+                          alt={booking.roomTitle}
                           fill
                           className="object-cover"
                         />
@@ -235,7 +202,7 @@ Thank you for choosing Hotel Santorini!
                       {/* Booking Details */}
                       <div className="p-6">
                         <h4 className="text-lg font-bold text-gray-900 mb-4">
-                          {booking.room.title}
+                          {booking.roomTitle}
                         </h4>
 
                         <div className="space-y-3 mb-4">
@@ -295,4 +262,5 @@ Thank you for choosing Hotel Santorini!
     </RouteGuard>
   );
 }
+
 
