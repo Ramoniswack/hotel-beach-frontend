@@ -256,53 +256,60 @@ export default function AboutPageManagement() {
 
                         {/* Manager Name */}
                         {section.sectionId === 'intro-text' && (
+                          <>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Signature Image
+                              </label>
+                              <ImageUpload
+                                label=""
+                                value={formData.images?.[0] || ''}
+                                onChange={(url) => {
+                                  const newImages = [...(formData.images || [])];
+                                  newImages[0] = url;
+                                  setFormData({ ...formData, images: newImages });
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Manager Name & Title
+                              </label>
+                              <input
+                                type="text"
+                                value={formData.content || ''}
+                                onChange={(e) => updateFormField('content', e.target.value)}
+                                placeholder="RICARD MORGAN - GENERAL MANAGER"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                              />
+                            </div>
+                          </>
+                        )}
+
+                        {/* Images */}
+                        {(section.sectionId === 'hero-image' || section.sectionId === 'banner-image') && (
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Manager Name & Title
-                            </label>
-                            <input
-                              type="text"
-                              value={formData.content || ''}
-                              onChange={(e) => updateFormField('content', e.target.value)}
-                              placeholder="RICARD MORGAN - GENERAL MANAGER"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                            <ImageUpload
+                              label={section.sectionId === 'hero-image' ? 'Hero Image' : 'Banner Image'}
+                              value={formData.images?.[0] || ''}
+                              onChange={(url) => {
+                                const newImages = [...(formData.images || [])];
+                                newImages[0] = url;
+                                setFormData({ ...formData, images: newImages });
+                              }}
                             />
                           </div>
                         )}
 
-                        {/* Images */}
-                        {(section.sectionId === 'hero-image' || section.sectionId === 'gallery' || section.sectionId === 'banner-image') && (
+                        {/* Gallery Images */}
+                        {section.sectionId === 'gallery' && (
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              {section.sectionId === 'gallery' ? 'Gallery Images (5 images)' : 'Image URL'}
-                            </label>
-                            {formData.images?.map((img, idx) => (
-                              <div key={idx} className="flex gap-2 mb-2">
-                                <input
-                                  type="text"
-                                  value={img}
-                                  onChange={(e) => updateImageAtIndex(idx, e.target.value)}
-                                  placeholder="Image URL"
-                                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
-                                />
-                                {section.sectionId === 'gallery' && (
-                                  <button
-                                    onClick={() => removeImage(idx)}
-                                    className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                                  >
-                                    <X size={20} />
-                                  </button>
-                                )}
-                              </div>
-                            ))}
-                            {section.sectionId === 'gallery' && (
-                              <button
-                                onClick={addImage}
-                                className="mt-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-                              >
-                                + Add Image
-                              </button>
-                            )}
+                            <MultiImageUpload
+                              label="Gallery Images (5 images recommended)"
+                              value={formData.images || []}
+                              onChange={(urls) => setFormData({ ...formData, images: urls })}
+                              maxImages={10}
+                            />
                           </div>
                         )}
 

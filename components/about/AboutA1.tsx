@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 interface Section {
   sectionId: string;
@@ -19,8 +19,9 @@ interface AboutA1Props {
 
 const AboutA1: React.FC<AboutA1Props> = ({ sections }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(false);
+  const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
+  const galleryRef = useRef<HTMLDivElement>(null);
 
   const getSection = (id: string) => sections.find(s => s.sectionId === id && s.isVisible);
   
@@ -32,13 +33,18 @@ const AboutA1: React.FC<AboutA1Props> = ({ sections }) => {
   const bannerImage = getSection('banner-image');
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!galleryRef.current) return;
     setIsDragging(true);
-    setStartX(e.pageX);
+    setStartX(e.pageX - galleryRef.current.offsetLeft);
+    setScrollLeft(galleryRef.current.scrollLeft);
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDragging) return;
+    if (!isDragging || !galleryRef.current) return;
     e.preventDefault();
+    const x = e.pageX - galleryRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // Scroll speed multiplier
+    galleryRef.current.scrollLeft = scrollLeft - walk;
   };
 
   const handleMouseUp = () => {
@@ -53,12 +59,12 @@ const AboutA1: React.FC<AboutA1Props> = ({ sections }) => {
     <div className="bg-white">
       {/* 1. Header Section */}
       {(sections.length === 0 || header) && (
-        <div className="pt-40 pb-16 text-center">
-          <div className="container mx-auto px-6">
+        <div className="pt-40 pb-16">
+          <div className="container mx-auto" style={{ paddingLeft: '3.5cm' }}>
             <h1 className="font-sans text-4xl md:text-5xl font-bold text-[#1a1a1a] mb-6 tracking-tight">
               {header?.title || 'Retreat Hotel at Santorini'}
             </h1>
-            <p className="text-[#1a1a1a]/60 text-sm max-w-2xl mx-auto font-medium leading-relaxed">
+            <p className="text-[#1a1a1a]/60 text-sm max-w-2xl font-medium leading-relaxed">
               {header?.subtitle || 'Unwind the clock of modern life. Unlock the door to a wonder of the world.'}
             </p>
           </div>
@@ -67,23 +73,21 @@ const AboutA1: React.FC<AboutA1Props> = ({ sections }) => {
 
       {/* 2. Main Hero Image */}
       {(sections.length === 0 || heroImage) && (
-        <div className="w-full px-6 mb-24">
-          <div className="container mx-auto">
-            <div className="relative aspect-[21/10] overflow-hidden rounded-sm">
-              <Image 
-                src={heroImage?.images?.[0] || 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&q=80&w=2000'} 
-                alt="Santorini Blue Dome"
-                fill
-                className="object-cover"
-              />
-            </div>
+        <div className="w-full mb-24" style={{ paddingLeft: '1cm' }}>
+          <div className="relative aspect-[21/10] overflow-hidden rounded-sm">
+            <Image 
+              src={heroImage?.images?.[0] || 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&q=80&w=2000'} 
+              alt="Santorini Blue Dome"
+              fill
+              className="object-cover"
+            />
           </div>
         </div>
       )}
 
       {/* 3. Intro Text & Signature */}
       {(sections.length === 0 || introText) && (
-        <div className="container mx-auto px-6 mb-32">
+        <div className="mb-32" style={{ paddingLeft: '5cm', paddingRight: '5cm' }}>
           <div className="flex flex-col lg:flex-row items-start justify-between gap-16">
             <div className="lg:w-2/3">
               <p className="text-[#1a1a1a]/70 text-[13px] leading-[2] font-medium max-w-2xl">
@@ -91,13 +95,15 @@ const AboutA1: React.FC<AboutA1Props> = ({ sections }) => {
               </p>
             </div>
             <div className="lg:w-1/3 flex flex-col items-start lg:items-end">
-              <Image 
-                src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Signature_of_Richard_Nixon.svg" 
-                alt="Signature" 
-                width={120}
-                height={80}
-                className="h-20 w-auto mb-4 opacity-80 grayscale invert brightness-0"
-              />
+              {introText?.images?.[0] && (
+                <Image 
+                  src={introText.images[0]} 
+                  alt="Signature" 
+                  width={120}
+                  height={80}
+                  className="h-20 w-auto mb-4 object-contain"
+                />
+              )}
               <p className="text-[10px] uppercase tracking-[0.3em] font-black text-[#1a1a1a]">
                 {introText?.content || 'RICARD MORGAN - GENERAL MANAGER'}
               </p>
@@ -109,13 +115,15 @@ const AboutA1: React.FC<AboutA1Props> = ({ sections }) => {
       {/* 4. Horizontal Gallery Strip */}
       {(sections.length === 0 || gallery) && (
         <div 
-          className="relative group mb-32 px-1 cursor-grab active:cursor-grabbing select-none"
+          ref={galleryRef}
+          className="relative group mb-32 cursor-grab active:cursor-grabbing select-none overflow-x-auto scrollbar-hide"
+          style={{ paddingRight: '3.5cm' }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseLeave}
         >
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-0.5 h-[480px]">
+          <div className="flex" style={{ gap: '0.3cm', height: '9cm' }}>
             {(gallery?.images || [
               'https://images.unsplash.com/photo-1433086177604-50dc80846517?auto=format&fit=crop&q=80&w=600',
               'https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&q=80&w=600',
@@ -123,7 +131,7 @@ const AboutA1: React.FC<AboutA1Props> = ({ sections }) => {
               'https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?auto=format&fit=crop&q=80&w=600',
               'https://images.unsplash.com/photo-1549294413-26f195200c16?auto=format&fit=crop&q=80&w=600'
             ]).map((img, idx) => (
-              <div key={idx} className="relative w-full h-full">
+              <div key={idx} className="relative flex-shrink-0" style={{ width: '5.5cm', height: '9cm' }}>
                 <Image src={img} alt={`Gallery ${idx + 1}`} fill className="object-cover pointer-events-none" />
               </div>
             ))}
@@ -145,7 +153,7 @@ const AboutA1: React.FC<AboutA1Props> = ({ sections }) => {
 
       {/* 5. "Everything Handy" Content */}
       {(sections.length === 0 || contentSection) && (
-        <div className="container mx-auto px-6 mb-32">
+        <div className="mb-32" style={{ paddingLeft: '3.5cm', paddingRight: '8.5cm' }}>
           <div className="max-w-4xl">
             <h2 className="text-3xl font-bold text-[#1a1a1a] mb-10 tracking-tight">
               {contentSection?.title || 'Everything Handy'}
@@ -165,16 +173,16 @@ const AboutA1: React.FC<AboutA1Props> = ({ sections }) => {
 
       {/* 6. Landscape Banner */}
       {(sections.length === 0 || bannerImage) && (
-        <div className="w-full px-6 pb-24">
-          <div className="container mx-auto">
-            <div className="relative aspect-[21/9] overflow-hidden rounded-sm shadow-sm">
-              <Image 
-                src={bannerImage?.images?.[0] || 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&q=80&w=2000'} 
-                alt="Santorini Landscape"
-                fill
-                className="object-cover"
-              />
-            </div>
+        <div className="w-full -mb-24">
+          <div className="relative aspect-[21/9] overflow-hidden">
+            <Image 
+              src={bannerImage?.images?.[0] || 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&q=80&w=2000'} 
+              alt="Santorini Landscape"
+              fill
+              className="object-cover"
+            />
+            {/* White gradient overlay at top, dark gradient at bottom to blend with footer */}
+            <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-[#1a1a1a] pointer-events-none"></div>
           </div>
         </div>
       )}
