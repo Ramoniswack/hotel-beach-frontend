@@ -5,6 +5,7 @@ import RouteGuard from '@/components/RouteGuard';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { contentAPI } from '@/lib/api';
 import { Mail, Edit, X, Save, Eye, EyeOff } from 'lucide-react';
+import ImageUpload from '@/components/ImageUpload';
 
 interface Section {
   sectionId: string;
@@ -291,35 +292,22 @@ export default function ContactManagement() {
                           </div>
                         )}
 
-                        {/* Map Image */}
+                        {/* Map Address */}
                         {section.sectionId === 'map' && (
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Map Image URL
+                              Map Address or Location
                             </label>
-                            {formData.images?.map((img, idx) => (
-                              <div key={idx} className="flex gap-2 mb-2">
-                                <input
-                                  type="text"
-                                  value={img}
-                                  onChange={(e) => updateImageAtIndex(idx, e.target.value)}
-                                  placeholder="Image URL"
-                                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
-                                />
-                                <button
-                                  onClick={() => removeImage(idx)}
-                                  className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                                >
-                                  <X size={20} />
-                                </button>
-                              </div>
-                            ))}
-                            <button
-                              onClick={addImage}
-                              className="mt-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-                            >
-                              + Add Image
-                            </button>
+                            <input
+                              type="text"
+                              value={formData.description || ''}
+                              onChange={(e) => updateFormField('description', e.target.value)}
+                              placeholder="Santorini, Greece"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                            />
+                            <p className="text-xs text-gray-500 mt-2">
+                              Enter the address or location name to display on Google Maps
+                            </p>
                           </div>
                         )}
 

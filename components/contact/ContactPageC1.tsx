@@ -62,7 +62,19 @@ const ContactPageC1: React.FC<ContactPageC1Props> = ({ sections }) => {
           <div className="container mx-auto px-6 lg:px-24">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-6">
               <h1 className="font-sans text-4xl md:text-5xl font-bold text-[#1a1a1a] tracking-tight leading-tight">
-                {header?.title || 'Located in center of Santorini, Greece'}
+                {header?.title ? (
+                  header.title.includes('Located in center of') ? (
+                    <>
+                      Located in center of<br />Santorini, Greece
+                    </>
+                  ) : (
+                    header.title
+                  )
+                ) : (
+                  <>
+                    Located in center of<br />Santorini, Greece
+                  </>
+                )}
               </h1>
               <a 
                 href={header?.buttonLink || 'https://maps.google.com'}
@@ -84,25 +96,22 @@ const ContactPageC1: React.FC<ContactPageC1Props> = ({ sections }) => {
       {/* 2. Map Section */}
       {(sections.length === 0 || map) && (
         <div className="w-full h-[500px] bg-gray-100 relative mb-20 overflow-hidden">
-          <Image 
-            src={map?.images?.[0] || 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=2000'} 
-            alt="Santorini Map" 
-            fill
-            className="object-cover grayscale opacity-40"
-          />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-             <div className="relative">
-                <div className="w-10 h-10 bg-[#1a1a1a] rounded-full flex items-center justify-center border-4 border-white shadow-2xl">
-                   <div className="w-2.5 h-2.5 bg-hotel-gold rounded-full"></div>
-                </div>
-             </div>
-          </div>
+          <iframe
+            src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(map?.description || 'Santorini, Greece')}`}
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            className="grayscale"
+          ></iframe>
         </div>
       )}
 
       {/* 3. Info Columns */}
       {(sections.length === 0 || infoColumns) && (
-        <div className="container mx-auto px-6 lg:px-24 mb-32">
+        <div className="mb-32" style={{ paddingLeft: '4cm', paddingRight: '5cm' }}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
             {(infoColumns?.items || [
               { title: 'Our Address', content: '45 Santorini Station. Thira 150-0042 Greece\nrevs@hotellerbeach.com' },
@@ -111,7 +120,7 @@ const ContactPageC1: React.FC<ContactPageC1Props> = ({ sections }) => {
             ]).map((item: any, idx: number) => (
               <div key={idx}>
                 <h4 className="text-[#1a1a1a] text-[11px] uppercase tracking-[0.3em] font-black mb-6">{item.title}</h4>
-                <div className="text-[#1a1a1a]/50 text-[13px] leading-loose font-medium whitespace-pre-line">
+                <div className="text-[#1a1a1a]/50 text-[13px] leading-loose font-bold whitespace-pre-line">
                   {item.content}
                 </div>
               </div>
@@ -191,7 +200,7 @@ const ContactPageC1: React.FC<ContactPageC1Props> = ({ sections }) => {
           {/* Right Side Card & Socials */}
           <div className="lg:w-[320px] pt-16">
             {(sections.length === 0 || contactInfo) && (
-              <div className="bg-[#fcfcfc] border border-gray-100 p-10 text-center mb-16 rounded-sm shadow-sm">
+              <div className="bg-[#fcfcfc] border-4 border-double border-gray-300 p-10 text-center mb-16 rounded-sm shadow-sm">
                 <h3 className="text-[13px] font-black text-[#1a1a1a] mb-6 tracking-tight">
                   {contactInfo?.title || 'Hoteller Beach Hotel'}
                 </h3>
