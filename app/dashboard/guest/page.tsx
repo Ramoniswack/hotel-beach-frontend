@@ -27,6 +27,11 @@ interface Booking {
     email: string;
     phone: string;
   };
+  additionalServices?: Array<{
+    name: string;
+    price: number;
+    quantity?: number;
+  }>;
   createdAt: string;
 }
 
@@ -35,6 +40,8 @@ export default function GuestDashboard() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   useEffect(() => {
     fetchBookings();
@@ -233,6 +240,17 @@ export default function GuestDashboard() {
                         {/* Actions */}
                         <div className="space-y-2">
                           <button
+                            onClick={() => {
+                              setSelectedBooking(booking);
+                              setShowDetailsModal(true);
+                            }}
+                            className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium flex items-center justify-center space-x-2"
+                          >
+                            <FileText size={18} />
+                            <span>View Details</span>
+                          </button>
+                          
+                          <button
                             onClick={() => downloadInvoice(booking)}
                             className="w-full px-4 py-2 bg-[#59a4b5] text-white rounded-lg hover:bg-[#4a8a99] transition-colors font-medium flex items-center justify-center space-x-2"
                           >
@@ -258,6 +276,142 @@ export default function GuestDashboard() {
             </div>
           </div>
         </div>
+
+        {/* Booking Details Modal */}
+        {showDetailsModal && selectedBooking && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
+                <h3 className="text-xl font-bold text-gray-900">Booking Details</h3>
+                <button
+                  onClick={() => setShowDetailsModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {/* Room Info */}
+                <div>
+                  <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">Room Information</h4>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-lg font-bold text-gray-900">{selectedBooking.roomTitle}</p>
+                    <p className="text-sm text-gray-600 mt-1">Invoice: {selectedBooking.invoiceNumber}</p>
+                  </div>
+                </div>
+
+                {/* Dates */}
+                <div>
+                  <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">Stay Dates</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <p className="text-xs text-gray-500 mb-1">Check-in</p>
+                      <p className="font-bold text-gray-900">{format(new Date(selectedBooking.checkInDate), 'MMM dd, yyyy')}</p>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <p className="text-xs text-gray-500 mb-1">Check-out</p>
+                      <p className="font-bold text-gray-900">{format(new Date(selectedBooking.checkOutDate), 'MMM dd, yyyy')}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Guests */}
+                <div>
+                  <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">Guests</h4>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center space-x-4">
+                      <div>
+                        <p className="text-xs text-gray-500">Adults</p>
+                        <p className="font-bold text-gray-900">{selectedBooking.adults}</p>
+                      </div>
+                      <div className="h-8 w-px bg-gray-300"></div>
+                      <div>
+                        <p className="text-xs text-gray-500">Children</p>
+                        <p className="font-bold text-gray-900">{selectedBooking.children}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Additional Services */}
+                {selectedBooking.additionalServices && selectedBooking.additionalServices.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">Additional Services</h4>
+                    <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                      {selectedBooking.additionalServices.map((service, idx) => (
+                        <div key={idx} className="flex justify-between items-center">
+                          <span className="text-sm text-gray-700">
+                            {service.name}
+                            {service.quantity && service.quantity > 1 && ` (x${service.quantity})`}
+                          </span>
+                          <span className="text-sm font-bold text-gray-900">
+                            ${service.price * (service.quantity || 1)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Guest Info */}
+                <div>
+                  <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">Guest Information</h4>
+                  <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                    <div>
+                      <p className="text-xs text-gray-500">Name</p>
+                      <p className="text-sm font-medium text-gray-900">{selectedBooking.guestInfo.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Email</p>
+                      <p className="text-sm font-medium text-gray-900">{selectedBooking.guestInfo.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Phone</p>
+                      <p className="text-sm font-medium text-gray-900">{selectedBooking.guestInfo.phone}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status & Payment */}
+                <div>
+                  <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">Status</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <p className="text-xs text-gray-500 mb-1">Booking Status</p>
+                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
+                        selectedBooking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                        selectedBooking.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                        selectedBooking.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {selectedBooking.status.toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <p className="text-xs text-gray-500 mb-1">Payment Status</p>
+                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
+                        selectedBooking.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' :
+                        selectedBooking.paymentStatus === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {selectedBooking.paymentStatus.toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Total Price */}
+                <div className="border-t border-gray-200 pt-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-bold text-gray-900">Total Price</span>
+                    <span className="text-2xl font-bold text-[#59a4b5]">${selectedBooking.totalPrice}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </DashboardLayout>
     </RouteGuard>
   );
