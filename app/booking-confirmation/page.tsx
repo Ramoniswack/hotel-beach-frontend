@@ -67,6 +67,42 @@ function BookingConfirmationContent() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Fetch user profile to pre-fill billing info
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user) {
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth/profile`, {
+            headers: {
+              'Authorization': `Bearer ${user.token}`,
+            },
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            const profile = data.data;
+            
+            // Pre-fill billing info if available
+            if (profile.billingInfo) {
+              if (profile.billingInfo.country) setCountry(profile.billingInfo.country);
+              if (profile.billingInfo.address) setAddress(profile.billingInfo.address);
+              if (profile.billingInfo.city) setCity(profile.billingInfo.city);
+              if (profile.billingInfo.state) setState(profile.billingInfo.state);
+              if (profile.billingInfo.postcode) setPostcode(profile.billingInfo.postcode);
+            }
+            
+            // Pre-fill phone if available
+            if (profile.phone) setPhone(profile.phone);
+          }
+        } catch (err) {
+          console.error('Error fetching profile:', err);
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
+
 
   useEffect(() => {
     const fetchRoom = async () => {

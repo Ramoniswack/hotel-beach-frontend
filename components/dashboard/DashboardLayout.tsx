@@ -17,7 +17,8 @@ import {
   MessageSquare,
   FileText,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  User
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -39,6 +40,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   // Navigation items based on role
   const guestNavItems = [
     { name: 'My Bookings', href: '/dashboard/guest', icon: Calendar },
+    { name: 'Profile', href: '/dashboard/guest/profile', icon: User },
+    { name: 'Browse Rooms', href: '/rooms', icon: Hotel },
     { name: 'Contact', href: '/dashboard/guest/contact', icon: MessageSquare },
     { name: 'Back to Site', href: '/', icon: Home },
   ];
