@@ -22,6 +22,11 @@ interface Booking {
     email: string;
     phone: string;
   };
+  additionalServices?: Array<{
+    name: string;
+    price: number;
+    quantity?: number;
+  }>;
   createdAt: string;
 }
 
@@ -293,6 +298,26 @@ export default function BookingsManager() {
                       <p><span className="font-medium">Children:</span> {selectedBooking.children}</p>
                     </div>
                   </div>
+
+                  {/* Additional Services */}
+                  {selectedBooking.additionalServices && selectedBooking.additionalServices.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">Additional Services</h3>
+                      <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                        {selectedBooking.additionalServices.map((service, idx) => (
+                          <div key={idx} className="flex justify-between items-center">
+                            <span>
+                              {service.name}
+                              {service.quantity && service.quantity > 1 && ` (x${service.quantity})`}
+                            </span>
+                            <span className="font-medium">
+                              ${service.price * (service.quantity || 1)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Payment Details */}
                   <div>
