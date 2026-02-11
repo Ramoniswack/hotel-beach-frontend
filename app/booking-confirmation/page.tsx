@@ -7,13 +7,27 @@ import { ChevronDown, Minus } from 'lucide-react';
 import Header from '@/components/Header';
 import MainContentWrapper from '@/components/MainContentWrapper';
 import Footer from '@/components/Footer';
-import { roomsAPI, bookingsAPI } from '@/lib/api';
+import { roomsAPI, bookingsAPI, contentAPI } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 
 interface Room {
   _id: string;
   title: string;
   price: number;
+}
+
+interface BookingSettings {
+  checkInTime?: string;
+  checkOutTime?: string;
+  policies?: Array<{ title: string; content: string }>;
+  sidebarContact?: {
+    title: string;
+    items: Array<{ label: string; value: string }>;
+  };
+  sidebarAddress?: {
+    title: string;
+    items: Array<{ label: string; value: string }>;
+  };
 }
 
 function BookingConfirmationContent() {
@@ -25,6 +39,7 @@ function BookingConfirmationContent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [room, setRoom] = useState<Room | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [bookingSettings, setBookingSettings] = useState<BookingSettings>({});
   
   // Get search params
   const roomId = searchParams.get('roomId');
@@ -88,6 +103,39 @@ function BookingConfirmationContent() {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Fetch booking settings
+  useEffect(() => {
+    const fetchBookingSettings = async () => {
+      try {
+        const response = await contentAPI.getByPage('booking-settings');
+        const sections = response.data.data.sections;
+        
+        const checkTimes = sections.find((s: any) => s.sectionId === 'check-times');
+        const policies = sections.find((s: any) => s.sectionId === 'policies');
+        const sidebarContact = sections.find((s: any) => s.sectionId === 'sidebar-contact');
+        const sidebarAddress = sections.find((s: any) => s.sectionId === 'sidebar-address');
+        
+        setBookingSettings({
+          checkInTime: checkTimes?.title || 'Check-in: from 11:00 am',
+          checkOutTime: checkTimes?.subtitle || 'Check-out: until 10:00 am',
+          policies: policies?.items || [],
+          sidebarContact: sidebarContact ? {
+            title: sidebarContact.title,
+            items: sidebarContact.items
+          } : undefined,
+          sidebarAddress: sidebarAddress ? {
+            title: sidebarAddress.title,
+            items: sidebarAddress.items
+          } : undefined
+        });
+      } catch (err) {
+        console.error('Error fetching booking settings:', err);
+      }
+    };
+
+    fetchBookingSettings();
   }, []);
 
   // Fetch user profile to pre-fill billing info
@@ -268,14 +316,14 @@ function BookingConfirmationContent() {
                   <span className="font-semibold">
                     {checkIn ? format(new Date(checkIn), 'MMMM dd, yyyy') : 'N/A'}
                   </span>
-                  , from 11:00 am
+                  , {bookingSettings.checkInTime?.replace('Check-in: ', '') || 'from 11:00 am'}
                 </div>
                 <div>
                   <span className="text-gray-500">Check-out: </span>
                   <span className="font-semibold">
                     {checkOut ? format(new Date(checkOut), 'MMMM dd, yyyy') : 'N/A'}
                   </span>
-                  , until 10:00 am
+                  , {bookingSettings.checkOutTime?.replace('Check-out: ', '') || 'until 10:00 am'}
                 </div>
               </div>
 
@@ -463,12 +511,22 @@ function BookingConfirmationContent() {
 
               {/* Policies */}
               <div className="space-y-4 mb-16">
-                <p className="text-[10px] leading-relaxed text-gray-500">
-                  <span className="font-bold text-gray-700">Confirmations:</span> Confirmations that are received by email or fax will be processed and confirmed by our reservation office within 24 hours. A reservation is considered provisional until the hotel confirms acceptance of the reservation.
-                </p>
-                <p className="text-[10px] leading-relaxed text-gray-500">
-                  <span className="font-bold text-gray-700">Cancellations:</span> Cancellations and changes must be done in writing (e.g. email or fax). A confirmed reservation can be cancelled or changed until 3 full days prior scheduled arrival date. In case of non-arrival on the day (no-show) or cancellation less than 3 full days prior to arrival, the amount of the first night will be charged.
-                </p>
+                {bookingSettings.policies && bookingSettings.policies.length > 0 ? (
+                  bookingSettings.policies.map((policy, idx) => (
+                    <p key={idx} className="text-[10px] leading-relaxed text-gray-500">
+                      <span className="font-bold text-gray-700">{policy.title}:</span> {policy.content}
+                    </p>
+                  ))
+                ) : (
+                  <>
+                    <p className="text-[10px] leading-relaxed text-gray-500">
+                      <span className="font-bold text-gray-700">Confirmations:</span> Confirmations that are received by email or fax will be processed and confirmed by our reservation office within 24 hours. A reservation is considered provisional until the hotel confirms acceptance of the reservation.
+                    </p>
+                    <p className="text-[10px] leading-relaxed text-gray-500">
+                      <span className="font-bold text-gray-700">Cancellations:</span> Cancellations and changes must be done in writing (e.g. email or fax). A confirmed reservation can be cancelled or changed until 3 full days prior scheduled arrival date. In case of non-arrival on the day (no-show) or cancellation less than 3 full days prior to arrival, the amount of the first night will be charged.
+                    </p>
+                  </>
+                )}
               </div>
 
               {/* YOUR INFORMATION */}
@@ -698,6 +756,7 @@ function BookingConfirmationContent() {
                 selectedCurrency={selectedCurrency}
                 setSelectedCurrency={setSelectedCurrency}
                 exchangeRates={exchangeRates}
+                bookingSettings={bookingSettings}
               />
             </div>
           </div>
@@ -741,7 +800,8 @@ const Sidebar: React.FC<{
   selectedCurrency: string;
   setSelectedCurrency: (currency: string) => void;
   exchangeRates: { [key: string]: { rate: number; symbol: string } };
-}> = ({ selectedCurrency, setSelectedCurrency, exchangeRates }) => (
+  bookingSettings: BookingSettings;
+}> = ({ selectedCurrency, setSelectedCurrency, exchangeRates, bookingSettings }) => (
   <div className="space-y-8 sticky top-8">
     {/* Currency Selector */}
     <div>
@@ -768,32 +828,43 @@ const Sidebar: React.FC<{
     </div>
 
     {/* Questions */}
-    <div>
-      <h3 className="text-[11px] font-bold text-[#59a4b5] uppercase tracking-widest mb-4">
-        Questions About Booking?
-      </h3>
-      <div className="text-xs text-gray-600 space-y-1 font-light">
-        <p>Tel: +41 (0)54 2344 00</p>
-        <p>Fax: +41 (0)542344 99</p>
-        <p className="text-gray-500 hover:text-[#59a4b5] cursor-pointer">reservations@hoteliercity.com</p>
+    {bookingSettings.sidebarContact && (
+      <div>
+        <h3 className="text-[11px] font-bold text-[#59a4b5] uppercase tracking-widest mb-4">
+          {bookingSettings.sidebarContact.title}
+        </h3>
+        <div className="text-xs text-gray-600 space-y-1 font-light">
+          {bookingSettings.sidebarContact.items.map((item, idx) => (
+            <p key={idx} className={item.label === 'Email' ? 'text-gray-500 hover:text-[#59a4b5] cursor-pointer' : ''}>
+              {item.label !== 'Email' && `${item.label}: `}{item.value}
+            </p>
+          ))}
+        </div>
       </div>
-    </div>
+    )}
 
     {/* Address */}
-    <div>
-      <h3 className="text-[11px] font-bold text-[#59a4b5] uppercase tracking-widest mb-4">
-        Our Address
-      </h3>
-      <div className="text-xs text-gray-600 space-y-1 font-light">
-        <p className="font-medium text-gray-800">Hotel Beach</p>
-        <p>45 Santorini Beach</p>
-        <p>Santorini 847 00</p>
-        <br />
-        <p>Tel: +41 (0)54 2344 00</p>
-        <p>Fax: +41 (0)542344 99</p>
-        <p className="text-gray-500 hover:text-[#59a4b5] cursor-pointer">reservations@hotelbeach.com</p>
+    {bookingSettings.sidebarAddress && (
+      <div>
+        <h3 className="text-[11px] font-bold text-[#59a4b5] uppercase tracking-widest mb-4">
+          {bookingSettings.sidebarAddress.title}
+        </h3>
+        <div className="text-xs text-gray-600 space-y-1 font-light">
+          {bookingSettings.sidebarAddress.items.map((item, idx) => (
+            <React.Fragment key={idx}>
+              <p className={
+                item.label === 'Hotel Name' ? 'font-medium text-gray-800' :
+                item.label === 'Email' ? 'text-gray-500 hover:text-[#59a4b5] cursor-pointer' : ''
+              }>
+                {item.label !== 'Hotel Name' && item.label !== 'Address Line 1' && item.label !== 'Address Line 2' && item.label !== 'Email' && `${item.label}: `}
+                {item.value}
+              </p>
+              {item.label === 'Address Line 2' && <br />}
+            </React.Fragment>
+          ))}
+        </div>
       </div>
-    </div>
+    )}
   </div>
 );
 

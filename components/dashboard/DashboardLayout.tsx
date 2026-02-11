@@ -69,6 +69,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'About Page', href: '/dashboard/admin/about' },
     { name: 'Explore Page', href: '/dashboard/admin/explore' },
     { name: 'Contact Page', href: '/dashboard/admin/contact' },
+    { name: 'Booking Settings', href: '/dashboard/admin/booking-settings' },
   ];
 
   const navItems = 
