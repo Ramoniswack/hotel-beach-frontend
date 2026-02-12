@@ -158,12 +158,15 @@ export default function RoomManagement() {
 
     setIsSaving(true);
     try {
-      // Generate a unique ID for the room
-      const roomId = `room-${Date.now()}`;
+      // Generate a slug from the room title
+      const slug = formData.title!
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
       
       const newRoomData = {
         ...formData,
-        id: roomId,
+        id: slug,
         // Ensure specs has all required fields with defaults
         specs: {
           bed: formData.specs?.bed || '',
