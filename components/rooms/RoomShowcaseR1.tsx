@@ -78,30 +78,30 @@ const RoomRow: React.FC<{ room: Room }> = ({ room }) => {
   return (
     <div className="flex flex-col lg:flex-row w-full border-b border-black last:border-b-0 overflow-hidden">
       {/* Sidebar Info */}
-      <div className="w-full lg:w-[460px] bg-[#1a1a1a] p-12 lg:p-20 text-white flex flex-col justify-center min-h-[650px] lg:min-h-[720px]">
-        <h3 className="text-[32px] font-bold mb-10 tracking-tight leading-tight">
+      <div className="w-full lg:w-[460px] bg-[#1a1a1a] p-6 sm:p-8 md:p-12 lg:p-20 text-white flex flex-col justify-center min-h-[500px] sm:min-h-[550px] md:min-h-[650px] lg:min-h-[720px]">
+        <h3 className="text-2xl sm:text-[28px] md:text-[32px] font-bold mb-6 sm:mb-8 md:mb-10 tracking-tight leading-tight">
           {room.title}
         </h3>
 
-        <div className="mb-12">
-          <p className="text-[13px] text-gray-400 mb-6 font-medium">From</p>
-          <p className="text-[52px] font-bold tracking-tighter leading-none">${room.price}</p>
+        <div className="mb-8 sm:mb-10 md:mb-12">
+          <p className="text-xs sm:text-[13px] text-gray-400 mb-4 sm:mb-6 font-medium">From</p>
+          <p className="text-4xl sm:text-[44px] md:text-[52px] font-bold tracking-tighter leading-none">${room.price}</p>
         </div>
 
-        <div className="space-y-6 mb-16 text-[14px]">
-          <div className="grid grid-cols-[120px_1fr] items-baseline">
+        <div className="space-y-4 sm:space-y-5 md:space-y-6 mb-10 sm:mb-12 md:mb-16 text-[13px] sm:text-[14px]">
+          <div className="grid grid-cols-[100px_1fr] sm:grid-cols-[120px_1fr] items-baseline">
             <span className="font-bold text-white tracking-wide">bed:</span>
             <span className="text-gray-300 font-light lowercase pl-2">{room.specs.bed}</span>
           </div>
-          <div className="grid grid-cols-[120px_1fr] items-baseline">
+          <div className="grid grid-cols-[100px_1fr] sm:grid-cols-[120px_1fr] items-baseline">
             <span className="font-bold text-white tracking-wide">capacity:</span>
             <span className="text-gray-300 font-light lowercase pl-2">{room.specs.capacity}</span>
           </div>
-          <div className="grid grid-cols-[120px_1fr] items-baseline">
+          <div className="grid grid-cols-[100px_1fr] sm:grid-cols-[120px_1fr] items-baseline">
             <span className="font-bold text-white tracking-wide">room size:</span>
             <span className="text-gray-300 font-light pl-2">{room.specs.size}</span>
           </div>
-          <div className="grid grid-cols-[120px_1fr] items-baseline">
+          <div className="grid grid-cols-[100px_1fr] sm:grid-cols-[120px_1fr] items-baseline">
             <span className="font-bold text-white tracking-wide">view:</span>
             <span className="text-gray-300 font-light lowercase pl-2">{room.specs.view}</span>
           </div>
@@ -110,7 +110,7 @@ const RoomRow: React.FC<{ room: Room }> = ({ room }) => {
         <div className="mt-4">
           <a 
             href={`/accommodation/${room.id}`}
-            className="px-12 py-3.5 rounded-full border border-white/80 text-[11px] font-bold uppercase tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 inline-block"
+            className="px-8 sm:px-10 md:px-12 py-3 sm:py-3.5 rounded-full border border-white/80 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 inline-block"
           >
             view detail
           </a>
@@ -120,7 +120,7 @@ const RoomRow: React.FC<{ room: Room }> = ({ room }) => {
       {/* Image Slider with 3cm Peek Preview */}
       <div 
         ref={containerRef}
-        className="flex-grow relative overflow-hidden h-[500px] lg:h-auto"
+        className="flex-grow relative overflow-hidden h-[400px] sm:h-[450px] md:h-[500px] lg:h-auto"
         style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -159,20 +159,20 @@ const RoomRow: React.FC<{ room: Room }> = ({ room }) => {
           <>
             <button 
               onClick={prevImg}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-white transition-all hover:scale-110 z-20 bg-black/20 backdrop-blur-sm rounded-sm"
+              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white transition-all hover:scale-110 z-20 bg-black/20 backdrop-blur-sm rounded-sm"
               aria-label="Previous image"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
 
             <button 
               onClick={nextImg}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-white transition-all hover:scale-110 z-20 bg-black/20 backdrop-blur-sm rounded-sm"
+              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white transition-all hover:scale-110 z-20 bg-black/20 backdrop-blur-sm rounded-sm"
               aria-label="Next image"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -231,11 +231,11 @@ const RoomShowcaseR1: React.FC<{ section?: any }> = ({ section }) => {
   return (
     <section className="bg-white">
       {/* Intro Header Section */}
-  <div className="max-w-[1300px] mx-auto px-8 pt-4 pb-16 lg:pt-6 lg:pb-24">
-        <h2 className="text-[36px] md:text-[30px] font-bold mb-8 tracking-tight text-[#1a1a1a] leading-[1.1]" style={{ fontFamily: '"Raleway", sans-serif' }}>
+      <div className="max-w-[1300px] mx-auto px-4 sm:px-6 md:px-8 pt-4 pb-12 sm:pb-16 lg:pt-6 lg:pb-24">
+        <h2 className="text-2xl sm:text-3xl md:text-[36px] font-bold mb-6 sm:mb-8 tracking-tight text-[#1a1a1a] leading-[1.1]" style={{ fontFamily: '"Raleway", sans-serif' }}>
           {section?.title || 'In harmony with nature'}
         </h2>
-        <p className="text-[#666] text-[15px] leading-[1.9] max-w-2xl font-normal">
+        <p className="text-[#666] text-sm sm:text-[15px] leading-[1.7] sm:leading-[1.9] max-w-2xl font-normal">
           {section?.description || 'Exercitation photo booth stumptown tote bag Banksy, elit small batch freegan sed. Craft beer elit seitan exercitation, photo booth et 8-bit kale chips proident chillwave deep v laborum.'}
         </p>
       </div>

@@ -24,6 +24,8 @@ interface Room {
   specs: {
     bed: string;
     capacity: string;
+    maxAdults: number;
+    maxChildren: number;
     size: string;
     view: string;
   };
@@ -37,6 +39,7 @@ export default function RoomManagement() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingRoomId, setEditingRoomId] = useState<string | null>(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [formData, setFormData] = useState<Partial<Room>>({});
   const [isSaving, setIsSaving] = useState(false);
 
@@ -111,7 +114,95 @@ export default function RoomManagement() {
 
   const handleCancelEdit = () => {
     setEditingRoomId(null);
+    setShowCreateForm(false);
     setFormData({});
+  };
+
+  const handleCreateRoom = () => {
+    setShowCreateForm(true);
+    setEditingRoomId(null);
+    setFormData({
+      title: '',
+      subtitle: '',
+      price: 0,
+      heroImage: '',
+      isAvailable: true,
+      cleaningStatus: 'clean',
+      occupancyStatus: 'vacant',
+      specs: {
+        bed: '',
+        capacity: '',
+        maxAdults: 2,
+        maxChildren: 2,
+        size: '',
+        view: '',
+      },
+      description: [],
+      gallery: [],
+      amenities: [],
+      services: [],
+    });
+  };
+
+  const handleSaveNewRoom = async () => {
+    // Validate required fields
+    if (!formData.title || !formData.subtitle || !formData.price || !formData.heroImage) {
+      alert('Please fill in all required fields: Title, Subtitle, Price, and Hero Image');
+      return;
+    }
+
+    if (!formData.specs?.bed || !formData.specs?.capacity || !formData.specs?.size || !formData.specs?.view) {
+      alert('Please fill in all room specifications: Bed, Capacity, Size, and View');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      // Generate a unique ID for the room
+      const roomId = `room-${Date.now()}`;
+      
+      const newRoomData = {
+        ...formData,
+        id: roomId,
+        // Ensure specs has all required fields with defaults
+        specs: {
+          bed: formData.specs?.bed || '',
+          capacity: formData.specs?.capacity || '2 Adults',
+          maxAdults: formData.specs?.maxAdults || 2,
+          maxChildren: formData.specs?.maxChildren || 2,
+          size: formData.specs?.size || '',
+          view: formData.specs?.view || '',
+        },
+        // Ensure arrays are initialized
+        description: formData.description || [],
+        gallery: formData.gallery || [],
+        amenities: formData.amenities || [],
+        services: formData.services || [],
+        // Ensure status fields have defaults
+        cleaningStatus: formData.cleaningStatus || 'clean',
+        occupancyStatus: formData.occupancyStatus || 'vacant',
+        isAvailable: formData.isAvailable !== undefined ? formData.isAvailable : true,
+      };
+
+      console.log('Creating room with data:', newRoomData);
+      
+      const response = await roomsAPI.create(newRoomData);
+      console.log('Create response:', response.data);
+      
+      setShowCreateForm(false);
+      setFormData({});
+      
+      await fetchRooms();
+      
+      alert('Room created successfully!');
+    } catch (err: any) {
+      console.error('Create error:', err);
+      console.error('Error response:', err.response?.data);
+      const errorMsg = err.response?.data?.error || err.response?.data?.message || err.message || 'Unknown error';
+      alert('Failed to create room: ' + errorMsg);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -124,12 +215,21 @@ export default function RoomManagement() {
               <h2 className="text-3xl font-bold text-gray-900">Room Management</h2>
               <p className="text-gray-600 mt-1">Manage room availability and details</p>
             </div>
-            <button
-              onClick={fetchRooms}
-              className="px-4 py-2 bg-[#59a4b5] text-white rounded-lg hover:bg-[#4a8a99] transition-colors"
-            >
-              Refresh
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={handleCreateRoom}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+              >
+                <Hotel size={20} />
+                Create New Room
+              </button>
+              <button
+                onClick={fetchRooms}
+                className="px-4 py-2 bg-[#59a4b5] text-white rounded-lg hover:bg-[#4a8a99] transition-colors"
+              >
+                Refresh
+              </button>
+            </div>
           </div>
 
           {/* Rooms Grid */}
@@ -138,13 +238,376 @@ export default function RoomManagement() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#59a4b5] mx-auto"></div>
               <p className="mt-4 text-gray-600">Loading rooms...</p>
             </div>
-          ) : rooms.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-              <Hotel className="mx-auto text-gray-400 mb-4" size={48} />
-              <p className="text-gray-600">No rooms found</p>
-            </div>
           ) : (
-            <div className="grid grid-cols-1 gap-6">
+            <>
+              {/* Create New Room Form */}
+              {showCreateForm && (
+                <div className="bg-white rounded-lg border-2 border-green-500 overflow-hidden shadow-lg">
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        <Hotel className="text-green-600" size={24} />
+                        Create New Room
+                      </h3>
+                      <button
+                        onClick={handleCancelEdit}
+                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        <X size={24} />
+                      </button>
+                    </div>
+
+                    <div className="space-y-6">
+                      {/* Basic Info */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Room Title *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.title || ''}
+                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            placeholder="e.g., Deluxe Room"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Subtitle *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.subtitle || ''}
+                            onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            placeholder="e.g., Luxury Accommodation"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Price per Night ($) *
+                          </label>
+                          <input
+                            type="number"
+                            value={formData.price || ''}
+                            onChange={(e) =>
+                              setFormData({ ...formData, price: Number(e.target.value) })
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            placeholder="e.g., 250"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Room Number
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.roomNumber || ''}
+                            onChange={(e) =>
+                              setFormData({ ...formData, roomNumber: e.target.value })
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            placeholder="e.g., 101"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Floor
+                          </label>
+                          <input
+                            type="number"
+                            value={formData.floor || ''}
+                            onChange={(e) =>
+                              setFormData({ ...formData, floor: Number(e.target.value) })
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            placeholder="e.g., 1"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Availability
+                          </label>
+                          <select
+                            value={formData.isAvailable ? 'true' : 'false'}
+                            onChange={(e) =>
+                              setFormData({ ...formData, isAvailable: e.target.value === 'true' })
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          >
+                            <option value="true">Available</option>
+                            <option value="false">Unavailable</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Specs */}
+                      <div>
+                        <h4 className="text-lg font-bold text-gray-900 mb-3">
+                          Room Specifications *
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Bed *
+                            </label>
+                            <input
+                              type="text"
+                              value={formData.specs?.bed || ''}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  specs: { ...formData.specs!, bed: e.target.value },
+                                })
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                              placeholder="e.g., King Size"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Size *
+                            </label>
+                            <input
+                              type="text"
+                              value={formData.specs?.size || ''}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  specs: { ...formData.specs!, size: e.target.value },
+                                })
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                              placeholder="e.g., 35 m²"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              View *
+                            </label>
+                            <input
+                              type="text"
+                              value={formData.specs?.view || ''}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  specs: { ...formData.specs!, view: e.target.value },
+                                })
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                              placeholder="e.g., Sea View"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Capacity (Display Text) *
+                            </label>
+                            <input
+                              type="text"
+                              value={formData.specs?.capacity || ''}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  specs: { ...formData.specs!, capacity: e.target.value },
+                                })
+                              }
+                              placeholder="e.g., 2 Adults"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Max Adults *
+                            </label>
+                            <select
+                              value={formData.specs?.maxAdults || 2}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  specs: { ...formData.specs!, maxAdults: Number(e.target.value) },
+                                })
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            >
+                              <option value="1">1 Adult</option>
+                              <option value="2">2 Adults</option>
+                              <option value="3">3 Adults</option>
+                              <option value="4">4 Adults</option>
+                              <option value="5">5 Adults</option>
+                              <option value="6">6 Adults</option>
+                              <option value="8">8 Adults</option>
+                              <option value="10">10 Adults</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Max Children *
+                            </label>
+                            <select
+                              value={formData.specs?.maxChildren || 2}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  specs: { ...formData.specs!, maxChildren: Number(e.target.value) },
+                                })
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            >
+                              <option value="0">0 Children</option>
+                              <option value="1">1 Child</option>
+                              <option value="2">2 Children</option>
+                              <option value="3">3 Children</option>
+                              <option value="4">4 Children</option>
+                              <option value="5">5 Children</option>
+                              <option value="6">6 Children</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Hero Image */}
+                      <div>
+                        <ImageUpload
+                          label="Hero Image *"
+                          value={formData.heroImage || ''}
+                          onChange={(url) => setFormData({ ...formData, heroImage: url })}
+                        />
+                      </div>
+
+                      {/* Description */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Description (one paragraph per line)
+                        </label>
+                        <textarea
+                          value={formData.description?.join('\n') || ''}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              description: e.target.value.split('\n').filter(line => line.trim()),
+                            })
+                          }
+                          rows={6}
+                          placeholder="Enter each paragraph on a new line"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        />
+                      </div>
+
+                      {/* Gallery Images */}
+                      <div>
+                        <MultiImageUpload
+                          label="Gallery Images"
+                          value={formData.gallery || []}
+                          onChange={(urls) => setFormData({ ...formData, gallery: urls })}
+                          maxImages={10}
+                        />
+                      </div>
+
+                      {/* Amenities */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Amenities (one per line)
+                        </label>
+                        <textarea
+                          value={formData.amenities?.join('\n') || ''}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              amenities: e.target.value.split('\n').filter(line => line.trim()),
+                            })
+                          }
+                          rows={5}
+                          placeholder="40-inch Samsung® LED TV&#10;Electronic safe with charging facility&#10;Mini bar"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        />
+                      </div>
+
+                      {/* Services */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Services (one per line)
+                        </label>
+                        <textarea
+                          value={formData.services?.join('\n') || ''}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              services: e.target.value.split('\n').filter(line => line.trim()),
+                            })
+                          }
+                          rows={5}
+                          placeholder="Free-to-use smartphone (Free)&#10;Safe-deposit box (Free)&#10;Massage ($15 / Once / Per Guest)"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        />
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex space-x-3 pt-4 border-t border-gray-200">
+                        <button
+                          onClick={handleSaveNewRoom}
+                          disabled={isSaving}
+                          className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isSaving ? (
+                            <>
+                              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                              <span>Creating...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Save size={20} />
+                              <span>Create Room</span>
+                            </>
+                          )}
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          disabled={isSaving}
+                          className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Existing Rooms */}
+              {rooms.length === 0 && !showCreateForm ? (
+                <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+                  <Hotel className="mx-auto text-gray-400 mb-4" size={48} />
+                  <p className="text-gray-600 mb-4">No rooms found</p>
+                  <button
+                    onClick={handleCreateRoom}
+                    className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    Create Your First Room
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-6">
               {rooms.map((room) => (
                 <div
                   key={room._id}
@@ -297,7 +760,7 @@ export default function RoomManagement() {
                           <h4 className="text-lg font-bold text-gray-900 mb-3">
                             Room Specifications
                           </h4>
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Bed
@@ -309,23 +772,6 @@ export default function RoomManagement() {
                                   setFormData({
                                     ...formData,
                                     specs: { ...formData.specs!, bed: e.target.value },
-                                  })
-                                }
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#59a4b5] focus:border-transparent"
-                              />
-                            </div>
-
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Capacity
-                              </label>
-                              <input
-                                type="text"
-                                value={formData.specs?.capacity || ''}
-                                onChange={(e) =>
-                                  setFormData({
-                                    ...formData,
-                                    specs: { ...formData.specs!, capacity: e.target.value },
                                   })
                                 }
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#59a4b5] focus:border-transparent"
@@ -364,6 +810,75 @@ export default function RoomManagement() {
                                 }
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#59a4b5] focus:border-transparent"
                               />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Capacity (Display Text)
+                              </label>
+                              <input
+                                type="text"
+                                value={formData.specs?.capacity || ''}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    specs: { ...formData.specs!, capacity: e.target.value },
+                                  })
+                                }
+                                placeholder="e.g., 2 Adults"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#59a4b5] focus:border-transparent"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Max Adults
+                              </label>
+                              <select
+                                value={formData.specs?.maxAdults || 2}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    specs: { ...formData.specs!, maxAdults: Number(e.target.value) },
+                                  })
+                                }
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#59a4b5] focus:border-transparent"
+                              >
+                                <option value="1">1 Adult</option>
+                                <option value="2">2 Adults</option>
+                                <option value="3">3 Adults</option>
+                                <option value="4">4 Adults</option>
+                                <option value="5">5 Adults</option>
+                                <option value="6">6 Adults</option>
+                                <option value="8">8 Adults</option>
+                                <option value="10">10 Adults</option>
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Max Children
+                              </label>
+                              <select
+                                value={formData.specs?.maxChildren || 2}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    specs: { ...formData.specs!, maxChildren: Number(e.target.value) },
+                                  })
+                                }
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#59a4b5] focus:border-transparent"
+                              >
+                                <option value="0">0 Children</option>
+                                <option value="1">1 Child</option>
+                                <option value="2">2 Children</option>
+                                <option value="3">3 Children</option>
+                                <option value="4">4 Children</option>
+                                <option value="5">5 Children</option>
+                                <option value="6">6 Children</option>
+                              </select>
                             </div>
                           </div>
                         </div>
@@ -539,6 +1054,18 @@ export default function RoomManagement() {
                             </span>
                           </div>
                           <div>
+                            <span className="text-gray-600">Max Adults:</span>
+                            <span className="ml-2 font-medium text-gray-900">
+                              {room.specs.maxAdults || 2}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Max Children:</span>
+                            <span className="ml-2 font-medium text-gray-900">
+                              {room.specs.maxChildren || 2}
+                            </span>
+                          </div>
+                          <div>
                             <span className="text-gray-600">Size:</span>
                             <span className="ml-2 font-medium text-gray-900">
                               {room.specs.size}
@@ -615,7 +1142,9 @@ export default function RoomManagement() {
                   )}
                 </div>
               ))}
-            </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </DashboardLayout>

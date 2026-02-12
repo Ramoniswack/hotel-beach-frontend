@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import RouteGuard from '@/components/RouteGuard';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { bookingsAPI, roomsAPI } from '@/lib/api';
-import { Calendar, DollarSign, Hotel, TrendingUp, Users } from 'lucide-react';
+import { Calendar, DollarSign, Hotel, TrendingUp, Users, Clock, CheckCircle, XCircle, UserPlus, MessageSquare } from 'lucide-react';
 
 interface Stats {
   totalBookings: number;
@@ -12,6 +12,15 @@ interface Stats {
   activeBookings: number;
   totalRooms: number;
   availableRooms: number;
+}
+
+interface Activity {
+  id: string;
+  type: 'booking' | 'user' | 'comment';
+  action: string;
+  description: string;
+  timestamp: string;
+  status?: string;
 }
 
 export default function AdminDashboard() {
@@ -22,6 +31,7 @@ export default function AdminDashboard() {
     totalRooms: 0,
     availableRooms: 0,
   });
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -58,11 +68,70 @@ export default function AdminDashboard() {
         totalRooms: rooms.length,
         availableRooms,
       });
+
+      // Generate recent activities from bookings
+      const recentActivities: Activity[] = bookings
+        .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 10)
+        .map((booking: any) => ({
+          id: booking._id,
+          type: 'booking' as const,
+          action: `New booking ${booking.status}`,
+          description: `${booking.guestName} booked ${booking.roomId?.name || 'a room'} for ${booking.numberOfNights} night(s)`,
+          timestamp: booking.createdAt,
+          status: booking.status,
+        }));
+
+      setActivities(recentActivities);
     } catch (err) {
       console.error('Error fetching stats:', err);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const getActivityIcon = (type: string, status?: string) => {
+    if (type === 'booking') {
+      if (status === 'confirmed') return <CheckCircle className="text-green-600" size={20} />;
+      if (status === 'cancelled') return <XCircle className="text-red-600" size={20} />;
+      return <Calendar className="text-blue-600" size={20} />;
+    }
+    if (type === 'user') return <UserPlus className="text-purple-600" size={20} />;
+    if (type === 'comment') return <MessageSquare className="text-orange-600" size={20} />;
+    return <Clock className="text-gray-600" size={20} />;
+  };
+
+  const getStatusBadge = (status?: string) => {
+    if (!status) return null;
+    
+    const colors: Record<string, string> = {
+      confirmed: 'bg-green-100 text-green-800',
+      pending: 'bg-yellow-100 text-yellow-800',
+      cancelled: 'bg-red-100 text-red-800',
+      completed: 'bg-blue-100 text-blue-800',
+    };
+
+    return (
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status] || 'bg-gray-100 text-gray-800'}`}>
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </span>
+    );
+  };
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
   return (
@@ -182,10 +251,36 @@ export default function AdminDashboard() {
                   <p className="text-gray-600 text-sm mt-1">Latest updates and actions</p>
                 </div>
                 <div className="p-6">
-                  <div className="text-center py-8 text-gray-500">
-                    <Calendar size={48} className="mx-auto mb-4 text-gray-400" />
-                    <p>Activity log coming soon</p>
-                  </div>
+                  {activities.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <Clock size={48} className="mx-auto mb-4 text-gray-400" />
+                      <p>No recent activity</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {activities.map((activity) => (
+                        <div
+                          key={activity.id}
+                          className="flex items-start gap-4 p-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100"
+                        >
+                          <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                            {getActivityIcon(activity.type, activity.status)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="font-medium text-gray-900">{activity.action}</p>
+                              {getStatusBadge(activity.status)}
+                            </div>
+                            <p className="text-sm text-gray-600">{activity.description}</p>
+                            <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                              <Clock size={12} />
+                              {formatTimestamp(activity.timestamp)}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </>

@@ -116,6 +116,9 @@ export const bookingsAPI = {
   updateStatus: (id: string, status: string) =>
     api.patch(`/bookings/${id}/status`, { status }),
   
+  updatePaymentStatus: (id: string, paymentStatus: string, paymentMethod?: string) =>
+    api.patch(`/bookings/${id}/payment-status`, { paymentStatus, paymentMethod }),
+  
   cancel: (id: string) =>
     api.delete(`/bookings/${id}`),
 };

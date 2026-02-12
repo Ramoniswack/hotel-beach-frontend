@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import RouteGuard from '@/components/RouteGuard';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { bookingsAPI } from '@/lib/api';
@@ -31,11 +32,10 @@ interface Booking {
 }
 
 export default function BookingsManager() {
+  const router = useRouter();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
-  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   useEffect(() => {
     fetchBookings();
@@ -210,33 +210,13 @@ export default function BookingsManager() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                           <button
-                            onClick={() => {
-                              setSelectedBooking(booking);
-                              setShowDetailsModal(true);
-                            }}
-                            className="text-blue-600 hover:text-blue-900 mr-2"
+                            onClick={() => router.push(`/dashboard/admin/bookings/${booking._id}`)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                             title="View Details"
                           >
-                            <Eye size={18} />
+                            <Eye size={16} />
+                            View
                           </button>
-                          {booking.status === 'pending' && (
-                            <button
-                              onClick={() => handleStatusUpdate(booking._id, 'confirmed')}
-                              className="text-green-600 hover:text-green-900"
-                              title="Confirm"
-                            >
-                              <Check size={18} />
-                            </button>
-                          )}
-                          {booking.status !== 'cancelled' && booking.status !== 'completed' && (
-                            <button
-                              onClick={() => handleStatusUpdate(booking._id, 'cancelled')}
-                              className="text-red-600 hover:text-red-900"
-                              title="Cancel"
-                            >
-                              <X size={18} />
-                            </button>
-                          )}
                         </td>
                       </tr>
                     ))}
@@ -246,107 +226,6 @@ export default function BookingsManager() {
             )}
           </div>
         </div>
-
-        {/* Booking Details Modal */}
-        {showDetailsModal && selectedBooking && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">Booking Details</h2>
-                  <button
-                    onClick={() => setShowDetailsModal(false)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <X size={24} />
-                  </button>
-                </div>
-
-                <div className="space-y-6">
-                  {/* Booking ID */}
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">Booking ID</h3>
-                    <p className="text-gray-900">{selectedBooking._id}</p>
-                  </div>
-
-                  {/* Guest Information */}
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">Guest Information</h3>
-                    <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                      <p><span className="font-medium">Name:</span> {selectedBooking.guestInfo.name}</p>
-                      <p><span className="font-medium">Email:</span> {selectedBooking.guestInfo.email}</p>
-                      <p><span className="font-medium">Phone:</span> {selectedBooking.guestInfo.phone}</p>
-                    </div>
-                  </div>
-
-                  {/* Room Details */}
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">Room Details</h3>
-                    <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                      <p><span className="font-medium">Room:</span> {selectedBooking.roomTitle}</p>
-                      <p><span className="font-medium">Room ID:</span> {selectedBooking.roomId}</p>
-                    </div>
-                  </div>
-
-                  {/* Stay Details */}
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">Stay Details</h3>
-                    <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                      <p><span className="font-medium">Check-in:</span> {format(new Date(selectedBooking.checkInDate), 'MMM dd, yyyy')}</p>
-                      <p><span className="font-medium">Check-out:</span> {format(new Date(selectedBooking.checkOutDate), 'MMM dd, yyyy')}</p>
-                      <p><span className="font-medium">Adults:</span> {selectedBooking.adults}</p>
-                      <p><span className="font-medium">Children:</span> {selectedBooking.children}</p>
-                    </div>
-                  </div>
-
-                  {/* Additional Services */}
-                  {selectedBooking.additionalServices && selectedBooking.additionalServices.length > 0 && (
-                    <div>
-                      <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">Additional Services</h3>
-                      <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                        {selectedBooking.additionalServices.map((service, idx) => (
-                          <div key={idx} className="flex justify-between items-center">
-                            <span>
-                              {service.name}
-                              {service.quantity && service.quantity > 1 && ` (x${service.quantity})`}
-                            </span>
-                            <span className="font-medium">
-                              ${service.price * (service.quantity || 1)}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Payment Details */}
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">Payment Details</h3>
-                    <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                      <p><span className="font-medium">Total Price:</span> <span className="text-lg font-bold text-[#59a4b5]">${selectedBooking.totalPrice}</span></p>
-                      <p><span className="font-medium">Status:</span> <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        selectedBooking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                        selectedBooking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        selectedBooking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>{selectedBooking.status}</span></p>
-                      <p><span className="font-medium">Booked on:</span> {format(new Date(selectedBooking.createdAt), 'MMM dd, yyyy HH:mm')}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6 flex justify-end space-x-3">
-                  <button
-                    onClick={() => setShowDetailsModal(false)}
-                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </DashboardLayout>
     </RouteGuard>
   );

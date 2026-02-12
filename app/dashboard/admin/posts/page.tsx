@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Eye } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, Folder, Tag, MessageSquare } from 'lucide-react';
 import RouteGuard from '@/components/RouteGuard';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import ImageUpload from '@/components/ImageUpload';
@@ -163,6 +163,31 @@ export default function PostsManagement() {
           <Plus size={20} />
           {showForm ? 'Cancel' : 'New Post'}
         </button>
+      </div>
+
+      {/* Sub-navigation */}
+      <div className="mb-6 flex gap-3">
+        <a
+          href="/dashboard/admin/posts/categories"
+          className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
+        >
+          <Folder size={18} />
+          Manage Categories
+        </a>
+        <a
+          href="/dashboard/admin/posts/tags"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+        >
+          <Tag size={18} />
+          Manage Tags
+        </a>
+        <a
+          href="/dashboard/admin/posts/comments"
+          className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+        >
+          <MessageSquare size={18} />
+          Manage Comments
+        </a>
       </div>
 
       {showForm && (
