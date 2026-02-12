@@ -10,6 +10,9 @@ module.exports = {
         'hotel-gold': '#c2a661',
         'hotel-dark': '#1a1a1a',
       },
+      fontFamily: {
+        roboto: ['var(--font-roboto)'],
+      },
     },
   },
   plugins: [],

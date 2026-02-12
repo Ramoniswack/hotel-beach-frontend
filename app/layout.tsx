@@ -1,6 +1,13 @@
 import type { Metadata } from 'next';
+import { Roboto } from 'next/font/google';
 import './globals.css';
 import AuthProvider from '@/components/AuthProvider';
+
+const roboto = Roboto({
+  weight: ['300', '400', '500', '700'],
+  subsets: ['latin'],
+  variable: '--font-roboto',
+});
 
 export const metadata: Metadata = {
   title: 'Hoteller Beach Hotel - Luxury Santorini Resort',
@@ -14,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className={roboto.variable}>
         <AuthProvider>
           {children}
         </AuthProvider>

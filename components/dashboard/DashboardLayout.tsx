@@ -57,7 +57,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Bookings', href: '/dashboard/admin/bookings', icon: Calendar },
     { name: 'Rooms', href: '/dashboard/admin/rooms', icon: Hotel },
     { name: 'Posts', href: '/dashboard/admin/posts', icon: FileText },
-    { name: 'Site Settings', href: '/dashboard/admin/site-settings', icon: MessageSquare },
     { name: 'Financial Hub', href: '/dashboard/admin/financial', icon: BarChart3 },
     { name: 'Users', href: '/dashboard/admin/users', icon: Users },
     { name: 'Back to Site', href: '/', icon: Home },
@@ -70,6 +69,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Explore Page', href: '/dashboard/admin/explore' },
     { name: 'Contact Page', href: '/dashboard/admin/contact' },
     { name: 'Booking Settings', href: '/dashboard/admin/booking-settings' },
+    { name: 'Site Settings', href: '/dashboard/admin/site-settings' },
   ];
 
   const navItems = 

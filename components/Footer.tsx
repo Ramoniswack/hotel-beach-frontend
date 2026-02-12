@@ -79,7 +79,7 @@ const Footer: React.FC = () => {
   const linksSection = getSection('footer-links');
 
   return (
-    <footer className="relative z-10 bg-[#1a1a1a] pt-24 pb-12 overflow-hidden">
+    <footer className="relative z-10 bg-[#1a1a1a] pt-24 pb-0 overflow-hidden font-roboto">
       {/* Wave Decorative Divider - Flipped horizontally (slant opposite) */}
       <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0] transform rotate-360 scale-x-[-1]">
         <svg
@@ -91,15 +91,25 @@ const Footer: React.FC = () => {
         </svg>
       </div>
 
-      <div className="relative z-10" style={{ width: 'calc(100% - 2cm)', listStyle: 'none', margin: 'auto', paddingTop: '50px', paddingBottom: '50px' }}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-24">
+      <div className="relative z-10 px-28 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-24">
           {/* Our Address */}
           {addressSection && (
             <div>
               <h4 className="text-white text-[11px] uppercase tracking-[0.3em] font-bold mb-10">
                 {addressSection.title}
               </h4>
-              <div className="text-white/90 text-sm space-y-2.5 leading-relaxed whitespace-pre-line">
+              <div 
+                className="text-white space-y-1 whitespace-pre-line"
+                style={{ 
+                  fontFamily: 'Raleway', 
+                  fontSize: '15px', 
+                  fontWeight: 400, 
+                  letterSpacing: '0px', 
+                  lineHeight: 1.7, 
+                  textTransform: 'none' 
+                }}
+              >
                 {addressSection.content?.split('\n').map((line, idx) => (
                   <p key={idx} className={idx === 0 ? 'font-extrabold text-[15px] tracking-tight' : 'font-medium opacity-90'}>
                     {line}
@@ -115,12 +125,22 @@ const Footer: React.FC = () => {
               <h4 className="text-white text-[11px] uppercase tracking-[0.3em] font-bold mb-10">
                 {reservationSection.title}
               </h4>
-              <div className="text-white/90 text-sm space-y-2.5 leading-relaxed font-medium whitespace-pre-line">
+              <div 
+                className="text-white space-y-1 whitespace-pre-line"
+                style={{ 
+                  fontFamily: 'Raleway', 
+                  fontSize: '15px', 
+                  fontWeight: 400, 
+                  letterSpacing: '0px', 
+                  lineHeight: 1.7, 
+                  textTransform: 'none' 
+                }}
+              >
                 {reservationSection.content?.split('\n').map((line, idx) => {
                   if (line.includes('@')) {
                     return (
                       <p key={idx}>
-                        <a href={`mailto:${line}`} className="text-hotel-gold border-b border-hotel-gold/50 hover:border-hotel-gold transition-colors pb-0.5">
+                        <a href={`mailto:${line}`} className="text-hotel-white border-b border-hotel-white hover:border-hotel-gold transition-colors pb-0">
                           {line}
                         </a>
                       </p>
@@ -143,7 +163,7 @@ const Footer: React.FC = () => {
                   <input 
                     type="email" 
                     placeholder="Your Email" 
-                    className="w-full bg-transparent border-b border-white pb-2 text-white text-[13px] outline-none focus:border-hotel-gold transition-colors font-medium placeholder:text-white"
+                    className="w-full bg-transparent border-b border-white pb-0 text-white text-[13px] outline-none focus:border-hotel-gold transition-colors font-medium placeholder:text-white"
                   />
                 </div>
                 <button 
@@ -180,7 +200,7 @@ const Footer: React.FC = () => {
 
         {/* Bottom Bar */}
         <div 
-          className="pt-10 border-t border-white/10 flex flex-col lg:flex-row justify-between items-center"
+          className="pt-10 border-t border-white/20 flex flex-col lg:flex-row justify-between items-center px-10"
           style={{ 
             fontFamily: 'Raleway', 
             fontSize: '13px', 

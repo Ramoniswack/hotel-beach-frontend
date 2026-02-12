@@ -1,265 +1,510 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import RouteGuard from '@/components/RouteGuard';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { roomsAPI, bookingsAPI } from '@/lib/api';
-import { DollarSign, TrendingUp, Calendar, PieChart, Save } from 'lucide-react';
+import { bookingsAPI } from '@/lib/api';
+import { 
+  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
+} from 'recharts';
+import { DollarSign, TrendingUp, Calendar, CreditCard } from 'lucide-react';
 
-interface Room {
+interface Booking {
   _id: string;
-  id: string;
-  title: string;
-  price: number;
-  seasonalPricing?: {
-    season: string;
-    startDate: string;
-    endDate: string;
-    price: number;
-  }[];
+  totalPrice: number;
+  status: string;
+  checkInDate: string;
+  checkOutDate: string;
+  createdAt: string;
 }
 
-export default function FinancialHub() {
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [revenue, setRevenue] = useState({
-    total: 0,
-    thisMonth: 0,
-    lastMonth: 0,
-  });
+export default function FinancialDashboard() {
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [editingRoom, setEditingRoom] = useState<string | null>(null);
+  const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month');
 
   useEffect(() => {
-    fetchData();
+    fetchBookings();
   }, []);
 
-  const fetchData = async () => {
+  const fetchBookings = async () => {
     try {
       setIsLoading(true);
-      
-      // Fetch rooms
-      const roomsResponse = await roomsAPI.getAll();
-      setRooms(roomsResponse.data.data || []);
-
-      // Fetch bookings for revenue
-      const bookingsResponse = await bookingsAPI.getAll();
-      const bookings = bookingsResponse.data.data || [];
-
-      const now = new Date();
-      const thisMonth = bookings.filter((b: any) => {
-        const date = new Date(b.createdAt);
-        return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
-      });
-
-      const lastMonth = bookings.filter((b: any) => {
-        const date = new Date(b.createdAt);
-        const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1);
-        return date.getMonth() === lastMonthDate.getMonth() && date.getFullYear() === lastMonthDate.getFullYear();
-      });
-
-      setRevenue({
-        total: bookings.reduce((sum: number, b: any) => sum + (b.totalPrice || 0), 0),
-        thisMonth: thisMonth.reduce((sum: number, b: any) => sum + (b.totalPrice || 0), 0),
-        lastMonth: lastMonth.reduce((sum: number, b: any) => sum + (b.totalPrice || 0), 0),
-      });
+      const response = await bookingsAPI.getAll();
+      setBookings(response.data.data || []);
     } catch (err) {
-      console.error('Error fetching data:', err);
+      console.error('Error fetching bookings:', err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const updateRoomPrice = async (roomId: string, newPrice: number) => {
-    try {
-      await roomsAPI.update(roomId, { price: newPrice });
-      fetchData();
-      setEditingRoom(null);
-    } catch (err) {
-      console.error('Error updating price:', err);
-      alert('Failed to update price');
-    }
+  // Calculate revenue metrics
+  const calculateMetrics = () => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const totalRevenue = bookings
+      .filter(b => b.status === 'confirmed' || b.status === 'checked-in' || b.status === 'checked-out')
+      .reduce((sum, b) => sum + b.totalPrice, 0);
+
+    const thisMonthRevenue = bookings
+      .filter(b => {
+        const bookingDate = new Date(b.createdAt);
+        return (
+          (b.status === 'confirmed' || b.status === 'checked-in' || b.status === 'checked-out') &&
+          bookingDate.getMonth() === currentMonth &&
+          bookingDate.getFullYear() === currentYear
+        );
+      })
+      .reduce((sum, b) => sum + b.totalPrice, 0);
+
+    const lastMonthRevenue = bookings
+      .filter(b => {
+        const bookingDate = new Date(b.createdAt);
+        const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+        const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+        return (
+          (b.status === 'confirmed' || b.status === 'checked-in' || b.status === 'checked-out') &&
+          bookingDate.getMonth() === lastMonth &&
+          bookingDate.getFullYear() === lastMonthYear
+        );
+      })
+      .reduce((sum, b) => sum + b.totalPrice, 0);
+
+    const growthRate = lastMonthRevenue > 0 
+      ? ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 
+      : 0;
+
+    const averageBookingValue = bookings.length > 0 
+      ? totalRevenue / bookings.filter(b => b.status === 'confirmed' || b.status === 'checked-in' || b.status === 'checked-out').length 
+      : 0;
+
+    return {
+      totalRevenue,
+      thisMonthRevenue,
+      growthRate,
+      averageBookingValue,
+      totalBookings: bookings.length
+    };
   };
 
-  const growthRate = revenue.lastMonth > 0
-    ? ((revenue.thisMonth - revenue.lastMonth) / revenue.lastMonth * 100).toFixed(1)
-    : '0';
+  // Generate monthly revenue data for the chart
+  const generateMonthlyData = () => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const currentYear = new Date().getFullYear();
+    
+    return months.map((month, index) => {
+      const monthRevenue = bookings
+        .filter(b => {
+          const bookingDate = new Date(b.createdAt);
+          return (
+            (b.status === 'confirmed' || b.status === 'checked-in' || b.status === 'checked-out') &&
+            bookingDate.getMonth() === index &&
+            bookingDate.getFullYear() === currentYear
+          );
+        })
+        .reduce((sum, b) => sum + b.totalPrice, 0);
+
+      return {
+        month,
+        revenue: monthRevenue,
+        bookings: bookings.filter(b => {
+          const bookingDate = new Date(b.createdAt);
+          return bookingDate.getMonth() === index && bookingDate.getFullYear() === currentYear;
+        }).length
+      };
+    });
+  };
+
+  // Generate status distribution data
+  const generateStatusData = () => {
+    const statusCounts = bookings.reduce((acc, booking) => {
+      acc[booking.status] = (acc[booking.status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return Object.entries(statusCounts).map(([status, count]) => ({
+      name: status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' '),
+      value: count
+    }));
+  };
+
+  // Generate room revenue data
+  const generateRoomRevenueData = () => {
+    const roomRevenue = bookings
+      .filter(b => b.status === 'confirmed' || b.status === 'checked-in' || b.status === 'checked-out')
+      .reduce((acc, booking: any) => {
+        const roomName = booking.room?.title || booking.roomId || 'Unknown Room';
+        if (!acc[roomName]) {
+          acc[roomName] = {
+            revenue: 0,
+            bookings: 0
+          };
+        }
+        acc[roomName].revenue += booking.totalPrice;
+        acc[roomName].bookings += 1;
+        return acc;
+      }, {} as Record<string, { revenue: number; bookings: number }>);
+
+    return Object.entries(roomRevenue)
+      .map(([name, data]) => ({
+        name,
+        revenue: data.revenue,
+        bookings: data.bookings,
+        avgRevenue: data.revenue / data.bookings
+      }))
+      .sort((a, b) => b.revenue - a.revenue);
+  };
+
+  const metrics = calculateMetrics();
+  const monthlyData = generateMonthlyData();
+  const statusData = generateStatusData();
+  const roomRevenueData = generateRoomRevenueData();
+
+  const COLORS = ['#59a4b5', '#4a8a99', '#3b7080', '#2c5660', '#1d3c40'];
+
+  if (isLoading) {
+    return (
+      <RouteGuard allowedRoles={['admin']}>
+        <DashboardLayout>
+          <div className="flex items-center justify-center h-96">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#59a4b5]"></div>
+          </div>
+        </DashboardLayout>
+      </RouteGuard>
+    );
+  }
 
   return (
     <RouteGuard allowedRoles={['admin']}>
       <DashboardLayout>
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Header */}
-          <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-lg p-8 text-white">
-            <h2 className="text-3xl font-bold mb-2">Financial Hub</h2>
-            <p className="text-white/90">Manage pricing, revenue analytics, and financial operations</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900">Financial Dashboard</h2>
+              <p className="text-gray-600 mt-1">Revenue analytics and financial insights</p>
+            </div>
+            <div className="flex gap-2">
+              {(['week', 'month', 'year'] as const).map((range) => (
+                <button
+                  key={range}
+                  onClick={() => setTimeRange(range)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    timeRange === range
+                      ? 'bg-[#59a4b5] text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {range.charAt(0).toUpperCase() + range.slice(1)}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Revenue Stats */}
-          {isLoading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading financial data...</p>
+          {/* Key Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                  <DollarSign className="text-green-600" size={24} />
+                </div>
+                <span className={`text-sm font-medium ${metrics.growthRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {metrics.growthRate >= 0 ? '+' : ''}{metrics.growthRate.toFixed(1)}%
+                </span>
+              </div>
+              <h3 className="text-gray-600 text-sm font-medium mb-1">Total Revenue</h3>
+              <p className="text-3xl font-bold text-gray-900">${metrics.totalRevenue.toLocaleString()}</p>
+              <p className="text-xs text-gray-500 mt-2">All time earnings</p>
             </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Total Revenue */}
-                <div className="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                      <DollarSign className="text-green-600" size={24} />
-                    </div>
-                  </div>
-                  <p className="text-gray-600 text-sm font-medium">Total Revenue</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">
-                    ${revenue.total.toLocaleString()}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-2">All time</p>
-                </div>
 
-                {/* This Month */}
-                <div className="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <Calendar className="text-blue-600" size={24} />
-                    </div>
-                    <span className={`text-sm font-medium flex items-center ${
-                      parseFloat(growthRate) >= 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      <TrendingUp size={16} className="mr-1" />
-                      {growthRate}%
-                    </span>
-                  </div>
-                  <p className="text-gray-600 text-sm font-medium">This Month</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">
-                    ${revenue.thisMonth.toLocaleString()}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-2">vs ${revenue.lastMonth.toLocaleString()} last month</p>
-                </div>
-
-                {/* Average Booking */}
-                <div className="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <PieChart className="text-purple-600" size={24} />
-                    </div>
-                  </div>
-                  <p className="text-gray-600 text-sm font-medium">Avg. Room Rate</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">
-                    ${rooms.length > 0 ? Math.round(rooms.reduce((sum, r) => sum + r.price, 0) / rooms.length) : 0}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-2">Per night</p>
+            <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                  <TrendingUp className="text-blue-600" size={24} />
                 </div>
               </div>
+              <h3 className="text-gray-600 text-sm font-medium mb-1">This Month</h3>
+              <p className="text-3xl font-bold text-gray-900">${metrics.thisMonthRevenue.toLocaleString()}</p>
+              <p className="text-xs text-gray-500 mt-2">Current month revenue</p>
+            </div>
 
-              {/* Room Pricing Management */}
-              <div className="bg-white rounded-lg border border-gray-200">
-                <div className="p-6 border-b border-gray-200">
-                  <h3 className="text-xl font-bold text-gray-900">Room Pricing Management</h3>
-                  <p className="text-gray-600 text-sm mt-1">Update base rates and seasonal pricing</p>
+            <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                  <CreditCard className="text-purple-600" size={24} />
                 </div>
+              </div>
+              <h3 className="text-gray-600 text-sm font-medium mb-1">Avg. Booking Value</h3>
+              <p className="text-3xl font-bold text-gray-900">${metrics.averageBookingValue.toFixed(0)}</p>
+              <p className="text-xs text-gray-500 mt-2">Per booking average</p>
+            </div>
 
-                <div className="p-6">
-                  <div className="space-y-4">
-                    {rooms.map((room) => (
-                      <div
-                        key={room._id}
-                        className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
-                      >
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <h4 className="text-lg font-bold text-gray-900">{room.title}</h4>
-                            <p className="text-sm text-gray-600">Room ID: {room.id}</p>
-                          </div>
-                          <div className="text-right">
-                            {editingRoom === room._id ? (
-                              <div className="flex items-center space-x-2">
-                                <input
-                                  type="number"
-                                  defaultValue={room.price}
-                                  className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                                  id={`price-${room._id}`}
-                                />
-                                <button
-                                  onClick={() => {
-                                    const input = document.getElementById(`price-${room._id}`) as HTMLInputElement;
-                                    updateRoomPrice(room._id, parseFloat(input.value));
-                                  }}
-                                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center space-x-2"
-                                >
-                                  <Save size={16} />
-                                  <span>Save</span>
-                                </button>
-                                <button
-                                  onClick={() => setEditingRoom(null)}
-                                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            ) : (
-                              <>
-                                <p className="text-2xl font-bold text-green-600">${room.price}</p>
-                                <p className="text-sm text-gray-600">per night</p>
-                                <button
-                                  onClick={() => setEditingRoom(room._id)}
-                                  className="mt-2 text-sm text-blue-600 hover:underline"
-                                >
-                                  Edit Price
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </div>
+            <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
+                  <Calendar className="text-orange-600" size={24} />
+                </div>
+              </div>
+              <h3 className="text-gray-600 text-sm font-medium mb-1">Total Bookings</h3>
+              <p className="text-3xl font-bold text-gray-900">{metrics.totalBookings}</p>
+              <p className="text-xs text-gray-500 mt-2">All time bookings</p>
+            </div>
+          </div>
 
-                        {/* Seasonal Pricing Section */}
-                        <div className="mt-4 pt-4 border-t border-gray-200">
-                          <h5 className="text-sm font-bold text-gray-700 mb-3">Seasonal Pricing</h5>
-                          {room.seasonalPricing && room.seasonalPricing.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              {room.seasonalPricing.map((season, idx) => (
-                                <div key={idx} className="bg-gray-50 rounded-lg p-3">
-                                  <p className="font-medium text-gray-900">{season.season}</p>
-                                  <p className="text-sm text-gray-600">
-                                    {new Date(season.startDate).toLocaleDateString()} - {new Date(season.endDate).toLocaleDateString()}
-                                  </p>
-                                  <p className="text-lg font-bold text-green-600 mt-1">${season.price}/night</p>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="bg-gray-50 rounded-lg p-4 text-center">
-                              <p className="text-sm text-gray-600 mb-2">No seasonal pricing configured</p>
-                              <button className="text-sm text-blue-600 hover:underline">
-                                Add Seasonal Rate
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+          {/* Revenue Chart */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Revenue Analytics</h3>
+              <p className="text-gray-600 text-sm">Monthly revenue trends and forecasts</p>
+            </div>
+            <ResponsiveContainer width="100%" height={400}>
+              <LineChart data={monthlyData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis 
+                  dataKey="month" 
+                  stroke="#666"
+                  style={{ fontSize: '12px' }}
+                />
+                <YAxis 
+                  stroke="#666"
+                  style={{ fontSize: '12px' }}
+                  tickFormatter={(value) => `$${value}`}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#fff', 
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  }}
+                  formatter={(value: any) => [`$${value}`, 'Revenue']}
+                />
+                <Legend />
+                <Line 
+                  type="monotone" 
+                  dataKey="revenue" 
+                  stroke="#59a4b5" 
+                  strokeWidth={3}
+                  dot={{ fill: '#59a4b5', r: 5 }}
+                  activeDot={{ r: 7 }}
+                  name="Revenue"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Charts Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Bookings Bar Chart */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Monthly Bookings</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis 
+                    dataKey="month" 
+                    stroke="#666"
+                    style={{ fontSize: '12px' }}
+                  />
+                  <YAxis 
+                    stroke="#666"
+                    style={{ fontSize: '12px' }}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#fff', 
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Bar dataKey="bookings" fill="#59a4b5" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Status Distribution Pie Chart */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Booking Status Distribution</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={statusData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {statusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
-                  </div>
-                </div>
-              </div>
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
 
-              {/* Revenue Chart Placeholder */}
-              <div className="bg-white rounded-lg border border-gray-200">
-                <div className="p-6 border-b border-gray-200">
-                  <h3 className="text-xl font-bold text-gray-900">Revenue Analytics</h3>
-                  <p className="text-gray-600 text-sm mt-1">Monthly revenue trends and forecasts</p>
+          {/* Room Revenue Performance */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Room Revenue Performance</h3>
+              <p className="text-gray-600 text-sm">Revenue breakdown by room type</p>
+            </div>
+            
+            {roomRevenueData.length > 0 ? (
+              <>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={roomRevenueData} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis 
+                      type="number" 
+                      stroke="#666"
+                      style={{ fontSize: '12px' }}
+                      tickFormatter={(value) => `$${value}`}
+                    />
+                    <YAxis 
+                      type="category"
+                      dataKey="name" 
+                      stroke="#666"
+                      style={{ fontSize: '12px' }}
+                      width={150}
+                    />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: '#fff', 
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px'
+                      }}
+                      formatter={(value: any) => [`$${value}`, 'Revenue']}
+                    />
+                    <Bar dataKey="revenue" fill="#59a4b5" radius={[0, 8, 8, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+
+                <div className="mt-6 overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Room Type
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Total Revenue
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Bookings
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Avg. Revenue
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Performance
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {roomRevenueData.map((room, index) => {
+                        const totalRevenue = roomRevenueData.reduce((sum, r) => sum + r.revenue, 0);
+                        const percentage = (room.revenue / totalRevenue) * 100;
+                        
+                        return (
+                          <tr key={room.name} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <div className={`w-3 h-3 rounded-full mr-3`} style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
+                                <span className="text-sm font-medium text-gray-900">{room.name}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                              ${room.revenue.toLocaleString()}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {room.bookings} bookings
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              ${room.avgRevenue.toFixed(0)}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <div className="w-full bg-gray-200 rounded-full h-2 mr-2" style={{ maxWidth: '100px' }}>
+                                  <div 
+                                    className="bg-[#59a4b5] h-2 rounded-full" 
+                                    style={{ width: `${percentage}%` }}
+                                  ></div>
+                                </div>
+                                <span className="text-sm text-gray-600">{percentage.toFixed(1)}%</span>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
-                <div className="p-6">
-                  <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-lg p-12 text-center">
-                    <PieChart size={64} className="mx-auto text-green-600 mb-4" />
-                    <p className="text-gray-700 font-medium">Revenue Chart Coming Soon</p>
-                    <p className="text-sm text-gray-600 mt-2">
-                      Interactive charts and analytics will be available here
-                    </p>
-                  </div>
-                </div>
+              </>
+            ) : (
+              <div className="text-center py-12 text-gray-500">
+                <p>No room revenue data available yet</p>
               </div>
-            </>
-          )}
+            )}
+          </div>
+
+          {/* Recent Transactions */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Recent Transactions</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Booking ID
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Amount
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {bookings.slice(0, 10).map((booking) => (
+                    <tr key={booking._id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        #{booking._id.slice(-8)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(booking.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                          booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          booking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                          'bg-blue-100 text-blue-800'
+                        }`}>
+                          {booking.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        ${booking.totalPrice.toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </DashboardLayout>
     </RouteGuard>
