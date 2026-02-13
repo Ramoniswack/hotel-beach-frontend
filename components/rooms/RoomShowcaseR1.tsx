@@ -131,7 +131,7 @@ const RoomRow: React.FC<{ room: Room }> = ({ room }) => {
         <div 
           className="flex h-full"
           style={{ 
-            transform: `translateX(calc(-${activeImg} * (100% - 3cm) - ${scrollOffset}px))`,
+            transform: `translateX(calc(-${activeImg} * (100% - 50px) - ${scrollOffset}px))`,
             transition: isDragging ? 'none' : 'transform 0.3s ease-out'
           }}
         >
@@ -140,7 +140,7 @@ const RoomRow: React.FC<{ room: Room }> = ({ room }) => {
               key={index}
               className="relative flex-shrink-0 h-full"
               style={{ 
-                width: 'calc(100% - 3cm)'
+                width: 'calc(100% - 50px)'
               }}
             >
               <Image 
