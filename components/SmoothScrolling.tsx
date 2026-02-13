@@ -15,7 +15,6 @@ export default function SmoothScrolling({ children }: { children: React.ReactNod
       gestureOrientation: 'vertical',
       smoothWheel: true,
       wheelMultiplier: 1, // Adjust scroll speed
-      smoothTouch: false, // Disable on touch devices for better mobile performance
       touchMultiplier: 2,
       infinite: false,
     });
@@ -45,7 +44,7 @@ export default function SmoothScrolling({ children }: { children: React.ReactNod
         e.preventDefault();
         const href = anchor.getAttribute('href');
         if (href && href !== '#') {
-          const targetElement = document.querySelector(href);
+          const targetElement = document.querySelector(href) as HTMLElement;
           if (targetElement) {
             lenis.scrollTo(targetElement, {
               offset: 0,

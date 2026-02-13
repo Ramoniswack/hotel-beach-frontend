@@ -25,7 +25,7 @@ export function scrollToElement(target: string | HTMLElement, options?: {
   const lenis = (window as any).__lenis as Lenis;
   if (!lenis) return;
 
-  const element = typeof target === 'string' ? document.querySelector(target) : target;
+  const element = typeof target === 'string' ? document.querySelector(target) as HTMLElement : target;
   if (!element) return;
 
   lenis.scrollTo(element, {

@@ -1,17 +1,17 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import RouteGuard from '@/components/RouteGuard';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { bookingsAPI } from '@/lib/api';
-import { Calendar, Check, X, Eye, Search, ArrowUpDown } from 'lucide-react';
+import { useBookings, useUpdateBookingStatus } from '@/lib/queries/useBookings';
+import { Calendar, Eye, Search, ArrowUpDown } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Booking {
   _id: string;
   roomId: string;
-  roomTitle: string; // Changed from room object to roomTitle string
+  roomTitle: string;
   checkInDate: string;
   checkOutDate: string;
   adults: number;
@@ -33,37 +33,17 @@ interface Booking {
 
 export default function BookingsManager() {
   const router = useRouter();
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortField, setSortField] = useState<string>('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  useEffect(() => {
-    fetchBookings();
-  }, []);
-
-  const fetchBookings = async () => {
-    try {
-      setIsLoading(true);
-      const response = await bookingsAPI.getAll();
-      setBookings(response.data.data || []);
-    } catch (err) {
-      console.error('Error fetching bookings:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Use TanStack Query
+  const { data: bookings = [], isLoading, refetch } = useBookings();
+  const updateStatus = useUpdateBookingStatus();
 
   const handleStatusUpdate = async (bookingId: string, newStatus: string) => {
-    try {
-      await bookingsAPI.updateStatus(bookingId, newStatus);
-      // Refresh bookings
-      fetchBookings();
-    } catch (err: any) {
-      alert('Failed to update status: ' + (err.response?.data?.message || 'Unknown error'));
-    }
+    updateStatus.mutate({ id: bookingId, status: newStatus });
   };
 
   const handleSort = (field: string) => {
@@ -76,7 +56,7 @@ export default function BookingsManager() {
   };
 
   const filteredBookings = bookings
-    .filter(booking => {
+    .filter((booking: Booking) => {
       if (filter !== 'all' && booking.status !== filter) return false;
       
       if (searchQuery) {
@@ -92,7 +72,7 @@ export default function BookingsManager() {
       
       return true;
     })
-    .sort((a, b) => {
+    .sort((a: Booking, b: Booking) => {
       let aValue: any;
       let bValue: any;
 
@@ -161,7 +141,7 @@ export default function BookingsManager() {
               <p className="text-gray-600 mt-1">Manage all reservations</p>
             </div>
             <button
-              onClick={fetchBookings}
+              onClick={() => refetch()}
               className="px-4 py-2 bg-[#59a4b5] text-white rounded-lg hover:bg-[#4a8a99] transition-colors"
             >
               Refresh
@@ -280,7 +260,7 @@ export default function BookingsManager() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredBookings.map((booking) => (
+                    {filteredBookings.map((booking: Booking) => (
                       <tr key={booking._id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>

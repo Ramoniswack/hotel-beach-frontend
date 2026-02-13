@@ -3,9 +3,11 @@ import { Roboto } from 'next/font/google';
 import './globals.css';
 import '../styles/mobile-optimizations.css';
 import AuthProvider from '@/components/AuthProvider';
+import QueryProvider from '@/components/QueryProvider';
 import UnifiedPageLoader from '@/components/UnifiedPageLoader';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import SmoothScrolling from '@/components/SmoothScrolling';
+import { Toaster } from 'react-hot-toast';
 
 const roboto = Roboto({
   weight: ['300', '400', '500', '700'],
@@ -34,14 +36,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={roboto.variable}>
-        <AuthProvider>
-          <UnifiedPageLoader />
-          <SmoothScrolling>
-            <LayoutWrapper>
-              {children}
-            </LayoutWrapper>
-          </SmoothScrolling>
-        </AuthProvider>
+        <QueryProvider>
+          <AuthProvider>
+            <Toaster position="top-right" />
+            <UnifiedPageLoader />
+            <SmoothScrolling>
+              <LayoutWrapper>
+                {children}
+              </LayoutWrapper>
+            </SmoothScrolling>
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );

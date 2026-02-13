@@ -1,52 +1,19 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { Suspense } from 'react';
 import { Calendar, CheckCircle, Clock } from 'lucide-react';
-import { bookingsAPI } from '@/lib/api';
-import { useAuthStore } from '@/store/authStore';
-
-interface Stats {
-  total: number;
-  upcoming: number;
-  completed: number;
-}
+import { useMyBookings } from '@/lib/queries/useBookings';
 
 function StatsContent() {
-  const { user } = useAuthStore();
-  const [stats, setStats] = useState<Stats>({ total: 0, upcoming: 0, completed: 0 });
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: bookings = [], isLoading } = useMyBookings();
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      if (!user?.email) return;
-
-      try {
-        const response = await bookingsAPI.getMyBookings();
-        const bookings = response.data.data || [];
-        
-        const now = new Date();
-        const upcoming = bookings.filter((b: any) => 
-          new Date(b.checkInDate) > now && b.status !== 'cancelled'
-        ).length;
-        
-        const completed = bookings.filter((b: any) => 
-          b.status === 'completed'
-        ).length;
-
-        setStats({
-          total: bookings.length,
-          upcoming,
-          completed,
-        });
-      } catch (error) {
-        console.error('Error fetching stats:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, [user]);
+  const stats = {
+    total: bookings.length,
+    upcoming: bookings.filter((b: any) => 
+      new Date(b.checkInDate) > new Date() && b.status !== 'cancelled'
+    ).length,
+    completed: bookings.filter((b: any) => b.status === 'completed').length,
+  };
 
   if (isLoading) {
     return (

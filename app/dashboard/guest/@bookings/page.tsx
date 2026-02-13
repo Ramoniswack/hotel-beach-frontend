@@ -1,13 +1,12 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { format } from 'date-fns';
 import { Calendar, Users, FileText } from 'lucide-react';
-import { bookingsAPI } from '@/lib/api';
-import { useAuthStore } from '@/store/authStore';
+import { useMyBookings } from '@/lib/queries/useBookings';
 
 interface Booking {
   _id: string;
@@ -26,26 +25,7 @@ interface Booking {
 
 function BookingsContent() {
   const router = useRouter();
-  const { user } = useAuthStore();
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchBookings = async () => {
-      if (!user?.email) return;
-
-      try {
-        const response = await bookingsAPI.getMyBookings();
-        setBookings(response.data.data || []);
-      } catch (error) {
-        console.error('Error fetching bookings:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchBookings();
-  }, [user]);
+  const { data: bookings = [], isLoading } = useMyBookings();
 
   if (isLoading) {
     return (
@@ -87,7 +67,7 @@ function BookingsContent() {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
-          {bookings.slice(0, 4).map((booking, index) => (
+          {bookings.slice(0, 4).map((booking: Booking, index: number) => (
             <motion.div
               key={booking._id}
               className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow"

@@ -9,6 +9,7 @@ import MainContentWrapper from '@/components/MainContentWrapper';
 import Footer from '@/components/Footer';
 import { roomsAPI, bookingsAPI, contentAPI } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
+import { getSmartDefaults } from '@/lib/geolocation';
 
 interface Room {
   _id: string;
@@ -340,6 +341,31 @@ function BookingConfirmationContent() {
     { code: 'zm', name: 'Zambia' },
     { code: 'zw', name: 'Zimbabwe' },
   ];
+
+  // Auto-detect user's country and currency based on IP
+  useEffect(() => {
+    const loadGeoDefaults = async () => {
+      try {
+        const geoData = await getSmartDefaults();
+        
+        // Only set if not already set by user
+        if (!country && geoData.country) {
+          setCountry(geoData.country);
+        }
+        
+        // Only set currency if not from URL params
+        if (!currencyParam && geoData.currency) {
+          setSelectedCurrency(geoData.currency);
+        }
+        
+        console.log('Geo defaults loaded:', geoData);
+      } catch (error) {
+        console.error('Failed to load geo defaults:', error);
+      }
+    };
+    
+    loadGeoDefaults();
+  }, []); // Run once on mount
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
