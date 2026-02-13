@@ -36,8 +36,8 @@ const BlogB1: React.FC = () => {
 
   if (loading) {
     return (
-      <section className="bg-white py-24 md:py-32">
-        <div className="max-w-[1300px] mx-auto px-6 lg:px-8 text-center">
+      <section className="bg-white py-16 sm:py-20 md:py-24 lg:py-32">
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-[#666]">Loading posts...</p>
         </div>
       </section>
@@ -45,20 +45,20 @@ const BlogB1: React.FC = () => {
   }
 
   return (
-    <section className="bg-white py-24 md:py-32">
-      {/* Header section with 3.5cm left spacing */}
-      <div className="mb-20" style={{ paddingLeft: '3.5cm' }}>
-        <h2 className="text-[36px] md:text-[48px] font-bold mb-6 tracking-tight text-[#1a1a1a]">
+    <section className="bg-white py-16 sm:py-20 md:py-24 lg:py-32">
+      {/* Header section with responsive left spacing */}
+      <div className="mb-12 sm:mb-16 md:mb-20 px-4 sm:px-8 md:px-12 lg:px-[132px]">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[48px] font-bold mb-4 sm:mb-6 tracking-tight text-[#1a1a1a]">
           Retreat Hotel at Santorini
         </h2>
-        <p className="text-[#666] text-[15px] font-normal">
+        <p className="text-[#666] text-sm sm:text-[15px] font-normal">
           Unwind the clock of modern life. Unlock the door to a wonder of the world.
         </p>
       </div>
 
-      <div style={{ paddingLeft: '3.5cm', paddingRight: '3.5cm' }}>
+      <div className="px-4 sm:px-8 md:px-12 lg:px-[132px]">
         {/* Adjusted gap and space-y to match the tighter, elegant masonry spacing */}
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-12 space-y-20">
+        <div className="columns-1 md:columns-2 lg:columns-3 gap-6 sm:gap-8 md:gap-10 lg:gap-12 space-y-12 sm:space-y-16 md:space-y-20">
           {posts.map((post, index) => {
             // Logic to replicate the specific layout in the image:
             // The middle column (index 1, 4, 7...) uses a very tall portrait aspect.
@@ -79,7 +79,7 @@ const BlogB1: React.FC = () => {
                 href={`/blog/${post.slug}`}
                 className="break-inside-avoid flex flex-col group cursor-pointer"
               >
-                <div className="overflow-hidden w-full mb-8 relative">
+                <div className="overflow-hidden w-full mb-6 sm:mb-8 relative">
                   <div className={`relative w-full ${aspectClass} blog-image-hover`}>
                     <Image 
                       src={post.heroImage}
@@ -98,13 +98,13 @@ const BlogB1: React.FC = () => {
 
                 {/* Text Content - Switched items-center to standard alignment for that editorial look */}
                 <div className="text-center px-2">
-                  <p className="text-[10px] font-bold tracking-[0.2em] text-[#ccc] mb-4 uppercase">
+                  <p className="text-[9px] sm:text-[10px] font-bold tracking-[0.15em] sm:tracking-[0.2em] text-[#ccc] mb-3 sm:mb-4 uppercase">
                     {post.categories.join('   ')}
                   </p>
-                  <h3 className="text-[21px] font-bold leading-[1.3] text-[#1a1a1a] mb-4 tracking-tight group-hover:text-[#59a4b5] transition-colors duration-300">
+                  <h3 className="text-lg sm:text-xl md:text-[21px] font-bold leading-[1.3] text-[#1a1a1a] mb-3 sm:mb-4 tracking-tight group-hover:text-[#59a4b5] transition-colors duration-300">
                     {post.title}
                   </h3>
-                  <p className="text-[11px] font-medium text-[#999] tracking-wide">
+                  <p className="text-[10px] sm:text-[11px] font-medium text-[#999] tracking-wide">
                     {new Date(post.publishedAt).toLocaleDateString('en-US', { 
                       year: 'numeric', 
                       month: 'long', 

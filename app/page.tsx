@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Header from '@/components/Header';
 import MainContentWrapper from '@/components/MainContentWrapper';
+import { useMenu } from '@/components/LayoutWrapper';
 import HeroH1 from '@/components/home/HeroH1';
 import IntroSectionH2 from '@/components/home/IntroSectionH2';
 import DeluxeRoomH3 from '@/components/home/DeluxeRoomH3';
@@ -29,17 +29,8 @@ interface Section {
 }
 
 export default function Home() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isMenuOpen, setIsMenuOpen } = useMenu();
   const [sections, setSections] = useState<Section[]>([]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -70,7 +61,6 @@ export default function Home() {
         overflow: 'hidden',
       }}
     >
-      <Header isScrolled={isScrolled} onMenuToggle={setIsMenuOpen} />
       <MainContentWrapper isMenuOpen={isMenuOpen} onOverlayClick={() => setIsMenuOpen(false)}>
         <main>
           {(sections.length === 0 || getSection('hero')) && <HeroH1 section={getSection('hero')} />}

@@ -66,7 +66,7 @@ const DeluxeRoomH3: React.FC = () => {
   };
 
   return (
-    <section className="flex flex-col lg:flex-row min-h-[600px] sm:min-h-[650px] md:min-h-[700px] w-full bg-[#1a1a1a] overflow-hidden">
+    <section className="flex flex-col lg:flex-row w-full bg-[#1a1a1a] overflow-hidden">
       {/* Left Column: Info Sidebar */}
       <div className="w-full lg:w-[450px] p-6 sm:p-8 md:p-12 lg:p-20 flex flex-col justify-center text-white">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-medium mb-8 sm:mb-12 md:mb-16 tracking-tight">
@@ -118,7 +118,7 @@ const DeluxeRoomH3: React.FC = () => {
       {/* Right Column: Image Slider with Preview */}
       <div 
         ref={sliderRef}
-        className="flex-grow relative overflow-hidden min-h-[400px] sm:min-h-[450px] md:min-h-[500px]"
+        className="w-full lg:flex-grow relative overflow-hidden h-[400px] sm:h-[500px] lg:h-auto lg:min-h-[600px]"
         style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -129,17 +129,14 @@ const DeluxeRoomH3: React.FC = () => {
         <div 
           className="flex h-full"
           style={{ 
-            transform: `translateX(calc(-${currentImageIndex} * (100% - 3cm) - ${scrollOffset}px))`,
+            transform: `translateX(calc(-${currentImageIndex} * 100% - ${scrollOffset}px))`,
             transition: isDragging ? 'none' : 'transform 0.3s ease-out'
           }}
         >
           {allImages.map((image, index) => (
             <div
               key={index}
-              className="relative flex-shrink-0 h-full"
-              style={{ 
-                width: 'calc(100% - 3cm)'
-              }}
+              className="relative flex-shrink-0 h-full w-full"
             >
               <Image 
                 src={image}
@@ -147,6 +144,7 @@ const DeluxeRoomH3: React.FC = () => {
                 fill
                 className="object-cover pointer-events-none select-none"
                 draggable={false}
+                priority={index === 0}
               />
             </div>
           ))}
@@ -157,24 +155,45 @@ const DeluxeRoomH3: React.FC = () => {
           <>
             <button 
               onClick={prevImage}
-              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white transition-all hover:scale-110 z-20 bg-black/20 backdrop-blur-sm rounded-sm tap-target"
+              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-white transition-all hover:scale-110 z-20 bg-black/30 backdrop-blur-sm rounded-full tap-target"
               aria-label="Previous image"
             >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
 
             <button 
               onClick={nextImage}
-              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white transition-all hover:scale-110 z-20 bg-black/20 backdrop-blur-sm rounded-sm tap-target"
+              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-white transition-all hover:scale-110 z-20 bg-black/30 backdrop-blur-sm rounded-full tap-target"
               aria-label="Next image"
             >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </button>
           </>
+        )}
+
+        {/* Dots Indicator */}
+        {allImages.length > 1 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+            {allImages.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  setCurrentImageIndex(index);
+                  setScrollOffset(0);
+                }}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  index === currentImageIndex 
+                    ? 'bg-white w-6' 
+                    : 'bg-white/50 hover:bg-white/75'
+                }`}
+                aria-label={`Go to image ${index + 1}`}
+              />
+            ))}
+          </div>
         )}
       </div>
     </section>

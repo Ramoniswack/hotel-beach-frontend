@@ -79,39 +79,37 @@ const Footer: React.FC = () => {
   const linksSection = getSection('footer-links');
 
   return (
-    <footer className="relative z-10 bg-[#1a1a1a] pt-24 pb-0 overflow-hidden font-roboto">
+    <footer className="relative z-10 bg-[#1a1a1a] pt-16 sm:pt-20 md:pt-24 pb-0 overflow-hidden font-roboto w-full">
       {/* Wave Decorative Divider - Flipped horizontally (slant opposite) */}
       <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0] transform rotate-360 scale-x-[-1]">
         <svg
           viewBox="0 0 1200 120"
           preserveAspectRatio="none"
-          className="relative block w-[calc(100%+1.3px)] h-[60px] fill-white"
+          className="relative block w-[calc(100%+1.3px)] h-[40px] sm:h-[50px] md:h-[60px] fill-white"
         >
           <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
         </svg>
       </div>
 
-      <div className="relative z-10 px-28 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-24">
+      <div className="relative z-10 w-full max-w-full px-6 sm:px-8 md:px-12 lg:px-16 xl:px-28 py-8 sm:py-10 md:py-12 overflow-x-hidden">
+        <div className="w-full max-w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 mb-12 sm:mb-16 md:mb-20 lg:mb-24">
           {/* Our Address */}
           {addressSection && (
-            <div>
-              <h4 className="text-white text-[11px] uppercase tracking-[0.3em] font-bold mb-10">
+            <div className="w-full">
+              <h4 className="text-white text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] md:tracking-[0.3em] font-bold mb-4 sm:mb-6 md:mb-8 lg:mb-10">
                 {addressSection.title}
               </h4>
               <div 
-                className="text-white space-y-1 whitespace-pre-line"
+                className="text-white space-y-1 text-[13px] sm:text-sm md:text-[15px] leading-relaxed"
                 style={{ 
                   fontFamily: 'Raleway', 
-                  fontSize: '15px', 
                   fontWeight: 400, 
                   letterSpacing: '0px', 
-                  lineHeight: 1.7, 
                   textTransform: 'none' 
                 }}
               >
                 {addressSection.content?.split('\n').map((line, idx) => (
-                  <p key={idx} className={idx === 0 ? 'font-extrabold text-[15px] tracking-tight' : 'font-medium opacity-90'}>
+                  <p key={idx} className={idx === 0 ? 'font-extrabold tracking-tight' : 'font-medium opacity-90'}>
                     {line}
                   </p>
                 ))}
@@ -121,26 +119,24 @@ const Footer: React.FC = () => {
 
           {/* Reservation */}
           {reservationSection && (
-            <div>
-              <h4 className="text-white text-[11px] uppercase tracking-[0.3em] font-bold mb-10">
+            <div className="w-full">
+              <h4 className="text-white text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] md:tracking-[0.3em] font-bold mb-4 sm:mb-6 md:mb-8 lg:mb-10">
                 {reservationSection.title}
               </h4>
               <div 
-                className="text-white space-y-1 whitespace-pre-line"
+                className="text-white space-y-1 text-[13px] sm:text-sm md:text-[15px] leading-relaxed break-words"
                 style={{ 
                   fontFamily: 'Raleway', 
-                  fontSize: '15px', 
                   fontWeight: 400, 
                   letterSpacing: '0px', 
-                  lineHeight: 1.7, 
                   textTransform: 'none' 
                 }}
               >
                 {reservationSection.content?.split('\n').map((line, idx) => {
                   if (line.includes('@')) {
                     return (
-                      <p key={idx}>
-                        <a href={`mailto:${line}`} className="text-hotel-white border-b border-hotel-white hover:border-hotel-gold transition-colors pb-0">
+                      <p key={idx} className="break-all">
+                        <a href={`mailto:${line}`} className="text-white border-b border-white hover:border-[#5fb2c1] transition-colors">
                           {line}
                         </a>
                       </p>
@@ -154,21 +150,21 @@ const Footer: React.FC = () => {
 
           {/* Newsletter */}
           {newsletterSection && (
-            <div>
-              <h4 className="text-white text-[11px] uppercase tracking-[0.3em] font-bold mb-10">
+            <div className="w-full">
+              <h4 className="text-white text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] md:tracking-[0.3em] font-bold mb-4 sm:mb-6 md:mb-8 lg:mb-10">
                 {newsletterSection.title}
               </h4>
-              <form className="space-y-6 max-w-[260px]">
+              <form className="space-y-4 sm:space-y-5 md:space-y-6 w-full max-w-[260px]">
                 <div className="relative">
                   <input 
                     type="email" 
                     placeholder="Your Email" 
-                    className="w-full bg-transparent border-b border-white pb-0 text-white text-[13px] outline-none focus:border-hotel-gold transition-colors font-medium placeholder:text-white"
+                    className="w-full bg-transparent border-b border-white pb-1 text-white text-[11px] sm:text-xs md:text-[13px] outline-none focus:border-[#5fb2c1] transition-colors font-medium placeholder:text-white/80"
                   />
                 </div>
                 <button 
                   type="submit"
-                  className="w-full bg-[#5fb2c1] hover:bg-[#4ea1af] text-white text-xs font-bold py-3.5 px-8 rounded-full transition-all duration-300 transform active:scale-95 shadow-lg"
+                  className="w-full bg-[#5fb2c1] hover:bg-[#4ea1af] text-white text-[10px] sm:text-[11px] md:text-xs font-bold py-2.5 sm:py-3 md:py-3.5 px-5 sm:px-6 md:px-8 rounded-full transition-all duration-300 transform active:scale-95 shadow-lg"
                 >
                   Subscribe
                 </button>
@@ -178,11 +174,11 @@ const Footer: React.FC = () => {
 
           {/* Awards */}
           {awardsSection && awardsSection.images && (
-            <div>
-              <h4 className="text-white text-[11px] uppercase tracking-[0.3em] font-bold mb-10">
+            <div className="w-full">
+              <h4 className="text-white text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] md:tracking-[0.3em] font-bold mb-4 sm:mb-6 md:mb-8 lg:mb-10">
                 {awardsSection.title}
               </h4>
-              <div className="flex items-center space-x-6">
+              <div className="flex items-center gap-3 sm:gap-4 md:gap-6">
                 {awardsSection.images.map((img, idx) => (
                   <Image 
                     key={idx}
@@ -190,7 +186,7 @@ const Footer: React.FC = () => {
                     alt={`Award ${idx + 1}`} 
                     width={56}
                     height={56}
-                    className="h-14 w-auto object-contain brightness-125" 
+                    className="h-8 sm:h-10 md:h-12 lg:h-14 w-auto object-contain brightness-125" 
                   />
                 ))}
               </div>
@@ -200,20 +196,19 @@ const Footer: React.FC = () => {
 
         {/* Bottom Bar */}
         <div 
-          className="pt-10 border-t border-white/20 flex flex-col lg:flex-row justify-between items-center px-10"
+          className="w-full max-w-full pt-6 sm:pt-8 md:pt-10 pb-6 sm:pb-8 border-t border-white/20 flex flex-col lg:flex-row justify-between items-center gap-4 lg:gap-6 text-[11px] sm:text-xs md:text-[13px]"
           style={{ 
             fontFamily: 'Raleway', 
-            fontSize: '13px', 
             fontWeight: 500, 
             letterSpacing: '0px', 
-            lineHeight: 1.7, 
+            lineHeight: 1.6, 
             textTransform: 'none' 
           }}
         >
-          <p className="text-white">{copyrightSection?.content}</p>
-          <div className="flex items-center space-x-6 mt-6 lg:mt-0 text-white">
+          <p className="text-white text-center lg:text-left px-2">{copyrightSection?.content}</p>
+          <div className="flex flex-wrap items-center justify-center lg:justify-end gap-3 sm:gap-4 md:gap-5 lg:gap-6 text-white px-2">
             {linksSection?.links?.map((link, idx) => (
-              <Link key={idx} href={link.url} className="hover:opacity-70 transition-opacity">
+              <Link key={idx} href={link.url} className="hover:opacity-70 transition-opacity whitespace-nowrap text-[11px] sm:text-xs md:text-[13px]">
                 {link.label}
               </Link>
             ))}

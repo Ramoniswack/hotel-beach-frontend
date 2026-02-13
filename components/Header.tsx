@@ -93,25 +93,25 @@ const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggl
   return (
     <>
       <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ease-in-out ${
-        scrolled ? 'bg-white border-b border-gray-100 shadow-md py-4' : 'bg-transparent py-6'
+        scrolled ? 'bg-white border-b border-gray-100 shadow-md py-3 sm:py-4' : 'bg-transparent py-4 sm:py-6'
       }`}>
-        <div className="max-w-[1425px] w-full box-border mx-auto px-[90px] flex justify-between items-center">
+        <div className="max-w-[1425px] w-full box-border mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-[90px] flex justify-between items-center">
           {/* Logo */}
           <Link href="/" className="flex flex-col leading-none">
             {useImageLogo && logoImage ? (
               <img 
                 src={logoImage} 
                 alt="Logo" 
-                className="h-12 w-auto object-contain"
+                className="h-8 sm:h-10 md:h-12 w-auto object-contain"
               />
             ) : (
               <>
-                <span className={`text-2xl font-bold tracking-tight transition-colors ${
+                <span className={`text-lg sm:text-xl md:text-2xl font-bold tracking-tight transition-colors ${
                   scrolled ? 'text-slate-900' : 'text-white'
                 }`}>
                   {logoMain}
                 </span>
-                <span className={`text-[10px] font-bold tracking-[0.4em] ml-1 transition-colors ${
+                <span className={`text-[8px] sm:text-[9px] md:text-[10px] font-bold tracking-[0.3em] sm:tracking-[0.4em] ml-1 transition-colors ${
                   scrolled ? 'text-slate-900' : 'text-white'
                 }`}>
                   {logoSub}
@@ -121,7 +121,7 @@ const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggl
           </Link>
 
           {/* Navigation Links */}
-          <div className={`hidden lg:flex space-x-10 text-[13px] font-medium transition-colors ${
+          <div className={`hidden lg:flex space-x-6 xl:space-x-10 text-[13px] font-medium transition-colors ${
             scrolled ? 'text-slate-800' : 'text-white/90'
           }`}>
             {navItems.map((item, idx) => (
@@ -139,9 +139,9 @@ const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggl
           </div>
 
           {/* Right Actions */}
-          <div className="flex items-center space-x-8">
+          <div className="flex items-center space-x-4 sm:space-x-6 md:space-x-8">
             {_hasHydrated && user ? (
-              <div className={`hidden lg:flex items-center space-x-4 text-[13px] font-medium transition-colors relative ${
+              <div className={`hidden lg:flex items-center space-x-3 xl:space-x-4 text-xs sm:text-[13px] font-medium transition-colors relative ${
                 scrolled ? 'text-slate-800' : 'text-white/90'
               }`}>
                 <button
@@ -187,10 +187,10 @@ const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggl
                 )}
               </div>
             ) : _hasHydrated ? (
-              <Link href="/login" className={`hidden lg:flex items-center space-x-2 text-[13px] font-medium transition-colors relative group ${
+              <Link href="/login" className={`hidden lg:flex items-center space-x-2 text-xs sm:text-[13px] font-medium transition-colors relative group ${
                 scrolled ? 'text-slate-800' : 'text-white/90'
               }`}>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
                 <span>Login</span>
@@ -206,7 +206,7 @@ const Header: React.FC<HeaderProps> = ({ isScrolled: isScrolledProp, onMenuToggl
               className={`${scrolled ? 'text-slate-900' : 'text-white'} transition-colors hover:opacity-70`}
               aria-label="Toggle menu"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
               </svg>
             </button>

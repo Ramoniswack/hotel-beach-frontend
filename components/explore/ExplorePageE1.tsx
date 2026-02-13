@@ -110,99 +110,122 @@ const ExplorePageE1: React.FC<ExplorePageE1Props> = ({ sections }) => {
           )}
         </div>
       )}
+{/* Our Rooms Section */}
+{(sections.length === 0 || ourRooms) && (
+<section className="bg-white py-20 flex flex-col items-center"><div className="w-full max-w-[1000px] border-t border-black mb-20"></div>
+    <div className="max-w-[1300px] mx-auto px-8">
+      
+      <div className="text-center mb-20">
+        <h2 className="text-[36px] font-bold text-[#1a1a1a] mb-4">
+          {ourRooms?.title || 'Our Rooms'}
+        </h2>
+        <p className="text-[10px]  tracking-[0.3em] uppercase text-black">
+          {ourRooms?.subtitle || 'Could also be interest for you'}
+        </p>
+      </div>
 
-      {/* Our Rooms Section */}
-      {(sections.length === 0 || ourRooms) && (
-        <section className="bg-white py-32 border-t border-gray-100">
-          <div className="max-w-[1300px] mx-auto px-8">
-            <div className="text-center mb-20">
-              <h2 className="text-[36px] font-bold text-[#1a1a1a] mb-4">
-                {ourRooms?.title || 'Our Rooms'}
-              </h2>
-              <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#bbb]">
-                {ourRooms?.subtitle || 'Could also be interest for you'}
-              </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+        {(ourRooms?.items || [
+          {
+            id: 'superior-room',
+            title: 'Superior Room',
+            image: 'https://images.unsplash.com/photo-1590490359683-658d3d23f972?auto=format&fit=crop&q=80&w=800',
+            size: '30',
+            maxAdults: '2',
+            maxChildren: '1',
+            price: '$199',
+            link: '/accommodation/superior-room'
+          },
+          {
+            id: 'deluxe-room',
+            title: 'Deluxe Room',
+            image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=800',
+            size: '55',
+            maxAdults: '3',
+            maxChildren: '1',
+            price: '$249',
+            link: '/accommodation/deluxe-room'
+          },
+          {
+            id: 'signature-room',
+            title: 'Signature Room',
+            image: 'https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&q=80&w=800',
+            size: '70',
+            maxAdults: '3',
+            maxChildren: '2',
+            price: '$299',
+            link: '/accommodation/signature-room'
+          },
+          {
+            id: 'luxury-suite',
+            title: 'Luxury Suite Room',
+            image: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&q=80&w=800',
+            size: '120',
+            maxAdults: '4',
+            maxChildren: '2',
+            price: '$399',
+            link: '/accommodation/luxury-suite'
+          }
+        ]).map((room: any, idx: number) => (
+          <Link key={idx} href={room.link} className="group block">
+            {/* Image section with cross animation */}
+            <div className="aspect-[1.4/1] overflow-hidden mb-8 relative">
+              <Image 
+                src={room.image}
+                alt={room.title}
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              {/* Dark overlay on hover */}
+              <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-40 transition-opacity duration-500"></div>
+              {/* Cross animation */}
+              <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                <div className="absolute left-0 top-1/2 h-[1px] w-0 bg-white -translate-y-1/2 group-hover:w-[40px] group-hover:left-[calc(50%-20px)] transition-all duration-500 ease-out delay-100"></div>
+                <div className="absolute top-0 left-1/2 w-[1px] h-0 bg-white -translate-x-1/2 group-hover:h-[40px] group-hover:top-[calc(50%-20px)] transition-all duration-500 ease-out"></div>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {(ourRooms?.items || [
-                {
-                  id: 'superior-room',
-                  title: 'Superior Room',
-                  image: 'https://images.unsplash.com/photo-1590490359683-658d3d23f972?auto=format&fit=crop&q=80&w=800',
-                  size: '30',
-                  maxAdults: '2',
-                  maxChildren: '1',
-                  price: '$199',
-                  link: '/accommodation/superior-room'
-                },
-                {
-                  id: 'deluxe-room',
-                  title: 'Deluxe Room',
-                  image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=800',
-                  size: '55',
-                  maxAdults: '3',
-                  maxChildren: '1',
-                  price: '$249',
-                  link: '/accommodation/deluxe-room'
-                },
-                {
-                  id: 'signature-room',
-                  title: 'Signature Room',
-                  image: 'https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&q=80&w=800',
-                  size: '70',
-                  maxAdults: '3',
-                  maxChildren: '2',
-                  price: '$299',
-                  link: '/accommodation/signature-room'
-                },
-                {
-                  id: 'luxury-suite',
-                  title: 'Luxury Suite Room',
-                  image: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&q=80&w=800',
-                  size: '120',
-                  maxAdults: '4',
-                  maxChildren: '2',
-                  price: '$399',
-                  link: '/accommodation/luxury-suite'
-                }
-              ]).map((room: any, idx: number) => (
-                <Link key={idx} href={room.link} className="group">
-                  <div className="aspect-[4/3] overflow-hidden mb-6 relative">
-                    <Image 
-                      src={room.image}
-                      alt={room.title}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                  </div>
-                  <div className="text-center">
-                    <h3 className="text-[18px] font-bold text-[#1a1a1a] mb-6">{room.title}</h3>
-                    <div className="flex justify-center gap-4 mb-6 text-[11px]">
-                      <div className="flex flex-col items-center">
-                        <span className="text-[20px] font-bold text-[#1a1a1a]">{room.size}</span>
-                        <span className="text-[9px] uppercase tracking-wider text-gray-400">Size m²</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <span className="text-[20px] font-bold text-[#1a1a1a]">{room.maxAdults}</span>
-                        <span className="text-[9px] uppercase tracking-wider text-gray-400">Max Adults</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <span className="text-[20px] font-bold text-[#1a1a1a]">{room.maxChildren}</span>
-                        <span className="text-[9px] uppercase tracking-wider text-gray-400">Max Children</span>
-                      </div>
-                    </div>
-                    <div className="border-t border-gray-200 pt-6">
-                      <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400 block mb-2">Book Now From</span>
-                      <span className="text-[20px] font-bold text-[#1a1a1a]">{room.price}</span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
+            <div className="text-center">
+              <h3 className="text-[24px] font-bold text-[#1a1a1a] mb-10">{room.title}</h3>
+              
+              {/* Stats with Vertical Dividers */}
+              <div className="flex justify-between items-start mb-10 max-w-[240px] mx-auto">
+                <div className="flex-1 flex flex-col items-center">
+                  <span className="text-[22px] font-bold text-[#1a1a1a] leading-none mb-1">{room.size}</span>
+                  <span className="text-[9px] uppercase tracking-wider text-black  leading-tight">Size<br/>m²</span>
+                </div>
+                
+                <div className="w-[1px] h-12 bg-black self-center"></div> {/* Divider */}
+                
+                <div className="flex-1 flex flex-col items-center">
+                  <span className="text-[22px] font-bold text-[#1a1a1a] leading-none mb-1">{room.maxAdults}</span>
+                  <span className="text-[9px] uppercase tracking-wider text-black  leading-tight">Max<br/>Adults</span>
+                </div>
+                
+                <div className="w-[1px] h-12 bg-black self-center"></div> {/* Divider */}
+                
+                <div className="flex-1 flex flex-col items-center">
+                  <span className="text-[22px] font-bold text-[#1a1a1a] leading-none mb-1">{room.maxChildren}</span>
+                  <span className="text-[9px] uppercase tracking-wider text-black leading-tight">Max<br/>Children</span>
+                </div>
+              </div>
+
+              {/* Book Now Section - Underlined Only */}
+              <div className="mt-8 pt-2">
+                <div className="inline-block border-b border-[#1a1a1a] pb-1 transition-opacity group-hover:opacity-60">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#1a1a1a]">
+                    Book Now From <span className="ml-1">{room.price}</span>
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
-        </section>
-      )}
+          </Link>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+    
     </section>
   );
 };

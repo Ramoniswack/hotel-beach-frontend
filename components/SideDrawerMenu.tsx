@@ -106,16 +106,9 @@ const SideDrawerMenu: React.FC<SideDrawerMenuProps> = ({ isOpen, onClose }) => {
     >
       <div className="h-full flex flex-col p-10 overflow-y-auto">
         {/* Logo */}
-        <div className="drawer-link mb-12">
-          <Link href="/" onClick={handleLinkClick} className="flex flex-col leading-none">
-            <span className="text-3xl font-bold tracking-tight text-white">
-              HOTEL
-            </span>
-            <span className="text-[10px] font-bold tracking-[0.4em] text-white/80 ml-1">
-              BEACH
-            </span>
-          </Link>
-        </div>
+        <br/>
+        <br/>
+        <br/>
 
         {/* Navigation Links */}
         <nav ref={linksRef} className="flex-1 space-y-6">
