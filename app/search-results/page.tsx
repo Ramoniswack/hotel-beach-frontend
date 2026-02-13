@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { format } from 'date-fns';
+import { motion } from 'framer-motion';
 import { ChevronRight, ChevronDown, Calendar, Users } from 'lucide-react';
 import Header from '@/components/Header';
 import MainContentWrapper from '@/components/MainContentWrapper';
@@ -236,13 +237,14 @@ function SearchResultsContent() {
                 {/* Room Cards */}
                 {!isLoading && !error && rooms.length > 0 && (
                   <div className="space-y-8 sm:space-y-10 md:space-y-12">
-                    {rooms.map((room) => (
+                    {rooms.map((room, index) => (
                       <RoomCard
                         key={room._id}
                         room={room}
                         onBook={() => handleBookRoom(room.id)}
                         convertPrice={convertPrice}
                         currencySymbol={exchangeRates[selectedCurrency].symbol}
+                        index={index}
                       />
                     ))}
                   </div>
@@ -276,11 +278,22 @@ const RoomCard: React.FC<{
   onBook: () => void;
   convertPrice: (price: number) => string;
   currencySymbol: string;
-}> = ({ room, onBook, convertPrice, currencySymbol }) => {
+  index: number;
+}> = ({ room, onBook, convertPrice, currencySymbol, index }) => {
   const images = [room.heroImage];
 
   return (
-    <div className="mb-8 sm:mb-12 md:mb-16">
+    <motion.div 
+      className="mb-8 sm:mb-12 md:mb-16"
+      initial={{ opacity: 0, y: 60 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ 
+        duration: 0.5,
+        delay: index * 0.1,
+        ease: [0.25, 0.46, 0.45, 0.94]
+      }}
+    >
       {/* Image */}
       <div className="relative w-full mb-4 sm:mb-5 md:mb-6 bg-gray-100 overflow-hidden group rounded-sm">
         <div className="relative aspect-[16/10] sm:aspect-[16/9]">
@@ -322,7 +335,7 @@ const RoomCard: React.FC<{
       >
         Book Now
       </button>
-    </div>
+    </motion.div>
   );
 };
 

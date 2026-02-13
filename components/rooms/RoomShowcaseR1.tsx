@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 import { roomsAPI } from '@/lib/api';
 
 interface Room {
@@ -20,7 +21,7 @@ interface Room {
   isAvailable: boolean;
 }
 
-const RoomRow: React.FC<{ room: Room }> = ({ room }) => {
+const RoomRow: React.FC<{ room: Room; index: number }> = ({ room, index }) => {
   const [activeImg, setActiveImg] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -76,7 +77,17 @@ const RoomRow: React.FC<{ room: Room }> = ({ room }) => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row w-full border-b border-black last:border-b-0 overflow-hidden">
+    <motion.div 
+      className="flex flex-col lg:flex-row w-full border-b border-black last:border-b-0 overflow-hidden"
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ 
+        duration: 0.6,
+        delay: index * 0.15,
+        ease: [0.25, 0.46, 0.45, 0.94]
+      }}
+    >
       {/* Sidebar Info */}
       <div className="w-full lg:w-[460px] bg-[#1a1a1a] p-6 sm:p-8 md:p-12 lg:p-20 text-white flex flex-col justify-center min-h-[500px] sm:min-h-[550px] md:min-h-[650px] lg:min-h-[720px]">
         <h3 className="text-2xl sm:text-[28px] md:text-[32px] font-bold mb-6 sm:mb-8 md:mb-10 tracking-tight leading-tight">
@@ -179,7 +190,7 @@ const RoomRow: React.FC<{ room: Room }> = ({ room }) => {
           </>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -242,8 +253,8 @@ const RoomShowcaseR1: React.FC<{ section?: any }> = ({ section }) => {
 
       {/* Room Rows Vertical Stack */}
       <div className="w-full flex flex-col border-t border-black">
-        {rooms.map((room) => (
-          <RoomRow key={room._id} room={room} />
+        {rooms.map((room, index) => (
+          <RoomRow key={room._id} room={room} index={index} />
         ))}
       </div>
     </section>

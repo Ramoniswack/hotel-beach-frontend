@@ -1,4 +1,7 @@
+'use client';
+
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 
 const DEFAULT_PROMOTIONS = [
   {
@@ -34,7 +37,18 @@ const PromotionGridR4: React.FC<PromotionGridR4Props> = ({ section }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 w-full h-auto md:h-[300px] mb-8 sm:mb-12 md:mb-16">
       {promotions.map((promo, idx) => (
-        <div key={idx} className="relative group overflow-hidden h-[250px] sm:h-[280px] md:h-full">
+        <motion.div 
+          key={idx} 
+          className="relative group overflow-hidden h-[250px] sm:h-[280px] md:h-full"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ 
+            duration: 0.6,
+            delay: idx * 0.2,
+            ease: [0.25, 0.46, 0.45, 0.94]
+          }}
+        >
           <Image 
             src={promo.image} 
             alt={promo.title}
@@ -53,7 +67,7 @@ const PromotionGridR4: React.FC<PromotionGridR4Props> = ({ section }) => {
               Read More
             </a>
           </div>
-        </div>
+        </motion.div>
       ))}
     </div>
   );

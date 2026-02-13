@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { useAuthStore } from '@/store/authStore';
 import { bookingsAPI } from '@/lib/api';
 import { generateInvoicePDF } from '@/lib/generateInvoicePDF';
@@ -176,10 +177,17 @@ export default function GuestDashboard() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
-                  {bookings.map((booking) => (
-                    <div
+                  {bookings.map((booking, index) => (
+                    <motion.div
                       key={booking._id}
                       className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                      initial={{ opacity: 0, y: 40 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ 
+                        duration: 0.4,
+                        delay: index * 0.1,
+                        ease: [0.25, 0.46, 0.45, 0.94]
+                      }}
                     >
                       {/* Room Image - Use placeholder since we don't have heroImage */}
                       <div className="relative h-40 sm:h-44 md:h-48 bg-gray-200">
@@ -266,7 +274,7 @@ export default function GuestDashboard() {
                           )} */}
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               )}

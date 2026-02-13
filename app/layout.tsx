@@ -5,6 +5,7 @@ import '../styles/mobile-optimizations.css';
 import AuthProvider from '@/components/AuthProvider';
 import UnifiedPageLoader from '@/components/UnifiedPageLoader';
 import LayoutWrapper from '@/components/LayoutWrapper';
+import SmoothScrolling from '@/components/SmoothScrolling';
 
 const roboto = Roboto({
   weight: ['300', '400', '500', '700'],
@@ -35,9 +36,11 @@ export default function RootLayout({
       <body className={roboto.variable}>
         <AuthProvider>
           <UnifiedPageLoader />
-          <LayoutWrapper>
-            {children}
-          </LayoutWrapper>
+          <SmoothScrolling>
+            <LayoutWrapper>
+              {children}
+            </LayoutWrapper>
+          </SmoothScrolling>
         </AuthProvider>
       </body>
     </html>
