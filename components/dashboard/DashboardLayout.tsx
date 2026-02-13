@@ -17,8 +17,8 @@ import {
   MessageSquare,
   FileText,
   ChevronDown,
-  ChevronRight,
-  User
+  User,
+  ArrowLeft
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -49,11 +49,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   // Navigation items based on role
   const guestNavItems = [
-    { name: 'My Bookings', href: '/dashboard/guest', icon: Calendar },
+    { name: 'Dashboard', href: '/dashboard/guest', icon: Home },
+    { name: 'My Bookings', href: '/dashboard/guest/bookings', icon: Calendar },
     { name: 'Profile', href: '/dashboard/guest/profile', icon: User },
-    { name: 'Browse Rooms', href: '/rooms', icon: Hotel },
     { name: 'Contact', href: '/dashboard/guest/contact', icon: MessageSquare },
-    { name: 'Back to Site', href: '/', icon: Home },
+  ];
+
+  const guestExternalLinks = [
+    { name: 'Browse Rooms', href: '/rooms', icon: Hotel },
+    { name: 'Back to Site', href: '/', icon: ArrowLeft },
   ];
 
   const staffNavItems = [
@@ -182,6 +186,33 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 </Link>
               );
             })}
+
+            {/* Guest External Links */}
+            {user?.role === 'guest' && guestExternalLinks && (
+              <div className="pt-4">
+                {sidebarOpen && (
+                  <div className="text-[10px] font-bold tracking-widest text-white/40 px-3 mb-3 uppercase">
+                    Quick Links
+                  </div>
+                )}
+                {guestExternalLinks.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      title={!sidebarOpen ? item.name : ''}
+                      className={`flex items-center rounded-xl transition-all group text-white/70 hover:bg-white/10 hover:text-white ${
+                        sidebarOpen ? 'space-x-3 px-4 py-3' : 'justify-center py-3'
+                      }`}
+                    >
+                      <Icon size={20} className="group-hover:scale-110 transition-transform" />
+                      {sidebarOpen && <span className="font-medium text-sm">{item.name}</span>}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
 
             {/* Pages Menu (Admin Only) */}
             {user?.role === 'admin' && (

@@ -113,6 +113,9 @@ export const bookingsAPI = {
   getByEmail: (email: string) =>
     api.get(`/bookings/user/${email}`),
   
+  getMyBookings: () =>
+    api.get('/bookings/my-bookings'),
+  
   updateStatus: (id: string, status: string) =>
     api.patch(`/bookings/${id}/status`, { status }),
   
