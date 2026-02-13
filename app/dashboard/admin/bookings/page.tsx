@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import RouteGuard from '@/components/RouteGuard';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { bookingsAPI } from '@/lib/api';
-import { Calendar, Check, X, Eye } from 'lucide-react';
+import { Calendar, Check, X, Eye, Search, ArrowUpDown } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Booking {
@@ -36,6 +36,9 @@ export default function BookingsManager() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [sortField, setSortField] = useState<string>('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   useEffect(() => {
     fetchBookings();
@@ -63,10 +66,72 @@ export default function BookingsManager() {
     }
   };
 
-  const filteredBookings = bookings.filter(booking => {
-    if (filter === 'all') return true;
-    return booking.status === filter;
-  });
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const filteredBookings = bookings
+    .filter(booking => {
+      if (filter !== 'all' && booking.status !== filter) return false;
+      
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        return (
+          booking.guestInfo.name.toLowerCase().includes(query) ||
+          booking.guestInfo.email.toLowerCase().includes(query) ||
+          booking.guestInfo.phone.toLowerCase().includes(query) ||
+          booking.roomTitle.toLowerCase().includes(query) ||
+          booking._id.toLowerCase().includes(query)
+        );
+      }
+      
+      return true;
+    })
+    .sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (sortField) {
+        case 'guestName':
+          aValue = a.guestInfo.name.toLowerCase();
+          bValue = b.guestInfo.name.toLowerCase();
+          break;
+        case 'roomTitle':
+          aValue = a.roomTitle.toLowerCase();
+          bValue = b.roomTitle.toLowerCase();
+          break;
+        case 'checkInDate':
+          aValue = new Date(a.checkInDate).getTime();
+          bValue = new Date(b.checkInDate).getTime();
+          break;
+        case 'checkOutDate':
+          aValue = new Date(a.checkOutDate).getTime();
+          bValue = new Date(b.checkOutDate).getTime();
+          break;
+        case 'totalPrice':
+          aValue = a.totalPrice;
+          bValue = b.totalPrice;
+          break;
+        case 'status':
+          aValue = a.status.toLowerCase();
+          bValue = b.status.toLowerCase();
+          break;
+        case 'createdAt':
+        default:
+          aValue = new Date(a.createdAt).getTime();
+          bValue = new Date(b.createdAt).getTime();
+          break;
+      }
+
+      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -103,8 +168,21 @@ export default function BookingsManager() {
             </button>
           </div>
 
-          {/* Filters */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
+          {/* Search and Filters */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-4">
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                placeholder="Search by guest name, email, phone, room, or booking ID..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#59a4b5] focus:border-transparent"
+              />
+            </div>
+
+            {/* Status Filters */}
             <div className="flex flex-wrap gap-2">
               {['all', 'pending', 'confirmed', 'checked-in', 'completed', 'cancelled'].map((status) => (
                 <button
@@ -139,26 +217,62 @@ export default function BookingsManager() {
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Guest
+                      <th 
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleSort('guestName')}
+                      >
+                        <div className="flex items-center gap-1">
+                          Guest
+                          <ArrowUpDown size={14} />
+                        </div>
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Room
+                      <th 
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleSort('roomTitle')}
+                      >
+                        <div className="flex items-center gap-1">
+                          Room
+                          <ArrowUpDown size={14} />
+                        </div>
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Check-in
+                      <th 
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleSort('checkInDate')}
+                      >
+                        <div className="flex items-center gap-1">
+                          Check-in
+                          <ArrowUpDown size={14} />
+                        </div>
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Check-out
+                      <th 
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleSort('checkOutDate')}
+                      >
+                        <div className="flex items-center gap-1">
+                          Check-out
+                          <ArrowUpDown size={14} />
+                        </div>
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Guests
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Total
+                      <th 
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleSort('totalPrice')}
+                      >
+                        <div className="flex items-center gap-1">
+                          Total
+                          <ArrowUpDown size={14} />
+                        </div>
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
+                      <th 
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleSort('status')}
+                      >
+                        <div className="flex items-center gap-1">
+                          Status
+                          <ArrowUpDown size={14} />
+                        </div>
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions

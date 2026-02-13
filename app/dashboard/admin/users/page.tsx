@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import RouteGuard from '@/components/RouteGuard';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { authAPI } from '@/lib/api';
-import { Users, UserPlus, Edit2, Trash2, Shield, User as UserIcon, Power } from 'lucide-react';
+import { Users, UserPlus, Edit2, Trash2, Shield, User as UserIcon, Power, Search, ArrowUpDown } from 'lucide-react';
 
 interface User {
   _id: string;
@@ -22,6 +22,9 @@ export default function UserManagement() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [filter, setFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [sortField, setSortField] = useState<string>('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // Form state
   const [formData, setFormData] = useState({
@@ -87,10 +90,64 @@ export default function UserManagement() {
     }
   };
 
-  const filteredUsers = users.filter(user => {
-    if (filter === 'all') return true;
-    return user.role === filter;
-  });
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const filteredUsers = users
+    .filter(user => {
+      if (filter !== 'all' && user.role !== filter) return false;
+      
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        return (
+          user.name.toLowerCase().includes(query) ||
+          user.email.toLowerCase().includes(query) ||
+          (user.phone && user.phone.toLowerCase().includes(query)) ||
+          user.role.toLowerCase().includes(query) ||
+          user._id.toLowerCase().includes(query)
+        );
+      }
+      
+      return true;
+    })
+    .sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (sortField) {
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'email':
+          aValue = a.email.toLowerCase();
+          bValue = b.email.toLowerCase();
+          break;
+        case 'role':
+          aValue = a.role.toLowerCase();
+          bValue = b.role.toLowerCase();
+          break;
+        case 'status':
+          aValue = a.isActive ? 1 : 0;
+          bValue = b.isActive ? 1 : 0;
+          break;
+        case 'createdAt':
+        default:
+          aValue = new Date(a.createdAt).getTime();
+          bValue = new Date(b.createdAt).getTime();
+          break;
+      }
+
+      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
 
   const getRoleColor = (role: string) => {
     switch (role) {
@@ -184,8 +241,21 @@ export default function UserManagement() {
             </div>
           </div>
 
-          {/* Filters */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
+          {/* Search and Filters */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-4">
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                placeholder="Search by name, email, phone, role, or user ID..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#59a4b5] focus:border-transparent"
+              />
+            </div>
+
+            {/* Role Filters */}
             <div className="flex flex-wrap gap-2">
               {['all', 'admin', 'staff', 'guest'].map((role) => (
                 <button
@@ -220,23 +290,53 @@ export default function UserManagement() {
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        User
+                      <th 
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleSort('name')}
+                      >
+                        <div className="flex items-center gap-1">
+                          User
+                          <ArrowUpDown size={14} />
+                        </div>
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Email
+                      <th 
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleSort('email')}
+                      >
+                        <div className="flex items-center gap-1">
+                          Email
+                          <ArrowUpDown size={14} />
+                        </div>
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Phone
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Role
+                      <th 
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleSort('role')}
+                      >
+                        <div className="flex items-center gap-1">
+                          Role
+                          <ArrowUpDown size={14} />
+                        </div>
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
+                      <th 
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleSort('status')}
+                      >
+                        <div className="flex items-center gap-1">
+                          Status
+                          <ArrowUpDown size={14} />
+                        </div>
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Joined
+                      <th 
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleSort('createdAt')}
+                      >
+                        <div className="flex items-center gap-1">
+                          Joined
+                          <ArrowUpDown size={14} />
+                        </div>
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
