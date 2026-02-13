@@ -66,40 +66,40 @@ const DeluxeRoomH3: React.FC = () => {
   };
 
   return (
-    <section className="flex flex-col lg:flex-row min-h-[700px] w-full bg-[#1a1a1a] overflow-hidden">
+    <section className="flex flex-col lg:flex-row min-h-[600px] sm:min-h-[650px] md:min-h-[700px] w-full bg-[#1a1a1a] overflow-hidden">
       {/* Left Column: Info Sidebar */}
-      <div className="w-full lg:w-[450px] p-12 lg:p-20 flex flex-col justify-center text-white">
-        <h2 className="text-4xl font-serif font-medium mb-16 tracking-tight">
+      <div className="w-full lg:w-[450px] p-6 sm:p-8 md:p-12 lg:p-20 flex flex-col justify-center text-white">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-medium mb-8 sm:mb-12 md:mb-16 tracking-tight">
           {deluxeRoom.title}
         </h2>
 
-        <div className="mb-16">
+        <div className="mb-8 sm:mb-12 md:mb-16">
           <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-slate-400 mb-2">
             From
           </p>
-          <div className="text-5xl font-bold tracking-tight">
+          <div className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
             {deluxeRoom.price}
           </div>
         </div>
 
-        <div className="space-y-4 mb-20 text-sm">
-          <div className="grid grid-cols-[110px_1fr] items-start">
+        <div className="space-y-3 sm:space-y-4 mb-12 sm:mb-16 md:mb-20 text-xs sm:text-sm">
+          <div className="grid grid-cols-[90px_1fr] sm:grid-cols-[110px_1fr] items-start">
             <span className="font-bold tracking-wider text-slate-100">bed:</span>
             <span className="text-slate-300 font-light italic">{deluxeRoom.specs.bed}</span>
           </div>
-          <div className="grid grid-cols-[110px_1fr] items-start">
+          <div className="grid grid-cols-[90px_1fr] sm:grid-cols-[110px_1fr] items-start">
             <span className="font-bold tracking-wider text-slate-100">capacity:</span>
             <span className="text-slate-300 font-light italic">{deluxeRoom.specs.capacity}</span>
           </div>
-          <div className="grid grid-cols-[110px_1fr] items-start">
+          <div className="grid grid-cols-[90px_1fr] sm:grid-cols-[110px_1fr] items-start">
             <span className="font-bold tracking-wider text-slate-100">room size:</span>
             <span className="text-slate-300 font-light italic">{deluxeRoom.specs.size}</span>
           </div>
-          <div className="grid grid-cols-[110px_1fr] items-start">
+          <div className="grid grid-cols-[90px_1fr] sm:grid-cols-[110px_1fr] items-start">
             <span className="font-bold tracking-wider text-slate-100">view:</span>
             <span className="text-slate-300 font-light italic">{deluxeRoom.specs.view}</span>
           </div>
-          <div className="grid grid-cols-[110px_1fr] items-start">
+          <div className="grid grid-cols-[90px_1fr] sm:grid-cols-[110px_1fr] items-start">
             <span className="font-bold tracking-wider text-slate-100">recommend:</span>
             <span className="text-slate-300 font-light italic">{deluxeRoom.subtitle}</span>
           </div>
@@ -108,7 +108,7 @@ const DeluxeRoomH3: React.FC = () => {
         <div>
           <a 
             href={`/accommodation/${deluxeRoom.id}`}
-            className="px-10 py-3 rounded-full border border-white text-[10px] font-bold tracking-[0.25em] uppercase hover:bg-white hover:text-black transition-all duration-300 inline-block"
+            className="px-8 sm:px-10 py-2.5 sm:py-3 rounded-full border border-white text-[10px] font-bold tracking-[0.25em] uppercase hover:bg-white hover:text-black transition-all duration-300 inline-block tap-target"
           >
             view detail
           </a>
@@ -118,7 +118,7 @@ const DeluxeRoomH3: React.FC = () => {
       {/* Right Column: Image Slider with Preview */}
       <div 
         ref={sliderRef}
-        className="flex-grow relative overflow-hidden"
+        className="flex-grow relative overflow-hidden min-h-[400px] sm:min-h-[450px] md:min-h-[500px]"
         style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -157,20 +157,20 @@ const DeluxeRoomH3: React.FC = () => {
           <>
             <button 
               onClick={prevImage}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-white transition-all hover:scale-110 z-20 bg-black/20 backdrop-blur-sm rounded-sm"
+              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white transition-all hover:scale-110 z-20 bg-black/20 backdrop-blur-sm rounded-sm tap-target"
               aria-label="Previous image"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
 
             <button 
               onClick={nextImage}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-white transition-all hover:scale-110 z-20 bg-black/20 backdrop-blur-sm rounded-sm"
+              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white transition-all hover:scale-110 z-20 bg-black/20 backdrop-blur-sm rounded-sm tap-target"
               aria-label="Next image"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </button>

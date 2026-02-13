@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { Roboto } from 'next/font/google';
 import './globals.css';
+import '../styles/mobile-optimizations.css';
 import AuthProvider from '@/components/AuthProvider';
+import UnifiedPageLoader from '@/components/UnifiedPageLoader';
 
 const roboto = Roboto({
   weight: ['300', '400', '500', '700'],
@@ -12,6 +14,14 @@ const roboto = Roboto({
 export const metadata: Metadata = {
   title: 'Hoteller Beach Hotel - Luxury Santorini Resort',
   description: 'Unwind the clock of modern life. Unlock the door to a wonder of the world.',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  },
+  themeColor: '#59a4b5',
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
@@ -23,6 +33,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={roboto.variable}>
         <AuthProvider>
+          <UnifiedPageLoader />
           {children}
         </AuthProvider>
       </body>

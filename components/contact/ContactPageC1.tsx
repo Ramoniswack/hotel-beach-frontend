@@ -1,8 +1,17 @@
 'use client';
 
-import { useState } from 'react';
-import { Facebook, Youtube, Instagram, MapPin, Bird } from 'lucide-react';
-import Image from 'next/image';
+import React, { useState } from 'react';
+import { Facebook, Youtube, Instagram, MapPin, Twitter, Linkedin } from 'lucide-react';
+
+// --- Types ---
+interface SectionItem {
+  title?: string;
+  content?: string;
+  type?: string;
+  platform?: string;
+  url?: string;
+  color?: string;
+}
 
 interface Section {
   sectionId: string;
@@ -10,17 +19,18 @@ interface Section {
   subtitle?: string;
   description?: string;
   images?: string[];
-  items?: any[];
+  items?: SectionItem[];
   buttonText?: string;
   buttonLink?: string;
   isVisible: boolean;
 }
 
 interface ContactPageC1Props {
-  sections: Section[];
+  sections?: Section[];
 }
 
-const ContactPageC1: React.FC<ContactPageC1Props> = ({ sections }) => {
+// --- Component ---
+const ContactPageC1: React.FC<ContactPageC1Props> = ({ sections = [] }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -47,46 +57,41 @@ const ContactPageC1: React.FC<ContactPageC1Props> = ({ sections }) => {
   const getSocialIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
       case 'facebook': return <Facebook size={18} fill="currentColor" />;
-      case 'twitter': return <Bird size={18} fill="currentColor" />;
+      case 'twitter': return <Twitter size={18} fill="currentColor" />;
       case 'youtube': return <Youtube size={18} fill="currentColor" />;
       case 'instagram': return <Instagram size={18} />;
+      case 'linkedin': return <Linkedin size={18} fill="currentColor" />;
       default: return null;
     }
   };
 
+  const defaultSections = sections.length === 0;
+
   return (
-    <div className="bg-white">
+    <div className="bg-white text-[#1a1a1a] selection:bg-[#66b1be] selection:text-white">
       {/* 1. Header Section */}
-      {(sections.length === 0 || header) && (
-        <div className="pt-40 pb-16">
-          <div className="container mx-auto px-6 lg:px-24">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-6">
-              <h1 className="font-sans text-4xl md:text-5xl font-bold text-[#1a1a1a] tracking-tight leading-tight">
-                {header?.title ? (
-                  header.title.includes('Located in center of') ? (
-                    <>
-                      Located in center of<br />Santorini, Greece
-                    </>
-                  ) : (
-                    header.title
-                  )
-                ) : (
-                  <>
-                    Located in center of<br />Santorini, Greece
-                  </>
-                )}
-              </h1>
-              <a 
-                href={header?.buttonLink || 'https://maps.google.com'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-[#66b1be] hover:bg-[#579ea9] text-white text-[11px] font-bold py-3.5 px-8 rounded-full transition-all duration-300 flex items-center gap-2 w-fit shadow-sm"
-              >
-                <MapPin size={16} strokeWidth={2} />
-                {header?.buttonText || 'Get Direction'}
-              </a>
+      {(defaultSections || header) && (
+        <div className="pt-24 pb-12">
+          <div className="container mx-auto px-6 lg:px-32">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-6">
+              <div className="flex-1">
+                <h1 className="text-4xl md:text-[42px] font-bold text-[#1a1a1a] tracking-tight leading-[1.15] max-w-xl">
+                  {header?.title || "Located in center of Santorini, Greece"}
+                </h1>
+              </div>
+              <div className="flex items-center pb-2">
+                <a 
+                  href={header?.buttonLink || 'https://maps.google.com'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-[#66b1be] hover:bg-[#579ea9] text-white text-[12px] uppercase tracking-wider font-bold py-2.5 px-6 rounded-full transition-all duration-300 flex items-center gap-2 w-fit shadow-md hover:-translate-y-0.5"
+                >
+                  <MapPin size={14} fill="currentColor" />
+                  {header?.buttonText || 'Get Direction'}
+                </a>
+              </div>
             </div>
-            <p className="text-[#1a1a1a]/60 text-sm font-medium leading-relaxed max-w-2xl">
+            <p className="text-black text-[15px] font-normal leading-relaxed max-w-2xl mt-8">
               {header?.subtitle || 'Unwind the clock of modern life. Unlock the door to a wonder of the world.'}
             </p>
           </div>
@@ -94,33 +99,35 @@ const ContactPageC1: React.FC<ContactPageC1Props> = ({ sections }) => {
       )}
 
       {/* 2. Map Section */}
-      {(sections.length === 0 || map) && (
-        <div className="w-full h-[500px] bg-gray-100 relative mb-20 overflow-hidden">
+      {(defaultSections || map) && (
+        <div className="w-full h-[520px] bg-[#f5f5f5] relative mt-12 mb-20 overflow-hidden border-y border-gray">
           <iframe
-            src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(map?.description || 'Santorini, Greece')}`}
+            src={`https://www.google.com/maps?q=${encodeURIComponent(map?.description || 'Santorini, Greece')}&output=embed&z=13`}
             width="100%"
             height="100%"
-            style={{ border: 0 }}
+            style={{ border: 0, filter: 'grayscale(100%) contrast(0.8) brightness(1.1)' }}
             allowFullScreen
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            className="grayscale"
+            title="Location Map"
           ></iframe>
         </div>
       )}
 
       {/* 3. Info Columns */}
-      {(sections.length === 0 || infoColumns) && (
-        <div className="mb-32" style={{ paddingLeft: '4cm', paddingRight: '5cm' }}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+      {(defaultSections || infoColumns) && (
+        <div className="container mx-auto px-6 lg:px-32 mb-28">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-24">
             {(infoColumns?.items || [
               { title: 'Our Address', content: '45 Santorini Station. Thira 150-0042 Greece\nrevs@hotellerbeach.com' },
-              { title: 'By Car', content: 'Approximately 5 minutes from Santorini station. or 10 minutes from Thira station.' },
-              { title: 'By Train', content: '7 minutes walk from St. Santorini Station. or 15 minutes walk from Thira Station.' }
-            ]).map((item: any, idx: number) => (
-              <div key={idx}>
-                <h4 className="text-[#1a1a1a] text-[11px] uppercase tracking-[0.3em] font-black mb-6">{item.title}</h4>
-                <div className="text-[#1a1a1a]/50 text-[13px] leading-loose font-bold whitespace-pre-line">
+              { title: 'By Car', content: 'Approximately 5 minutes from Santorini station, or 10 minutes from Thira station.' },
+              { title: 'By Train', content: '7 minutes walk from St. Santorini Station, or 15 minutes walk from Thira Station.' }
+            ]).map((item: SectionItem, idx: number) => (
+              <div key={idx} className="space-y-4">
+                <h4 className="text-black text-[13px] font-bold tracking-normal uppercase tracking-[0.2em]">
+                  {item.title}
+                </h4>
+                <div className="text-black text-[15px] leading-[1.8] font-normal whitespace-pre-line" style={{ fontFamily: 'Raleway', letterSpacing: '0px' }}>
                   {item.content}
                 </div>
               </div>
@@ -130,66 +137,89 @@ const ContactPageC1: React.FC<ContactPageC1Props> = ({ sections }) => {
       )}
 
       {/* 4. Contact Form & Side Card */}
-      <div className="container mx-auto px-6 lg:px-24 pb-32">
-        <div className="flex flex-col lg:flex-row gap-20">
+      <div className="container mx-auto px-6 lg:px-32 pb-32">
+        <div className="flex flex-col lg:flex-row gap-16 lg:gap-24">
           {/* Form */}
-          {(sections.length === 0 || contactForm) && (
+          {(defaultSections || contactForm) && (
             <div className="flex-1">
-              <h2 className="text-[26px] font-bold text-[#1a1a1a] mb-12 tracking-tight">
+              <h2 className="text-[32px] font-bold text-[#1a1a1a] mb-16 tracking-tight">
                 {contactForm?.title || 'Do you have any wishes or questions?'}
               </h2>
               
-              <form onSubmit={handleSubmit} className="space-y-12">
+              <form onSubmit={handleSubmit} className="space-y-10">
                 <div className="space-y-12">
-                  <div className="group">
-                    <label className="text-[10px] uppercase tracking-widest font-bold text-[#1a1a1a]/30 block mb-1 group-focus-within:text-hotel-gold transition-colors">Name (*)</label>
+                  <div className="relative">
+                    <label className="text-[11px] uppercase tracking-[0.2em] font-bold text-black block mb-2">
+                      Name (*)
+                    </label>
                     <input 
                       type="text" 
                       required
-                      className="w-full border-b border-gray-200 py-3 text-[14px] font-medium outline-none focus:border-[#1a1a1a] transition-all bg-transparent"
+                      placeholder=""
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      className="w-full border-b border-black pb-3 text-[15px] font-medium outline-none focus:border-[#1a1a1a] transition-colors bg-transparent placeholder:text-transparent"
                     />
                   </div>
-                  <div className="group">
-                    <label className="text-[10px] uppercase tracking-widest font-bold text-[#1a1a1a]/30 block mb-1 group-focus-within:text-hotel-gold transition-colors">Email (*)</label>
+
+                  <div className="relative">
+                    <label className="text-[11px] uppercase tracking-[0.2em] font-bold text-black block mb-2">
+                      Email (*)
+                    </label>
                     <input 
                       type="email" 
                       required
-                      className="w-full border-b border-gray-200 py-3 text-[14px] font-medium outline-none focus:border-[#1a1a1a] transition-all bg-transparent"
+                      placeholder=""
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      className="w-full border-b border-black pb-3 text-[15px] font-medium outline-none focus:border-[#1a1a1a] transition-colors bg-transparent placeholder:text-transparent"
                     />
                   </div>
-                  <div className="group">
-                    <label className="text-[10px] uppercase tracking-widest font-bold text-[#1a1a1a]/30 block mb-1 group-focus-within:text-hotel-gold transition-colors">Phone</label>
+
+                  <div className="relative">
+                    <label className="text-[11px] uppercase tracking-[0.2em] font-bold text-black block mb-2">
+                      Phone
+                    </label>
                     <input 
                       type="tel" 
-                      className="w-full border-b border-gray-200 py-3 text-[14px] font-medium outline-none focus:border-[#1a1a1a] transition-all bg-transparent"
+                      placeholder=""
+                      value={formData.phone}
+                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                      className="w-full border-b border-black pb-3 text-[15px] font-medium outline-none focus:border-[#1a1a1a] transition-colors bg-transparent placeholder:text-transparent"
                     />
                   </div>
-                  <div className="group">
-                    <label className="text-[10px] uppercase tracking-widest font-bold text-[#1a1a1a]/30 block mb-1 group-focus-within:text-hotel-gold transition-colors">Your Message</label>
+
+                  <div className="relative pt-4">
+                    <label className="text-[11px] uppercase tracking-[0.2em] font-bold text-black block mb-2">
+                      Your Message
+                    </label>
                     <textarea 
-                      rows={5}
-                      className="w-full border-b border-gray-200 py-3 text-[14px] font-medium outline-none focus:border-[#1a1a1a] transition-all resize-none bg-transparent"
+                      rows={1}
+                      placeholder=""
+                      value={formData.message}
+                      onChange={(e) => setFormData({...formData, message: e.target.value})}
+                      className="w-full border-b border-black pb-3 text-[15px] font-medium outline-none focus:border-[#1a1a1a] transition-colors resize-none bg-transparent overflow-hidden placeholder:text-transparent min-h-[40px]"
                     ></textarea>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 pt-4">
-                  <div className="pt-1">
-                    <input 
-                      type="checkbox" 
-                      id="consent"
-                      required
-                      className="w-3.5 h-3.5 rounded border-gray-300 text-hotel-gold focus:ring-0 cursor-pointer"
-                    />
-                  </div>
-                  <label htmlFor="consent" className="text-[11px] font-medium text-[#1a1a1a]/40 cursor-pointer leading-tight">
+                <div className="flex items-center gap-3 pt-6">
+                  <input 
+                    type="checkbox" 
+                    id="consent"
+                    required
+                    checked={formData.consent}
+                    onChange={(e) => setFormData({...formData, consent: e.target.checked})}
+                    className="w-4 h-4 rounded border-black text-[#66b1be] focus:ring-[#66b1be] cursor-pointer"
+                  />
+                  <label htmlFor="consent" className="text-[13px] font-normal text-black cursor-pointer leading-tight">
                     {contactForm?.description || 'I consent to Hoteller Hotel collecting my details through this form.'}
                   </label>
                 </div>
 
                 <button 
                   type="submit"
-                  className="bg-[#66b1be] hover:bg-[#579ea9] text-white text-[11px] font-bold py-3.5 px-10 rounded-full transition-all duration-300 shadow-sm"
+                  className="bg-[#66b1be] hover:bg-[#579ea9] text-white text-[12px] uppercase tracking-wider font-bold py-3 px-12 rounded-full transition-all duration-300 shadow-md hover:-translate-y-0.5 mt-4"
                 >
                   Send
                 </button>
@@ -198,45 +228,46 @@ const ContactPageC1: React.FC<ContactPageC1Props> = ({ sections }) => {
           )}
 
           {/* Right Side Card & Socials */}
-          <div className="lg:w-[320px] pt-16">
-            {(sections.length === 0 || contactInfo) && (
-              <div className="bg-[#fcfcfc] border-4 border-double border-gray-300 p-10 text-center mb-16 rounded-sm shadow-sm">
-                <h3 className="text-[13px] font-black text-[#1a1a1a] mb-6 tracking-tight">
+          <div className="lg:w-[360px] pt-12">
+            {(defaultSections || contactInfo) && (
+              <div className="bg-[#F9F9F9] border-[4px] border-double border-black mx-5 p-[30px] text-center mb-16 rounded-sm shadow-sm relative">
+                <h3 className="text-[15px] font-extrabold text-black mb-10 tracking-[0.1em] uppercase">
                   {contactInfo?.title || 'Hoteller Beach Hotel'}
                 </h3>
-                <div className="text-[#1a1a1a]/40 text-[12px] leading-[2.2] font-medium">
+                <div className="text-black text-[14px] leading-[2.4] font-medium">
                   {(contactInfo?.items || [
                     { type: 'address', content: '45 Santorini Station\nThira 150-0042' },
                     { type: 'contact', content: 'Tel.: +41 (0)54 2344 00\nFax: +41 (0)54 2344 99\nrevs@hotellerbeach.com' }
-                  ]).map((item: any, idx: number) => (
+                  ]).map((item: SectionItem, idx: number) => (
                     <div key={idx}>
                       <div className="whitespace-pre-line">{item.content}</div>
-                      {idx === 0 && <div className="my-5 border-t border-gray-100 mx-auto w-12"></div>}
+                      {idx === 0 && <div className="my-8 border-t border-black mx-auto w-12"></div>}
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {(sections.length === 0 || socialMedia) && (
+            {(defaultSections || socialMedia) && (
               <div className="text-center">
-                <p className="text-[10px] uppercase tracking-[0.25em] font-black text-[#1a1a1a] mb-8">
+                <p className="text-[13px] font-bold text-[#1a1a1a] mb-8 tracking-tight">
                   {socialMedia?.title || 'Stay in touch with us'}
                 </p>
-                <div className="flex items-center justify-center gap-3">
+                <div className="flex items-center justify-center gap-4">
                   {(socialMedia?.items || [
                     { platform: 'facebook', url: '#', color: '#3b5998' },
-                    { platform: 'twitter', url: '#', color: '#52c179' },
-                    { platform: 'youtube', url: '#', color: '#e32d2d' },
-                    { platform: 'instagram', url: '#', color: '#35465d' }
-                  ]).map((item: any, idx: number) => (
+                    { platform: 'twitter', url: '#', color: '#1DA1F2' },
+                    { platform: 'youtube', url: '#', color: '#cd201f' },
+                    { platform: 'instagram', url: '#', color: '#E4405F' }
+                  ]).map((item: SectionItem, idx: number) => (
                     <a 
                       key={idx}
                       href={item.url} 
-                      className="w-10 h-10 rounded-full text-white flex items-center justify-center hover:scale-105 transition-transform shadow-md"
+                      className="w-11 h-11 rounded-full text-white flex items-center justify-center hover:scale-110 transition-transform shadow-sm"
                       style={{ backgroundColor: item.color }}
+                      title={item.platform}
                     >
-                      {getSocialIcon(item.platform)}
+                      {getSocialIcon(item.platform || '')}
                     </a>
                   ))}
                 </div>

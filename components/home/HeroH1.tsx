@@ -118,14 +118,14 @@ const HeroH1: React.FC<HeroH1Props> = ({ section }) => {
                 ></div>
                 
                 {/* Content for each slide */}
-                <div className={`absolute inset-0 z-10 flex items-center justify-center text-center text-white px-6 transition-all duration-700 delay-200 ${
+                <div className={`absolute inset-0 z-10 flex items-center justify-center text-center text-white px-4 sm:px-6 transition-all duration-700 delay-200 ${
                   isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}>
                   <div>
-                    <h1 className="text-[60px] md:text-[80px] lg:text-[100px] font-bold tracking-tight mb-4 leading-none drop-shadow-2xl">
+                    <h1 className="text-4xl sm:text-5xl md:text-[80px] lg:text-[100px] font-bold tracking-tight mb-3 sm:mb-4 leading-none drop-shadow-2xl">
                       {slide.title}
                     </h1>
-                    <p className="text-[14px] md:text-[16px] uppercase tracking-[0.3em] font-medium opacity-90 drop-shadow-lg">
+                    <p className="text-xs sm:text-sm md:text-[16px] uppercase tracking-[0.2em] sm:tracking-[0.3em] font-medium opacity-90 drop-shadow-lg">
                       {slide.subtitle}
                     </p>
                   </div>
@@ -139,35 +139,35 @@ const HeroH1: React.FC<HeroH1Props> = ({ section }) => {
       {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
-        className="absolute left-8 md:left-12 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors p-4 z-20"
+        className="absolute left-4 sm:left-6 md:left-8 lg:left-12 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors p-2 sm:p-3 md:p-4 z-20 tap-target"
         aria-label="Previous slide"
       >
-        <svg className="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 19l-7-7 7-7" />
         </svg>
       </button>
 
       <button
         onClick={nextSlide}
-        className="absolute right-8 md:right-12 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors p-4 z-20"
+        className="absolute right-4 sm:right-6 md:right-8 lg:right-12 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors p-2 sm:p-3 md:p-4 z-20 tap-target"
         aria-label="Next slide"
       >
-        <svg className="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5l7 7-7 7" />
         </svg>
       </button>
 
       {/* Bottom Line Pagination */}
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center z-20">
+      <div className="absolute bottom-8 sm:bottom-10 md:bottom-12 left-1/2 -translate-x-1/2 flex items-center z-20">
         {slides.map((_, i) => (
           <button
             key={i}
             onClick={() => goToSlide(i)}
-            className="inline-block px-[5px] py-[15px] relative w-[46px] h-8 cursor-pointer z-10"
+            className="inline-block px-[5px] py-[15px] relative w-[36px] sm:w-[46px] h-8 cursor-pointer z-10 tap-target"
             aria-label={`Go to slide ${i + 1}`}
           >
             <span 
-              className={`block absolute top-[15px] left-[5px] w-9 h-[2px] bg-white transition-opacity duration-200 ${
+              className={`block absolute top-[15px] left-[5px] w-7 sm:w-9 h-[2px] bg-white transition-opacity duration-200 ${
                 i === current ? 'opacity-100' : 'opacity-30 hover:opacity-100'
               }`}
             ></span>

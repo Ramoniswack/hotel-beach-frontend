@@ -15,34 +15,34 @@ interface IntroSectionH2Props {
 
 const IntroSectionH2: React.FC<IntroSectionH2Props> = ({ section }) => {
   return (
-    <section className="py-24 overflow-hidden bg-white p-[30px]">
+    <section className="py-12 sm:py-16 md:py-20 lg:py-24 overflow-hidden bg-white px-4 sm:px-6 md:p-[30px]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16 items-center">
           {/* Left Column: Text Content */}
-          <div className="lg:col-span-5 space-y-8 animate-fade-in">
+          <div className="lg:col-span-5 space-y-6 sm:space-y-8 animate-fade-in">
             <header>
-              <p className="text-xs font-bold tracking-[0.2em] uppercase text-slate-400 mb-6">
+              <p className="text-xs font-bold tracking-[0.2em] uppercase text-slate-400 mb-4 sm:mb-6">
                 {section?.subtitle || 'About Hoteller'}
               </p>
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-medium leading-[1.1] text-slate-900 mb-8">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-medium leading-[1.1] text-slate-900 mb-6 sm:mb-8">
                 {section?.title || 'Beach Hotel More than a stay'}
               </h2>
             </header>
             
-            <div className="space-y-6 text-slate-600 leading-relaxed font-light">
+            <div className="space-y-4 sm:space-y-6 text-slate-600 leading-relaxed font-light text-sm sm:text-base">
               <p>
                 {section?.description || 'Pitchfork selfies master cleanse Kickstarter seitan retro. Drinking vinegar stumptown yr pop-up artisan sunt. Deep v cliche lomo biodiesel Neutra selfies. Shorts fixie consequat flexitarian four loko tempor duis single-origin coffee. Banksy, elit small batch freegan sed.'}
               </p>
             </div>
             
-            <div className="pt-8">
+            <div className="pt-6 sm:pt-8">
               <div className="mb-4">
                 <Image 
                   src="https://hotellerv1.b-cdn.net/beach/wp-content/uploads/sites/4/2018/06/signature.png" 
                   alt="Signature" 
                   width={200}
                   height={80}
-                  className="h-16 w-auto mb-4"
+                  className="h-12 sm:h-14 md:h-16 w-auto mb-3 sm:mb-4"
                 />
                 <p className="text-xs font-bold tracking-[0.2em] uppercase text-slate-900">
                   {section?.content || 'Richard Morgan - General Manager'}
@@ -53,7 +53,7 @@ const IntroSectionH2: React.FC<IntroSectionH2Props> = ({ section }) => {
 
           {/* Right Column: Overlapping Images */}
           <div className="lg:col-span-7 relative">
-            <div className="relative grid grid-cols-12 grid-rows-12 h-[600px] w-full">
+            <div className="relative grid grid-cols-12 grid-rows-12 h-[400px] sm:h-[500px] md:h-[600px] w-full">
               {/* Image 1: Tall Vertical (Left-most background) */}
               <div className="col-start-1 col-end-7 row-start-1 row-end-9 z-10 shadow-2xl relative">
                 <Image 
@@ -65,7 +65,7 @@ const IntroSectionH2: React.FC<IntroSectionH2Props> = ({ section }) => {
               </div>
 
               {/* Image 2: Wide Horizontal (Top-right overlap) */}
-              <div className="col-start-5 col-end-13 row-start-2 row-end-7 z-20 shadow-2xl translate-x-4 relative">
+              <div className="col-start-5 col-end-13 row-start-2 row-end-7 z-20 shadow-2xl translate-x-2 sm:translate-x-4 relative">
                 <Image 
                   src={section?.images?.[1] || 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&q=80&w=1200'} 
                   alt="Beach Setup" 
@@ -75,7 +75,7 @@ const IntroSectionH2: React.FC<IntroSectionH2Props> = ({ section }) => {
               </div>
 
               {/* Image 3: Square Horizontal (Bottom-right overlap) */}
-              <div className="col-start-4 col-end-12 row-start-6 row-end-12 z-30 shadow-2xl translate-y-4 relative">
+              <div className="col-start-4 col-end-12 row-start-6 row-end-12 z-30 shadow-2xl translate-y-2 sm:translate-y-4 relative">
                 <Image 
                   src={section?.images?.[2] || 'https://images.unsplash.com/photo-1602002418082-a4443e081dd1?auto=format&fit=crop&q=80&w=1000'} 
                   alt="Luxury Suite" 

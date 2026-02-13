@@ -177,6 +177,49 @@ export default function SiteSettingsManagement() {
                     </div>
 
                     <div className="space-y-4">
+                      {/* Page Loader Settings */}
+                      {section.sectionId === 'page-loader' && (
+                        <>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Main Text (Top)
+                            </label>
+                            <input
+                              type="text"
+                              value={formData.title || ''}
+                              onChange={(e) => updateFormField('title', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                              placeholder="HOTEL"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              Large text displayed on page load
+                            </p>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Sub Text (Bottom)
+                            </label>
+                            <input
+                              type="text"
+                              value={formData.subtitle || ''}
+                              onChange={(e) => updateFormField('subtitle', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                              placeholder="BEACH"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              Small text displayed below main text
+                            </p>
+                          </div>
+
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <p className="text-sm text-blue-800">
+                              <strong>Preview:</strong> The page loader shows a water-fill animation with your text on a teal background. Changes will apply on next page load.
+                            </p>
+                          </div>
+                        </>
+                      )}
+
                       {/* Header Settings */}
                       {section.sectionId === 'header' && (
                         <>
@@ -355,7 +398,9 @@ export default function SiteSettingsManagement() {
                         </h3>
                         <p className="text-sm text-gray-600">
                           {section.sectionId === 'header' 
-                            ? `${section.items?.length || 0} menu items` 
+                            ? `${section.items?.length || 0} menu items`
+                            : section.sectionId === 'page-loader'
+                            ? `Main: "${section.title || 'HOTEL'}" | Sub: "${section.subtitle || 'BEACH'}"`
                             : `${section.items?.length || 0} footer sections`}
                         </p>
                       </div>
