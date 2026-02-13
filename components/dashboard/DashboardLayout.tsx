@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
-import PageTransition from '@/components/PageTransition';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Home, 
   Calendar, 
@@ -28,9 +28,19 @@ interface DashboardLayoutProps {
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [pagesMenuOpen, setPagesMenuOpen] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthStore();
+
+  // Show loading animation when route changes
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500); // Increased to 1.5 seconds to cover data fetching
+    return () => clearTimeout(timer);
+  }, [pathname]);
 
   const handleLogout = () => {
     logout();
@@ -269,10 +279,97 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </header>
 
         {/* Page Content */}
-        <main className="p-6 bg-gray-50 min-h-[calc(100vh-73px)]">
-          <PageTransition>
-            {children}
-          </PageTransition>
+        <main className="p-6 bg-gray-50 min-h-[calc(100vh-73px)] relative">
+          {/* Loading Overlay */}
+          <AnimatePresence>
+            {isLoading && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="absolute inset-0 bg-[#5fb2c1] z-50 flex items-center justify-center"
+              >
+                <div className="text-center flex flex-col items-center">
+                  {/* Main Text with Water Fill Effect */}
+                  <div className="relative inline-block">
+                    {/* Background text (outline) */}
+                    <h1 
+                      className="text-[3rem] sm:text-[4rem] font-light tracking-[0.15em] text-transparent"
+                      style={{
+                        WebkitTextStroke: '1.5px rgba(255, 255, 255, 0.4)',
+                        fontFamily: 'system-ui, -apple-system, sans-serif',
+                        fontWeight: 300,
+                      }}
+                    >
+                      HOTEL
+                    </h1>
+                    
+                    {/* Filled text (water fill) */}
+                    <motion.div
+                      className="absolute inset-0 overflow-hidden"
+                      initial={{ clipPath: 'inset(100% 0 0 0)' }}
+                      animate={{ clipPath: 'inset(0% 0 0 0)' }}
+                      transition={{ 
+                        duration: 0.8,
+                        ease: "easeInOut" as const,
+                        delay: 0.1
+                      }}
+                    >
+                      <h1 
+                        className="text-[3rem] sm:text-[4rem] font-light tracking-[0.15em] text-white"
+                        style={{
+                          fontFamily: 'system-ui, -apple-system, sans-serif',
+                          fontWeight: 300,
+                        }}
+                      >
+                        HOTEL
+                      </h1>
+                    </motion.div>
+                  </div>
+
+                  {/* Sub Text with Water Fill Effect */}
+                  <div className="relative inline-block -mt-2">
+                    {/* Background text (outline) */}
+                    <p 
+                      className="text-[0.65rem] sm:text-[0.75rem] tracking-[0.35em] text-transparent font-light"
+                      style={{
+                        WebkitTextStroke: '0.5px rgba(255, 255, 255, 0.4)',
+                        fontFamily: 'system-ui, -apple-system, sans-serif',
+                        fontWeight: 300,
+                      }}
+                    >
+                      BEACH
+                    </p>
+                    
+                    {/* Filled text (water fill) */}
+                    <motion.div
+                      className="absolute inset-0 overflow-hidden"
+                      initial={{ clipPath: 'inset(100% 0 0 0)' }}
+                      animate={{ clipPath: 'inset(0% 0 0 0)' }}
+                      transition={{ 
+                        duration: 0.8,
+                        ease: "easeInOut" as const,
+                        delay: 0.3
+                      }}
+                    >
+                      <p 
+                        className="text-[0.65rem] sm:text-[0.75rem] tracking-[0.35em] text-white/95 font-light"
+                        style={{
+                          fontFamily: 'system-ui, -apple-system, sans-serif',
+                          fontWeight: 300,
+                        }}
+                      >
+                        BEACH
+                      </p>
+                    </motion.div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {children}
         </main>
       </div>
     </div>

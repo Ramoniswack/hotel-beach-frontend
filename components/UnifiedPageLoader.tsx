@@ -30,6 +30,12 @@ const UnifiedPageLoader: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // Don't show loader on dashboard pages
+    if (pathname.startsWith('/dashboard')) {
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     
     const timer = setTimeout(() => {
@@ -46,7 +52,7 @@ const UnifiedPageLoader: React.FC = () => {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5, ease: "easeInOut" }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#5fb2c1]"
+          className="fixed inset-0 z-[99999] flex items-center justify-center bg-[#5fb2c1]"
         >
           <div className="text-center flex flex-col items-center">
             {/* Main Text with Water Fill Effect */}
