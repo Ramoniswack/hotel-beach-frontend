@@ -136,3 +136,11 @@ export const contentAPI = {
   update: (pageName: string, data: any) =>
     api.put(`/content/${pageName}`, data),
 };
+
+export const contactSettingsAPI = {
+  get: () =>
+    api.get('/contact-settings'),
+  
+  update: (data: any) =>
+    api.put('/contact-settings', data),
+};

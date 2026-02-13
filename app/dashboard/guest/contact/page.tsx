@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import RouteGuard from '@/components/RouteGuard';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { contactSettingsAPI } from '@/lib/api';
 import { 
   MessageSquare, 
   Send, 
@@ -27,7 +28,8 @@ import {
   Coffee,
   Salad,
   Beef,
-  Cake
+  Cake,
+  Loader2
 } from 'lucide-react';
 
 interface Message {
@@ -37,8 +39,29 @@ interface Message {
   timestamp: Date;
 }
 
+interface ContactSettings {
+  phone: string;
+  email: string;
+  location: {
+    address: string;
+    city: string;
+    country: string;
+    postalCode: string;
+  };
+  serviceHours: {
+    frontDesk: string;
+    roomService: string;
+    concierge: string;
+    spa: string;
+    restaurant: string;
+  };
+  emergencyHotline: string;
+}
+
 export default function GuestContact() {
   const { user } = useAuthStore();
+  const [contactSettings, setContactSettings] = useState<ContactSettings | null>(null);
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -50,6 +73,21 @@ export default function GuestContact() {
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetchContactSettings();
+  }, []);
+
+  const fetchContactSettings = async () => {
+    try {
+      const response = await contactSettingsAPI.get();
+      setContactSettings(response.data.data);
+    } catch (error) {
+      console.error('Error fetching contact settings:', error);
+    } finally {
+      setIsLoadingSettings(false);
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -147,65 +185,65 @@ export default function GuestContact() {
   return (
     <RouteGuard allowedRoles={['guest']}>
       <DashboardLayout>
-        <div className="max-w-7xl mx-auto space-y-6">
+        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#59a4b5] to-[#4a8a99] rounded-lg p-8 text-white">
-            <div className="flex items-center space-x-3 mb-2">
-              <Sparkles size={32} />
-              <h2 className="text-3xl font-bold">AI Concierge</h2>
+          <div className="bg-gradient-to-r from-[#59a4b5] to-[#4a8a99] rounded-lg p-4 sm:p-6 md:p-8 text-white">
+            <div className="flex items-center space-x-2 sm:space-x-3 mb-1 sm:mb-2">
+              <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" />
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">AI Concierge</h2>
             </div>
-            <p className="text-white/90">24/7 assistance for all your needs</p>
+            <p className="text-sm sm:text-base text-white/90">24/7 assistance for all your needs</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Chat Interface */}
             <div className="lg:col-span-2">
-              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col h-[600px]">
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col h-[500px] sm:h-[600px]">
                 {/* Chat Header */}
-                <div className="bg-[#59a4b5] text-white p-4 flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <Bot size={24} />
+                <div className="bg-[#59a4b5] text-white p-3 sm:p-4 flex items-center space-x-2 sm:space-x-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <Bot className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                   <div>
-                    <h3 className="font-bold">AI Concierge</h3>
+                    <h3 className="text-sm sm:text-base font-bold">AI Concierge</h3>
                     <p className="text-xs text-white/80">Always here to help</p>
                   </div>
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-gray-50">
                   {messages.map((message) => (
                     <div
                       key={message.id}
                       className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`flex items-start space-x-2 max-w-[80%] ${
+                        className={`flex items-start space-x-1.5 sm:space-x-2 max-w-[85%] sm:max-w-[80%] ${
                           message.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''
                         }`}
                       >
                         <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                          className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                             message.sender === 'user'
                               ? 'bg-[#59a4b5] text-white'
                               : 'bg-gray-300 text-gray-700'
                           }`}
                         >
                           {message.sender === 'user' ? (
-                            <User size={16} />
+                            <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           ) : (
-                            <Bot size={16} />
+                            <Bot className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           )}
                         </div>
                         <div>
                           <div
-                            className={`rounded-lg p-3 ${
+                            className={`rounded-lg p-2.5 sm:p-3 ${
                               message.sender === 'user'
                                 ? 'bg-[#59a4b5] text-white'
                                 : 'bg-white border border-gray-200 text-gray-900'
                             }`}
                           >
-                            <p className="text-sm whitespace-pre-line">{message.text}</p>
+                            <p className="text-xs sm:text-sm whitespace-pre-line">{message.text}</p>
                           </div>
                           <p className="text-xs text-gray-500 mt-1 px-1">
                             {message.timestamp.toLocaleTimeString([], {
@@ -220,15 +258,15 @@ export default function GuestContact() {
 
                   {isTyping && (
                     <div className="flex justify-start">
-                      <div className="flex items-start space-x-2">
-                        <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
-                          <Bot size={16} />
+                      <div className="flex items-start space-x-1.5 sm:space-x-2">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                          <Bot className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </div>
-                        <div className="bg-white border border-gray-200 rounded-lg p-3">
-                          <div className="flex space-x-2">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100"></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></div>
+                        <div className="bg-white border border-gray-200 rounded-lg p-2.5 sm:p-3">
+                          <div className="flex space-x-1.5 sm:space-x-2">
+                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gray-400 rounded-full animate-bounce delay-100"></div>
+                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gray-400 rounded-full animate-bounce delay-200"></div>
                           </div>
                         </div>
                       </div>
@@ -239,19 +277,20 @@ export default function GuestContact() {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="border-t border-gray-200 p-3 bg-white">
-                  <p className="text-xs text-gray-600 mb-2">Quick actions:</p>
-                  <div className="flex flex-wrap gap-2">
+                <div className="border-t border-gray-200 p-2.5 sm:p-3 bg-white">
+                  <p className="text-xs text-gray-600 mb-1.5 sm:mb-2">Quick actions:</p>
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {quickActions.map((action, index) => {
                       const IconComponent = action.icon;
                       return (
                         <button
                           key={index}
                           onClick={() => handleQuickAction(action.text)}
-                          className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs font-medium text-gray-700 transition-colors flex items-center space-x-1"
+                          className="px-2 sm:px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs font-medium text-gray-700 transition-colors flex items-center space-x-1"
                         >
-                          <IconComponent size={14} />
-                          <span>{action.text}</span>
+                          <IconComponent className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                          <span className="hidden xs:inline">{action.text}</span>
+                          <span className="xs:hidden">{action.text.split(' ')[0]}</span>
                         </button>
                       );
                     })}
@@ -259,7 +298,7 @@ export default function GuestContact() {
                 </div>
 
                 {/* Input */}
-                <div className="border-t border-gray-200 p-4 bg-white">
+                <div className="border-t border-gray-200 p-3 sm:p-4 bg-white">
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
@@ -272,15 +311,15 @@ export default function GuestContact() {
                       value={inputMessage}
                       onChange={(e) => setInputMessage(e.target.value)}
                       placeholder="Type your message..."
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#59a4b5] focus:border-transparent"
+                      className="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#59a4b5] focus:border-transparent"
                     />
                     <button
                       type="submit"
                       disabled={!inputMessage.trim()}
-                      className="px-6 py-2 bg-[#59a4b5] text-white rounded-lg hover:bg-[#4a8a99] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                      className="px-3 sm:px-6 py-2 bg-[#59a4b5] text-white rounded-lg hover:bg-[#4a8a99] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1 sm:space-x-2"
                     >
-                      <Send size={18} />
-                      <span>Send</span>
+                      <Send className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                      <span className="hidden sm:inline text-sm sm:text-base">Send</span>
                     </button>
                   </form>
                 </div>
@@ -288,97 +327,117 @@ export default function GuestContact() {
             </div>
 
             {/* Contact Information */}
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Direct Contact */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
-                  <MessageSquare size={20} />
+              <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 flex items-center space-x-2">
+                  <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span>Direct Contact</span>
                 </h3>
-                <div className="space-y-4">
-                  <a
-                    href="tel:+302286012345"
-                    className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Phone className="text-green-600" size={20} />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">Phone</p>
-                      <p className="text-sm text-gray-600">+30 228 601 2345</p>
-                      <p className="text-xs text-gray-500 mt-1">24/7 Front Desk</p>
-                    </div>
-                  </a>
+                {isLoadingSettings ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-[#59a4b5]" />
+                  </div>
+                ) : (
+                  <div className="space-y-3 sm:space-y-4">
+                    <a
+                      href={`tel:${contactSettings?.phone || ''}`}
+                      className="flex items-start space-x-2 sm:space-x-3 p-2.5 sm:p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Phone className="text-green-600 w-4 h-4 sm:w-5 sm:h-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm sm:text-base font-medium text-gray-900">Phone</p>
+                        <p className="text-xs sm:text-sm text-gray-600">{contactSettings?.phone || 'N/A'}</p>
+                        <p className="text-xs text-gray-500 mt-0.5 sm:mt-1">24/7 Front Desk</p>
+                      </div>
+                    </a>
 
-                  <a
-                    href="mailto:concierge@hotelbeach.com"
-                    className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Mail className="text-blue-600" size={20} />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">Email</p>
-                      <p className="text-sm text-gray-600">concierge@hotelbeach.com</p>
-                      <p className="text-xs text-gray-500 mt-1">Response within 1 hour</p>
-                    </div>
-                  </a>
+                    <a
+                      href={`mailto:${contactSettings?.email || ''}`}
+                      className="flex items-start space-x-2 sm:space-x-3 p-2.5 sm:p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Mail className="text-blue-600 w-4 h-4 sm:w-5 sm:h-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm sm:text-base font-medium text-gray-900">Email</p>
+                        <p className="text-xs sm:text-sm text-gray-600 break-all">{contactSettings?.email || 'N/A'}</p>
+                        <p className="text-xs text-gray-500 mt-0.5 sm:mt-1">Response within 1 hour</p>
+                      </div>
+                    </a>
 
-                  <div className="flex items-start space-x-3 p-3 rounded-lg">
-                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <MapPin className="text-purple-600" size={20} />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">Location</p>
-                      <p className="text-sm text-gray-600">Perissa Beach</p>
-                      <p className="text-xs text-gray-500 mt-1">Santorini, Greece 84703</p>
+                    <div className="flex items-start space-x-2 sm:space-x-3 p-2.5 sm:p-3 rounded-lg">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <MapPin className="text-purple-600 w-4 h-4 sm:w-5 sm:h-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm sm:text-base font-medium text-gray-900">Location</p>
+                        <p className="text-xs sm:text-sm text-gray-600">{contactSettings?.location.address || 'N/A'}</p>
+                        <p className="text-xs text-gray-500 mt-0.5 sm:mt-1">
+                          {contactSettings?.location.city || 'N/A'}, {contactSettings?.location.country || 'N/A'} {contactSettings?.location.postalCode || ''}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Hours */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
-                  <Clock size={20} />
+              <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 flex items-center space-x-2">
+                  <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span>Service Hours</span>
                 </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Front Desk</span>
-                    <span className="text-sm font-medium text-gray-900">24/7</span>
+                {isLoadingSettings ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-[#59a4b5]" />
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Room Service</span>
-                    <span className="text-sm font-medium text-gray-900">24/7</span>
+                ) : (
+                  <div className="space-y-2.5 sm:space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-gray-600">Front Desk</span>
+                      <span className="text-xs sm:text-sm font-medium text-gray-900">{contactSettings?.serviceHours.frontDesk || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-gray-600">Room Service</span>
+                      <span className="text-xs sm:text-sm font-medium text-gray-900">{contactSettings?.serviceHours.roomService || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-gray-600">Concierge</span>
+                      <span className="text-xs sm:text-sm font-medium text-gray-900">{contactSettings?.serviceHours.concierge || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-gray-600">Spa</span>
+                      <span className="text-xs sm:text-sm font-medium text-gray-900">{contactSettings?.serviceHours.spa || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-gray-600">Restaurant</span>
+                      <span className="text-xs sm:text-sm font-medium text-gray-900">{contactSettings?.serviceHours.restaurant || 'N/A'}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Concierge</span>
-                    <span className="text-sm font-medium text-gray-900">7am - 11pm</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Spa</span>
-                    <span className="text-sm font-medium text-gray-900">9am - 8pm</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Restaurant</span>
-                    <span className="text-sm font-medium text-gray-900">7am - 10pm</span>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Emergency */}
-              <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-                <h3 className="text-lg font-bold text-red-900 mb-2">Emergency</h3>
-                <p className="text-sm text-red-700 mb-3">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-bold text-red-900 mb-1.5 sm:mb-2">Emergency</h3>
+                <p className="text-xs sm:text-sm text-red-700 mb-2.5 sm:mb-3">
                   For urgent assistance, please call:
                 </p>
-                <a
-                  href="tel:+302286012345"
-                  className="block w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-center font-bold"
-                >
-                  Emergency Hotline
-                </a>
+                {isLoadingSettings ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="w-5 h-5 animate-spin text-red-600" />
+                  </div>
+                ) : (
+                  <a
+                    href={`tel:${contactSettings?.emergencyHotline || ''}`}
+                    className="block w-full px-4 py-2.5 sm:py-3 text-sm sm:text-base bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-center font-bold"
+                  >
+                    Emergency Hotline
+                  </a>
+                )}
               </div>
             </div>
           </div>
