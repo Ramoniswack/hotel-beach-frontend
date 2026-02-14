@@ -42,7 +42,7 @@ const ChefExperienceH4: React.FC<ChefExperienceH4Props> = ({ section }) => {
             <p className="text-[10px] sm:text-[11px] font-bold tracking-[0.3em] sm:tracking-[0.35em] uppercase text-slate-800 mb-6 sm:mb-8 md:mb-10">
               {section?.subtitle || '5 STARS MICHALIN'}
             </p>
-            <h2 className="text-3xl sm:text-4xl md:text-[48px] lg:text-[50px] xl:text-[64px] font-[500] leading-[1.05] text-[#1a1a1a] mb-8 sm:mb-10 md:mb-12 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-[48px] lg:text-[50px] xl:text-[64px] font-[500] leading-[1.1] text-[#1a1a1a] mb-8 sm:mb-10 md:mb-12 tracking-tight">
               {section?.title || 'Experience Deliciously from Our Chefs'}
             </h2>
             <p className="text-[#666666] text-sm sm:text-[15px] leading-[1.7] sm:leading-[1.9] font-normal max-w-[460px]">
