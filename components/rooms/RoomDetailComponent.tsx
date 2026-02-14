@@ -49,6 +49,8 @@ const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
   // Room data states
   const [roomData, setRoomData] = useState<RoomData | null>(null);
   const [isLoadingRoom, setIsLoadingRoom] = useState(true);
+  const [otherRooms, setOtherRooms] = useState<RoomData[]>([]);
+  const [isLoadingOtherRooms, setIsLoadingOtherRooms] = useState(true);
   
   // Availability check states
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
@@ -82,6 +84,44 @@ const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
     };
 
     fetchRoomData();
+  }, [roomId]);
+
+  // Fetch other rooms from API
+  useEffect(() => {
+    const fetchOtherRooms = async () => {
+      try {
+        setIsLoadingOtherRooms(true);
+        const response = await roomsAPI.getAll();
+        // Filter out current room and limit to 3 rooms
+        const filtered = response.data.data
+          .filter((room: RoomData) => room.id !== roomId && room._id !== roomId)
+          .slice(0, 3);
+        setOtherRooms(filtered);
+      } catch (error) {
+        console.error('Error fetching other rooms:', error);
+        // Fallback to static data
+        const fallbackData = fallbackRooms[roomId];
+        if (fallbackData?.otherRooms) {
+          const mappedRooms = fallbackData.otherRooms.map((room: any) => ({
+            _id: room.id,
+            id: room.id,
+            title: room.title,
+            subtitle: room.tag,
+            heroImage: room.image,
+            price: parseInt(room.price.replace('$', '')),
+            description: [],
+            specs: { bed: '', capacity: '', size: '', view: '' },
+            gallery: [],
+            isAvailable: true,
+          }));
+          setOtherRooms(mappedRooms);
+        }
+      } finally {
+        setIsLoadingOtherRooms(false);
+      }
+    };
+
+    fetchOtherRooms();
   }, [roomId]);
   
   // Gallery slider handlers
@@ -453,43 +493,49 @@ const RoomDetailComponent: React.FC<Props> = ({ roomId }) => {
             <p className="text-[9px] sm:text-[10px] font-bold tracking-[0.25em] sm:tracking-[0.3em] uppercase text-[#1a1a1a]">Could also be interest for you</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 md:gap-12">
-            {/* Use fallback data for other rooms section */}
-            {fallbackRooms[roomId]?.otherRooms?.map((room: any, idx: number) => (
-              <Link key={idx} href={`/accommodation/${room.id}`} className="group">
-                <div className="aspect-[4/3] overflow-hidden mb-6 sm:mb-8 relative">
-                  <Image 
-                    src={room.image}
-                    alt={room.title}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  {/* Dark overlay on hover */}
-                  <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-40 transition-opacity duration-500"></div>
-                  {/* Cross animation */}
-                  <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                    <div className="absolute left-0 top-1/2 h-[1px] w-0 bg-white -translate-y-1/2 group-hover:w-[40px] group-hover:left-[calc(50%-20px)] transition-all duration-500 ease-out delay-100"></div>
-                    <div className="absolute top-0 left-1/2 w-[1px] h-0 bg-white -translate-x-1/2 group-hover:h-[40px] group-hover:top-[calc(50%-20px)] transition-all duration-500 ease-out"></div>
-                  </div>
-                </div>
-                <div className="text-center">
-                  <h3 className="text-lg sm:text-xl md:text-[20px] font-bold text-[#1a1a1a] mb-2">{room.title}</h3>
-                  <p className="text-[10px] sm:text-[11px] text-[#999] mb-6 sm:mb-8">{room.tag}</p>
-                  <div className="flex items-center justify-between border-t border-gray-100 pt-6 sm:pt-8">
-                    <div className="flex flex-col items-start">
-                      <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-gray-400">From</span>
-                      <span className="text-xl sm:text-[22px] font-bold text-[#1a1a1a]">{room.price}</span>
+          {isLoadingOtherRooms ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#59a4b5] mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading other rooms...</p>
+            </div>
+          ) : otherRooms.length === 0 ? (
+            <p className="text-center text-gray-500">No other rooms available</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 md:gap-12">
+              {otherRooms.map((room, idx) => (
+                <Link key={idx} href={`/accommodation/${room.id}`} className="group">
+                  <div className="aspect-[4/3] overflow-hidden mb-6 sm:mb-8 relative">
+                    <Image 
+                      src={room.heroImage}
+                      alt={room.title}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    {/* Dark overlay on hover */}
+                    <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-40 transition-opacity duration-500"></div>
+                    {/* Cross animation */}
+                    <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                      <div className="absolute left-0 top-1/2 h-[1px] w-0 bg-white -translate-y-1/2 group-hover:w-[40px] group-hover:left-[calc(50%-20px)] transition-all duration-500 ease-out delay-100"></div>
+                      <div className="absolute top-0 left-1/2 w-[1px] h-0 bg-white -translate-x-1/2 group-hover:h-[40px] group-hover:top-[calc(50%-20px)] transition-all duration-500 ease-out"></div>
                     </div>
-                    <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest border-b border-black pb-1 group-hover:text-[#59a4b5] group-hover:border-[#59a4b5] transition-colors">
-                      View Detail
-                    </span>
                   </div>
-                </div>
-              </Link>
-            )) || (
-              <p className="col-span-full text-center text-gray-500">No other rooms available</p>
-            )}
-          </div>
+                  <div className="text-center">
+                    <h3 className="text-lg sm:text-xl md:text-[20px] font-bold text-[#1a1a1a] mb-2">{room.title}</h3>
+                    <p className="text-[10px] sm:text-[11px] text-[#999] mb-6 sm:mb-8">{room.subtitle}</p>
+                    <div className="flex items-center justify-between border-t border-gray-100 pt-6 sm:pt-8">
+                      <div className="flex flex-col items-start">
+                        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-gray-400">From</span>
+                        <span className="text-xl sm:text-[22px] font-bold text-[#1a1a1a]">${room.price}</span>
+                      </div>
+                      <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest border-b border-black pb-1 group-hover:text-[#59a4b5] group-hover:border-[#59a4b5] transition-colors">
+                        View Detail
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </div>

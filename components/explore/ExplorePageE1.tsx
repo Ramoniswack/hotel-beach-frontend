@@ -164,7 +164,7 @@ const ExplorePageE1: React.FC<ExplorePageE1Props> = ({ sections }) => {
             maxAdults: '4',
             maxChildren: '2',
             price: '$399',
-            link: '/accommodation/luxury-suite'
+            link: '/accommodation/luxury-suite-room'
           }
         ]).map((room: any, idx: number) => (
           <Link key={idx} href={room.link} className="group block">
