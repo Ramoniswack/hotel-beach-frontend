@@ -1,10 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Eye, Folder, Tag, MessageSquare } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { 
+  Plus, 
+  Edit2, 
+  Trash2, 
+  Eye, 
+  Folder, 
+  Tag, 
+  MessageSquare,
+  Loader2,
+  Calendar,
+  Hash,
+  RefreshCw,
+  BookOpen
+} from 'lucide-react';
 import RouteGuard from '@/components/RouteGuard';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import ImageUpload from '@/components/ImageUpload';
 import api from '@/lib/api';
 
 interface BlogPost {
@@ -25,21 +38,9 @@ interface BlogPost {
 }
 
 export default function PostsManagement() {
+  const router = useRouter();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
-  const [formData, setFormData] = useState({
-    title: '',
-    slug: '',
-    excerpt: '',
-    content: '',
-    heroImage: '',
-    categories: '',
-    tags: '',
-    authorName: 'Admin',
-    status: 'draft' as 'draft' | 'published'
-  });
 
   useEffect(() => {
     fetchPosts();
@@ -57,56 +58,6 @@ export default function PostsManagement() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const postData = {
-        title: formData.title,
-        slug: formData.slug,
-        excerpt: formData.excerpt,
-        content: formData.content,
-        heroImage: formData.heroImage,
-        categories: formData.categories.split(',').map(c => c.trim()).filter(c => c),
-        tags: formData.tags.split(',').map(t => t.trim()).filter(t => t),
-        author: { name: formData.authorName },
-        status: formData.status
-      };
-
-      console.log('Submitting post data:', postData);
-
-      if (editingPost) {
-        await api.put(`/blog/${editingPost._id}`, postData);
-        alert('Post updated successfully!');
-      } else {
-        await api.post('/blog', postData);
-        alert('Post created successfully!');
-      }
-
-      fetchPosts();
-      resetForm();
-    } catch (error: any) {
-      console.error('Error saving post:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Error saving post';
-      alert(`Error: ${errorMessage}`);
-    }
-  };
-
-  const handleEdit = (post: BlogPost) => {
-    setEditingPost(post);
-    setFormData({
-      title: post.title,
-      slug: post.slug,
-      excerpt: post.excerpt,
-      content: post.content,
-      heroImage: post.heroImage,
-      categories: post.categories.join(', '),
-      tags: post.tags.join(', '),
-      authorName: post.author.name,
-      status: post.status
-    });
-    setShowForm(true);
-  };
-
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this post?')) return;
     try {
@@ -117,34 +68,16 @@ export default function PostsManagement() {
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      slug: '',
-      excerpt: '',
-      content: '',
-      heroImage: '',
-      categories: '',
-      tags: '',
-      authorName: 'Admin',
-      status: 'draft'
-    });
-    setEditingPost(null);
-    setShowForm(false);
-  };
-
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-  };
-
   if (loading) {
     return (
       <RouteGuard allowedRoles={['admin']}>
         <DashboardLayout>
-          <div className="p-8">Loading...</div>
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center py-12">
+              <Loader2 className="animate-spin h-12 w-12 text-[#59a4b5] mx-auto" />
+              <p className="mt-4 text-gray-600">Loading posts...</p>
+            </div>
+          </div>
         </DashboardLayout>
       </RouteGuard>
     );
@@ -153,235 +86,171 @@ export default function PostsManagement() {
   return (
     <RouteGuard allowedRoles={['admin']}>
       <DashboardLayout>
-        <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Blog Posts</h1>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          <Plus size={20} />
-          {showForm ? 'Cancel' : 'New Post'}
-        </button>
-      </div>
-
-      {/* Sub-navigation */}
-      <div className="mb-6 flex gap-3">
-        <a
-          href="/dashboard/admin/posts/categories"
-          className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
-        >
-          <Folder size={18} />
-          Manage Categories
-        </a>
-        <a
-          href="/dashboard/admin/posts/tags"
-          className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
-        >
-          <Tag size={18} />
-          Manage Tags
-        </a>
-        <a
-          href="/dashboard/admin/posts/comments"
-          className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
-        >
-          <MessageSquare size={18} />
-          Manage Comments
-        </a>
-      </div>
-
-      {showForm && (
-        <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-          <h2 className="text-xl font-bold mb-4">
-            {editingPost ? 'Edit Post' : 'Create New Post'}
-          </h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
             <div>
-              <label className="block text-sm font-medium mb-1">Title</label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(e) => {
-                  setFormData({ ...formData, title: e.target.value });
-                  if (!editingPost) {
-                    setFormData(prev => ({ ...prev, slug: generateSlug(e.target.value) }));
-                  }
-                }}
-                className="w-full border rounded px-3 py-2"
-                required
-              />
+              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                <BookOpen className="text-[#59a4b5]" size={32} />
+                Blog Posts
+              </h1>
+              <p className="text-gray-600 mt-1">Manage your blog content</p>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Slug</label>
-              <input
-                type="text"
-                value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                className="w-full border rounded px-3 py-2"
-                required
-              />
+            <div className="flex gap-3">
+              <button
+                onClick={() => router.push('/dashboard/admin/posts/new')}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 font-medium"
+              >
+                <Plus size={20} />
+                New Post
+              </button>
+              <button
+                onClick={fetchPosts}
+                className="px-4 py-2 bg-[#59a4b5] text-white rounded-lg hover:bg-[#4a8a99] transition-colors flex items-center gap-2"
+              >
+                <RefreshCw size={20} />
+                Refresh
+              </button>
             </div>
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Excerpt</label>
-              <textarea
-                value={formData.excerpt}
-                onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-                className="w-full border rounded px-3 py-2"
-                rows={2}
-                required
-              />
-            </div>
+          {/* Sub-navigation */}
+          <div className="flex flex-wrap gap-3">
+            <a
+              href="/dashboard/admin/posts/categories"
+              className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors font-medium"
+            >
+              <Folder size={18} />
+              Manage Categories
+            </a>
+            <a
+              href="/dashboard/admin/posts/tags"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium"
+            >
+              <Tag size={18} />
+              Manage Tags
+            </a>
+            <a
+              href="/dashboard/admin/posts/comments"
+              className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors font-medium"
+            >
+              <MessageSquare size={18} />
+              Manage Comments
+            </a>
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Content</label>
-              <textarea
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                className="w-full border rounded px-3 py-2"
-                rows={10}
-                required
-              />
-            </div>
-
-            <div>
-              <ImageUpload
-                label="Hero Image"
-                value={formData.heroImage}
-                onChange={(url) => setFormData({ ...formData, heroImage: url })}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Categories (comma-separated)</label>
-                <input
-                  type="text"
-                  value={formData.categories}
-                  onChange={(e) => setFormData({ ...formData, categories: e.target.value })}
-                  className="w-full border rounded px-3 py-2"
-                  placeholder="LUXURY, TRAVEL, VACATION"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Tags (comma-separated)</label>
-                <input
-                  type="text"
-                  value={formData.tags}
-                  onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                  className="w-full border rounded px-3 py-2"
-                  placeholder="hotel, luxury, vacation"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Author Name</label>
-                <input
-                  type="text"
-                  value={formData.authorName}
-                  onChange={(e) => setFormData({ ...formData, authorName: e.target.value })}
-                  className="w-full border rounded px-3 py-2"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Status</label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value as 'draft' | 'published' })}
-                  className="w-full border rounded px-3 py-2"
+          {/* Posts Table */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+            {posts.length === 0 ? (
+              <div className="text-center py-12">
+                <BookOpen className="mx-auto text-gray-400 mb-4" size={48} />
+                <p className="text-gray-600 mb-4">No blog posts found</p>
+                <button
+                  onClick={() => router.push('/dashboard/admin/posts/new')}
+                  className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                 >
-                  <option value="draft">Draft</option>
-                  <option value="published">Published</option>
-                </select>
+                  Create Your First Post
+                </button>
               </div>
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                type="submit"
-                className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
-              >
-                {editingPost ? 'Update Post' : 'Create Post'}
-              </button>
-              <button
-                type="button"
-                onClick={resetForm}
-                className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categories</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Published</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {posts.map((post) => (
-              <tr key={post._id}>
-                <td className="px-6 py-4">
-                  <div className="text-sm font-medium text-gray-900">{post.title}</div>
-                  <div className="text-sm text-gray-500">{post.slug}</div>
-                </td>
-                <td className="px-6 py-4">
-                  <span className={`px-2 py-1 text-xs rounded ${
-                    post.status === 'published' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {post.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500">
-                  {post.categories.join(', ')}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500">
-                  {new Date(post.publishedAt).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 text-right text-sm font-medium">
-                  <div className="flex justify-end gap-2">
-                    <a
-                      href={`/blog/${post.slug}`}
-                      target="_blank"
-                      className="text-blue-600 hover:text-blue-900"
-                    >
-                      <Eye size={18} />
-                    </a>
-                    <button
-                      onClick={() => handleEdit(post)}
-                      className="text-indigo-600 hover:text-indigo-900"
-                    >
-                      <Edit2 size={18} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(post._id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Title
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Categories
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Published
+                      </th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {posts.map((post) => (
+                      <tr key={post._id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-medium text-gray-900">{post.title}</div>
+                          <div className="text-sm text-gray-500 flex items-center gap-1">
+                            <Hash size={12} />
+                            {post.slug}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              post.status === 'published'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}
+                          >
+                            {post.status === 'published' ? '✅ Published' : '📝 Draft'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-wrap gap-1">
+                            {post.categories.slice(0, 2).map((cat, idx) => (
+                              <span
+                                key={idx}
+                                className="px-2 py-0.5 text-xs bg-purple-100 text-purple-700 rounded"
+                              >
+                                {cat}
+                              </span>
+                            ))}
+                            {post.categories.length > 2 && (
+                              <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">
+                                +{post.categories.length - 2}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-500 flex items-center gap-1">
+                            <Calendar size={14} />
+                            {new Date(post.publishedAt).toLocaleDateString()}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex justify-end gap-2">
+                            <a
+                              href={`/blog/${post.slug}`}
+                              target="_blank"
+                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              title="View Post"
+                            >
+                              <Eye size={18} />
+                            </a>
+                            <button
+                              onClick={() => router.push(`/dashboard/admin/posts/${post._id}/edit`)}
+                              className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                              title="Edit Post"
+                            >
+                              <Edit2 size={18} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(post._id)}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Delete Post"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       </DashboardLayout>
     </RouteGuard>
